@@ -22656,7 +22656,7 @@
 				)
 			)
 		)
-		(property "Value" "Hold 750mA"
+		(property "Value" "Hold 140mA"
 			(at 49.53 100.584 90)
 			(effects
 				(font
@@ -22683,7 +22683,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "PTC RESET FUSE 16V 750MA 1812"
+		(property "Description" "PTC RESET FUSE 60V 140MA 1812"
 			(at 50.8 104.14 0)
 			(effects
 				(font
@@ -22692,7 +22692,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "0ZCG0075FF2C"
+		(property "MPN" "0ZCG0014FF2C"
 			(at 50.8 104.14 0)
 			(effects
 				(font
