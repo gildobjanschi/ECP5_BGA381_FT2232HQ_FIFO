@@ -1,0 +1,16 @@
+.DS_Store
+kicad/*.pos
+kicad/*.lck
+kicad/*.zip
+kicad/*.gbr
+kicad/*.gbrjob
+kicad/*.numbers
+kicad/ECP5-backups
+kicad/fp-info-cache
+kicad/_autosave-
+kicad/#auto_saved_files#
+kicad/fp-lib-table
+kicad/sym-lib-table
+symbols/*.bak
+
+
