@@ -1,0 +1,332 @@
+(footprint "Oscillator_SMD_Diodes_FN-4Pin_7.0x5.0mm"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "FN Series Crystal Clock Oscillator (XO) (https://www.diodes.com/assets/Datasheets/FN_3-3V.pdf)")
+	(tags "Oscillator Crystal SMD SMT")
+	(property "Reference" "REF**"
+		(at -2.4 4.45 90)
+		(layer "F.SilkS")
+		(uuid "5621034b-452a-437f-8164-9ba840d71711")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "50MHz"
+		(at 0 5.175 180)
+		(layer "F.Fab")
+		(uuid "baaf5ec5-d519-48fd-acd4-187eb2d7dc1a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2e57f9ed-3b0b-437c-9e09-baf9d4f91b76")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d8fed6ea-3ab8-412d-af96-84a675eeeb05")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Four pin crystal, GND on pins 2 and 4"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e640211f-635e-4eec-80da-0244dd099996")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "MPN" "ECS-7050MV-500-DM-TR"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e021ec03-5973-4cf7-a663-ecf342288538")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Manufacturer" "ECS Inc."
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9f04e00b-9c02-4103-9c60-f70c50bd671a")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -3.2 -3.64)
+		(end 2.5 -3.64)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "856a46bb-1ba4-437c-95c0-0be29098cd0b")
+	)
+	(fp_line
+		(start -2.64 -1.44)
+		(end -3.2 -1.44)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "63217838-72ab-404d-97ca-d0af59a02029")
+	)
+	(fp_line
+		(start -2.64 -1.44)
+		(end -2.64 1.44)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "406d94af-be3d-4b9b-bb29-49af712374ce")
+	)
+	(fp_line
+		(start -2.5 3.64)
+		(end 2.5 3.64)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "8f507e61-a966-4728-aab5-b2477106dc8c")
+	)
+	(fp_line
+		(start 2.64 -1.44)
+		(end 2.64 1.44)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4ddce0e5-e30d-4808-80ae-7b9b1324c921")
+	)
+	(fp_circle
+		(center -2.921 -4.191)
+		(end -2.621 -4.191)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(fill solid)
+		(layer "F.SilkS")
+		(uuid "0d75589a-9ea9-48ed-be7c-cc969344c2d8")
+	)
+	(fp_line
+		(start -3.45 -3.75)
+		(end 3.45 -3.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "be7e6f89-57fb-4057-b079-d27bbd05e31a")
+	)
+	(fp_line
+		(start -3.45 3.75)
+		(end -3.45 -3.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "b75cf1ec-7b80-4034-86d0-b9cc05ad7f06")
+	)
+	(fp_line
+		(start 3.45 -3.75)
+		(end 3.45 3.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "8dd504d5-19b8-47df-9933-5a0abf8b3bc6")
+	)
+	(fp_line
+		(start 3.45 3.75)
+		(end -3.45 3.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "7c6cc3ad-c7ac-467c-b5a0-7c23d53d4395")
+	)
+	(fp_line
+		(start -2.5 -2.5)
+		(end -1.5 -3.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "2737dbdd-ec2d-459c-a0e7-124afcc285f7")
+	)
+	(fp_line
+		(start -2.5 3.25)
+		(end -2.5 -3.25)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "595b2057-46a3-4141-8d4f-5ff4f705421c")
+	)
+	(fp_line
+		(start -2.25 -3.5)
+		(end 2.25 -3.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "6c4db147-bf9c-4573-9519-fc72997da119")
+	)
+	(fp_line
+		(start -2.25 3.5)
+		(end 2.25 3.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "ce512cbf-206d-4d0f-91e9-a8035f82292d")
+	)
+	(fp_line
+		(start 2.5 -3.25)
+		(end 2.5 3.25)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "7017e192-8f93-492c-96dc-388607828d35")
+	)
+	(fp_arc
+		(start -2.5 3.25)
+		(mid -2.323223 3.323223)
+		(end -2.25 3.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "e249fa53-e904-45f6-818a-0e1023500a2f")
+	)
+	(fp_arc
+		(start -2.25 -3.5)
+		(mid -2.323223 -3.323223)
+		(end -2.5 -3.25)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "f62eeeff-bd9c-42d7-83a8-a6d858ed1c31")
+	)
+	(fp_arc
+		(start 2.25 3.5)
+		(mid 2.323223 3.323223)
+		(end 2.5 3.25)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "dd468e0c-a58f-427a-a0c5-15ba231fc079")
+	)
+	(fp_arc
+		(start 2.5 -3.25)
+		(mid 2.323223 -3.323223)
+		(end 2.25 -3.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "7895f9f9-9a5b-4072-8fee-254f3dfdd955")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 180)
+		(layer "F.Fab")
+		(uuid "ca65b709-d3c0-4c4a-acb9-08cc99c7fe0c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -2.2 -2.54)
+		(size 2 1.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "322e1210-39dc-4bcc-ac70-cc0a1c691ccc")
+	)
+	(pad "2" smd rect
+		(at -2.2 2.54)
+		(size 2 1.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "57e6c536-9091-43a1-85ad-5a534d903c5d")
+	)
+	(pad "3" smd rect
+		(at 2.2 2.54)
+		(size 2 1.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "492340b6-0152-4b35-8813-ac94648bbccc")
+	)
+	(pad "4" smd rect
+		(at 2.2 -2.54)
+		(size 2 1.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "8b3c79ba-9896-41e3-a210-2df68a22d31a")
+	)
+	(model "${ECP5_TX_AUDIO}/3dmodels/CRYSTAL_7050-4.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 90)
+		)
+	)
+)
