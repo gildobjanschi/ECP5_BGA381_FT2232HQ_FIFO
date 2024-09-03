@@ -13272,7 +13272,7 @@
 		)
 		(uuid "ad3ac2f8-07e8-41d5-a667-95d29522e65c")
 	)
-	(text "FT2232HQ & Extension Connector"
+	(text "FT2232HQ FIFO Interface"
 		(exclude_from_sim no)
 		(at 178.816 172.466 0)
 		(effects
