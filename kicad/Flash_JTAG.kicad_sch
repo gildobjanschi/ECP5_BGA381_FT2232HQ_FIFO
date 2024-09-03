@@ -10856,7 +10856,7 @@
 	)
 	(wire
 		(pts
-			(xy 138.43 137.16) (xy 138.43 139.7)
+			(xy 138.43 139.7) (xy 138.43 140.97)
 		)
 		(stroke
 			(width 0)
@@ -10886,7 +10886,7 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 147.32) (xy 148.59 149.86)
+			(xy 148.59 148.59) (xy 148.59 149.86)
 		)
 		(stroke
 			(width 0)
@@ -11586,7 +11586,7 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 137.16) (xy 148.59 139.7)
+			(xy 148.59 139.7) (xy 148.59 140.97)
 		)
 		(stroke
 			(width 0)
@@ -11726,7 +11726,7 @@
 	)
 	(wire
 		(pts
-			(xy 138.43 147.32) (xy 138.43 149.86)
+			(xy 138.43 148.59) (xy 138.43 149.86)
 		)
 		(stroke
 			(width 0)
@@ -15188,7 +15188,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3VP")
-		(at 148.59 137.16 0)
+		(at 148.59 139.7 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15196,7 +15196,7 @@
 		(dnp no)
 		(uuid "38d0784e-cf05-450b-ad77-9a2600dba32b")
 		(property "Reference" "#PWR037"
-			(at 152.4 138.43 0)
+			(at 152.4 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15205,7 +15205,7 @@
 			)
 		)
 		(property "Value" "+3V3P"
-			(at 148.59 133.35 0)
+			(at 148.59 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15213,7 +15213,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 148.59 137.16 0)
+			(at 148.59 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15222,7 +15222,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 148.59 137.16 0)
+			(at 148.59 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15231,7 +15231,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3P\""
-			(at 148.59 137.16 0)
+			(at 148.59 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22155,7 +22155,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3VP")
-		(at 138.43 137.16 0)
+		(at 138.43 139.7 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -22163,7 +22163,7 @@
 		(dnp no)
 		(uuid "bc63dce5-f0df-4e77-bbc1-92a98a6a4d34")
 		(property "Reference" "#PWR036"
-			(at 142.24 138.43 0)
+			(at 142.24 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22172,7 +22172,7 @@
 			)
 		)
 		(property "Value" "+3V3P"
-			(at 138.43 133.35 0)
+			(at 138.43 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22180,7 +22180,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 138.43 137.16 0)
+			(at 138.43 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22189,7 +22189,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 138.43 137.16 0)
+			(at 138.43 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22198,7 +22198,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3P\""
-			(at 138.43 137.16 0)
+			(at 138.43 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22297,7 +22297,7 @@
 	)
 	(symbol
 		(lib_id "Device:LED")
-		(at 148.59 143.51 90)
+		(at 148.59 144.78 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -22305,7 +22305,7 @@
 		(dnp no)
 		(uuid "be8c52d3-c1ae-4853-b7ed-946d9357a62d")
 		(property "Reference" "D9"
-			(at 150.368 142.24 90)
+			(at 150.368 143.51 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22314,7 +22314,7 @@
 			)
 		)
 		(property "Value" "YLW"
-			(at 150.622 144.78 90)
+			(at 150.622 146.05 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22323,7 +22323,7 @@
 			)
 		)
 		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
-			(at 148.59 143.51 0)
+			(at 148.59 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22332,7 +22332,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 148.59 143.51 0)
+			(at 148.59 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22341,7 +22341,7 @@
 			)
 		)
 		(property "Description" "LED YELLOW CLEAR 2SMD"
-			(at 148.59 143.51 0)
+			(at 148.59 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22350,7 +22350,7 @@
 			)
 		)
 		(property "Manufacturer" "Kingbright"
-			(at 148.59 143.51 0)
+			(at 148.59 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22359,7 +22359,7 @@
 			)
 		)
 		(property "MPN" "APT1608LSYCK/J3-PRV"
-			(at 148.59 143.51 0)
+			(at 148.59 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22483,7 +22483,7 @@
 	)
 	(symbol
 		(lib_id "Device:LED")
-		(at 138.43 143.51 90)
+		(at 138.43 144.78 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -22491,7 +22491,7 @@
 		(dnp no)
 		(uuid "c221258d-b24d-4c37-9db1-e3b9411f89d4")
 		(property "Reference" "D8"
-			(at 140.208 142.24 90)
+			(at 140.208 143.51 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22500,7 +22500,7 @@
 			)
 		)
 		(property "Value" "GREEN"
-			(at 139.7 144.78 90)
+			(at 139.7 146.05 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22509,7 +22509,7 @@
 			)
 		)
 		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
-			(at 138.43 143.51 0)
+			(at 138.43 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22518,7 +22518,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 138.43 143.51 0)
+			(at 138.43 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22527,7 +22527,7 @@
 			)
 		)
 		(property "Description" "LED GREEN CLEAR 2SMD"
-			(at 138.43 143.51 0)
+			(at 138.43 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22536,7 +22536,7 @@
 			)
 		)
 		(property "Manufacturer" "Kingbright"
-			(at 138.43 143.51 0)
+			(at 138.43 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22545,7 +22545,7 @@
 			)
 		)
 		(property "MPN" "APT1608LZGCK"
-			(at 138.43 143.51 0)
+			(at 138.43 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
