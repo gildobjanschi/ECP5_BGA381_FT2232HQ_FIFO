@@ -10157,7 +10157,7 @@
 		)
 		(uuid "0d6b8d13-61d5-48ea-8ead-352434e6539d")
 	)
-	(text "Extension"
+	(text "Extension Connector"
 		(exclude_from_sim no)
 		(at 178.308 172.72 0)
 		(effects
