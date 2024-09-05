@@ -13703,7 +13703,7 @@
 			)
 		)
 	)
-	(global_label "FT2232_RESET"
+	(global_label "~{FT2232_RESET}"
 		(shape input)
 		(at 95.25 123.19 180)
 		(fields_autoplaced yes)
@@ -13879,7 +13879,7 @@
 			)
 		)
 	)
-	(global_label "FT2232_RESET"
+	(global_label "~{FT2232_RESET}"
 		(shape output)
 		(at 226.06 36.83 180)
 		(fields_autoplaced yes)
