@@ -14,6 +14,6 @@ In the Manage Footprint Libraries click the Project Specific Libraries and add: 
 ## Project Status
 The board is coming back from manufacturing soon. 
 
-![Schematic PDF](https://github.com/gildobjanschi/ECP5_Tx_Audio_HW/kicad/ECP5.pdf)
+[Schematic PDF](https://github.com/gildobjanschi/ECP5_Tx_Audio_HW/blob/main/kicad/ECP5.pdf)
 
 ![Board 3D view](https://github.com/gildobjanschi/ECP5_Tx_Audio_HW/blob/main/ECP5.jpg)
