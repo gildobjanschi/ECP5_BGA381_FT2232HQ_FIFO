@@ -3397,7 +3397,7 @@
 		(solder_paste_margin -0.025)
 		(uuid "7f9dd1bf-77b5-4c8f-b246-b01bec4f1080")
 	)
-	(model "${ECP5_TX_AUDIO}/3dmodels/LFE5UM-85F-8BG381C.STEP"
+	(model "${ECP5_BGA381_FT2232HQ_FIFO}/3dmodels/LFE5UM-85F-8BG381C.STEP"
 		(offset
 			(xyz 0 0 0)
 		)

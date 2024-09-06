@@ -1594,7 +1594,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:LFE5U-25F-xBG381x"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -12283,7 +12283,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 179.07 59.69 0)
 		(unit 2)
 		(exclude_from_sim no)
@@ -12309,7 +12309,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 175.26 -97.79 0)
 			(effects
 				(font
@@ -13507,7 +13507,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 147.32 59.69 0)
 		(unit 7)
 		(exclude_from_sim no)
@@ -13533,7 +13533,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 143.51 -97.79 0)
 			(effects
 				(font
@@ -14755,7 +14755,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:SAMTEC-FTS-126-02-X-DV"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:SAMTEC-FTS-126-02-X-DV"
 			(at 59.69 66.04 0)
 			(effects
 				(font
@@ -14966,7 +14966,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 111.76 63.5 0)
 		(unit 3)
 		(exclude_from_sim no)
@@ -14992,7 +14992,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 107.95 -93.98 0)
 			(effects
 				(font

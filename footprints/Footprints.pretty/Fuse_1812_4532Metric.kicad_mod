@@ -213,7 +213,7 @@
 		(roundrect_rratio 0.2222222222)
 		(uuid "e6ed92fa-2061-47c8-ad19-18f5e13095ed")
 	)
-	(model "${ECP5_TX_AUDIO}/3dmodels/0ZCG-0_70mm.STEP"
+	(model "${ECP5_BGA381_FT2232HQ_FIFO}/3dmodels/0ZCG-0_70mm.STEP"
 		(offset
 			(xyz 0 0 0)
 		)

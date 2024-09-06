@@ -1202,7 +1202,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:25LCxxx"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:25LCxxx"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1463,7 +1463,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:FT231XQ"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:FT231XQ"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1924,7 +1924,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:LFE5U-25F-xBG381x"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -9052,7 +9052,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:USB_C_Receptacle_USB2.0"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_USB2.0"
 			(pin_names
 				(offset 1.016)
 			)
@@ -13950,7 +13950,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:FT231XQ")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:FT231XQ")
 		(at 101.6 148.59 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13994,7 +13994,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "IC USB SERIAL FULL UART 20QFN"
+		(property "Description" "Full Speed USB to Full Handshake UART, QFN-20"
 			(at 101.6 148.59 0)
 			(effects
 				(font
@@ -15088,7 +15088,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:USB_C_Receptacle_USB2.0")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_USB2.0")
 		(at 31.75 140.97 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15113,7 +15113,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
 			(at 35.56 140.97 0)
 			(effects
 				(font
@@ -15131,7 +15131,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "CONN RCP USB2.0 TYP C 24P SMD RA"
+		(property "Description" "USB 2.0-only Type-C Receptacle connector"
 			(at 31.75 140.97 0)
 			(effects
 				(font
@@ -15410,7 +15410,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 135.89 45.72 0)
 		(unit 8)
 		(exclude_from_sim no)
@@ -15434,7 +15434,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 132.08 -111.76 0)
 			(effects
 				(font
@@ -20184,7 +20184,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:25LCxxx")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:25LCxxx")
 		(at 41.91 71.12 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -20210,7 +20210,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:WSON-8-1EP_6x5mm_P1.27mm_EP3.4x4.3mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:WSON-8-1EP_6x5mm_P1.27mm_EP3.4x4.3mm"
 			(at 41.91 71.12 0)
 			(effects
 				(font
@@ -20357,7 +20357,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 276.86 69.85 0)
 		(unit 6)
 		(exclude_from_sim no)
@@ -20383,7 +20383,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 273.05 -87.63 0)
 			(effects
 				(font
@@ -23011,7 +23011,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:Fuse_1812_4532Metric"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:Fuse_1812_4532Metric"
 			(at 45.72 105.41 0)
 			(effects
 				(font
@@ -24653,7 +24653,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 175.26 121.92 0)
 		(mirror y)
 		(unit 9)
@@ -24680,7 +24680,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 179.07 -35.56 0)
 			(effects
 				(font

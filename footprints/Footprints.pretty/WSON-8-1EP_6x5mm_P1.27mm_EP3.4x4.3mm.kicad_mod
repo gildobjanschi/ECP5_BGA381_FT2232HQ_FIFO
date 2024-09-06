@@ -310,7 +310,7 @@
 		(layers "F.Cu" "F.Mask")
 		(uuid "71b68324-4f24-43b6-b47d-c3666cbd2c6e")
 	)
-	(model "${ECP5_TX_AUDIO}/3dmodels/WSON8-6x5.STEP"
+	(model "${ECP5_BGA381_FT2232HQ_FIFO}/3dmodels/WSON8-6x5.STEP"
 		(offset
 			(xyz 0 0 0)
 		)

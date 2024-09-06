@@ -209,7 +209,7 @@
 		(solder_mask_margin 0.102)
 		(uuid "6deaccf6-7680-4628-8bb1-b73c10cce349")
 	)
-	(model "${ECP5_TX_AUDIO}/3dmodels/5197TR.step"
+	(model "${ECP5_BGA381_FT2232HQ_FIFO}/3dmodels/5197TR.step"
 		(offset
 			(xyz -1.45 2.3 -0.5)
 		)

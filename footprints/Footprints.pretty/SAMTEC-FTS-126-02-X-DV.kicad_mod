@@ -7138,7 +7138,7 @@
 		(layers "F.Cu" "F.Paste")
 		(uuid "635460c5-c22a-4f38-99a1-0a8696cd6544")
 	)
-	(model "${ECP5_TX_AUDIO}/3dmodels/SAMTEC-FTS-126-02-X-DV.step"
+	(model "${ECP5_BGA381_FT2232HQ_FIFO}/3dmodels/SAMTEC-FTS-126-02-X-DV.step"
 		(offset
 			(xyz 0 0 0.5)
 		)

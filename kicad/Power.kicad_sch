@@ -570,7 +570,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:LFE5U-25F-xBG381x"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -14106,7 +14106,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:KEYSTONE_5197TR"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:KEYSTONE_5197TR"
 			(at 34.29 67.31 0)
 			(effects
 				(font
@@ -15412,7 +15412,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:KEYSTONE_5197TR"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:KEYSTONE_5197TR"
 			(at 24.13 67.31 0)
 			(effects
 				(font
@@ -15839,7 +15839,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 92.71 107.95 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15863,7 +15863,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 88.9 -49.53 0)
 			(effects
 				(font

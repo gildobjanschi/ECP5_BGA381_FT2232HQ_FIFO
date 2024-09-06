@@ -1026,7 +1026,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:LFE5U-25F-xBG381x"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -8154,7 +8154,7 @@
 				)
 			)
 		)
-		(symbol "ECP5_TX_AUDIO:USB_C_Receptacle_USB2.0"
+		(symbol "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_USB2.0"
 			(pin_names
 				(offset 1.016)
 			)
@@ -14340,7 +14340,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 269.24 60.96 0)
 		(unit 4)
 		(exclude_from_sim no)
@@ -14366,7 +14366,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 265.43 -96.52 0)
 			(effects
 				(font
@@ -15808,7 +15808,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:USB_C_Receptacle_USB2.0")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_USB2.0")
 		(at 24.13 50.8 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15833,7 +15833,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
 			(at 27.94 50.8 0)
 			(effects
 				(font
@@ -15851,7 +15851,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "CONN RCP USB2.0 TYP C 24P SMD RA"
+		(property "Description" "USB 2.0-only Type-C Receptacle connector"
 			(at 24.13 50.8 0)
 			(effects
 				(font
@@ -16412,7 +16412,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ECP5_TX_AUDIO:LFE5U-25F-xBG381x")
+		(lib_id "ECP5_BGA381_FT2232HQ_FIFO:LFE5U-25F-xBG381x")
 		(at 237.49 62.23 0)
 		(unit 5)
 		(exclude_from_sim no)
@@ -16438,7 +16438,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:BGA-381_pitch0.8mm_dia0.4mm"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:BGA-381_pitch0.8mm_dia0.4mm"
 			(at 233.68 -95.25 0)
 			(effects
 				(font
@@ -24531,7 +24531,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ECP5_TX_AUDIO:Fuse_1812_4532Metric"
+		(property "Footprint" "ECP5_BGA381_FT2232HQ_FIFO:Fuse_1812_4532Metric"
 			(at 39.37 36.83 0)
 			(effects
 				(font
