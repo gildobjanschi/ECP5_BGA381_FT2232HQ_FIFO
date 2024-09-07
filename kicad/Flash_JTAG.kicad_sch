@@ -13994,7 +13994,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Full Speed USB to Full Handshake UART, QFN-20"
+		(property "Description" "IC USB SERIAL FULL UART 20QFN"
 			(at 101.6 148.59 0)
 			(effects
 				(font
@@ -15131,7 +15131,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB 2.0-only Type-C Receptacle connector"
+		(property "Description" "CONN RCP USB2.0 TYP C 24P SMD RA"
 			(at 31.75 140.97 0)
 			(effects
 				(font

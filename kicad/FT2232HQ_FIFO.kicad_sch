@@ -15851,7 +15851,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB 2.0-only Type-C Receptacle connector"
+		(property "Description" "CONN RCP USB2.0 TYP C 24P SMD RA"
 			(at 24.13 50.8 0)
 			(effects
 				(font

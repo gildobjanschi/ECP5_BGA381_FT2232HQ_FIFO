@@ -59,7 +59,16 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "hole_clearance|118805000|107700000|f123e492-5301-44b9-bcfa-883c346c63d2|65b7c565-a67b-4bb2-932c-3576d486996d",
+        "hole_clearance|118805000|107700000|f123e492-5301-44b9-bcfa-883c346c63d2|8fdb1593-fdbb-4f29-a06f-e46cdeded3c0",
+        "hole_clearance|118805000|113500000|a2ad4696-1e57-430b-9989-8783a53a51b3|25f0d97c-3b9e-4d06-8bb9-ab9d91ac6f08",
+        "hole_clearance|118805000|113500000|a2ad4696-1e57-430b-9989-8783a53a51b3|7b59e8db-a319-4eb3-9f92-fdb4402464ea",
+        "hole_clearance|169567500|103500000|ea9a2ce3-0694-4500-8fdc-d8576a24927e|6c64503b-cd6e-4e5b-9447-82a149b758fd",
+        "hole_clearance|169567500|103500000|ea9a2ce3-0694-4500-8fdc-d8576a24927e|800c5242-21aa-4a48-a7bf-8a0657d44f08",
+        "hole_clearance|169567500|97700000|dfe1c3aa-82f5-4b05-bed1-11e28da1048b|7426b700-0651-45fd-adf5-624dbb172d95",
+        "hole_clearance|169567500|97700000|dfe1c3aa-82f5-4b05-bed1-11e28da1048b|a5399f34-b443-463d-9c0f-9dd119df6b4d"
+      ],
       "meta": {
         "version": 2
       },
@@ -738,8 +747,8 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
-      "pos_files": "",
+      "plot": "/Users/virgildobjanschi/Desktop/ECP5_FT2232/",
+      "pos_files": "/Users/virgildobjanschi/Desktop/ECP5_FT2232/",
       "specctra_dsn": "",
       "step": "",
       "svg": "",
@@ -749,7 +758,7 @@
   },
   "schematic": {
     "annotate_start_num": 0,
-    "bom_export_filename": "",
+    "bom_export_filename": "/Users/virgildobjanschi/Desktop/ECP5_FT2232/ECP5.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
       "field_delimiter": ",",
