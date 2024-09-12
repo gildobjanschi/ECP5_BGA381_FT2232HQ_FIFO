@@ -212,6 +212,9 @@ module ft2232_fifo (
                 end
 
                 STATE_RD_WAIT_IN_ROOM: begin
+                    // For STATE_RD_MAKE_OUT_ROOM
+                    fifo_wr_n_o <= 1'b1;
+
                     if (~wr_in_fifo_full_i && ~wr_in_fifo_afull_i) begin
                         if (saved_data_bits[0]) begin
                             // Write the data to the input FIFO.

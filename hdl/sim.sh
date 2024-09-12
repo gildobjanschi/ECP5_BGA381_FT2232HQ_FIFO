@@ -12,10 +12,12 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 -a -b -t <test number> -h [-D <flag>]"
+    echo "Usage: $0 -a -b -t <test number> -p <payload 0..63> -c <count of packets 1..255> -h [-D <flag>]"
     echo "    -a: Tx board Rev A."
     echo "    -b: Tx board Rev B."
     echo "    -t: Test number."
+    echo "    -p: Test payload length (0..63)."
+    echo "    -c: Test number of packets (1..255)."
     echo "    -h: Help."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1
@@ -29,16 +31,18 @@ helpFunction()
 # FT_FIFO:      FT2232 FIFO messages.
 # FIFO:         Asynchronous FIFO messages.
 # TX:           Transmitter messages.
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_FIFO -D D_TX"
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_TX"
 
 BOARD=""
 OUTPUT_FILE=out.sim
 
-while getopts 'abt:hD:' opt; do
+while getopts 'abt:p:c:hD:' opt; do
     case "$opt" in
         a ) BOARD="BOARD_REV_A" ;;
         b ) BOARD="BOARD_REV_B" ;;
         t ) OPTIONS="$OPTIONS -D TEST_MODE -D TEST_NUMBER=${OPTARG}" ;;
+        p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=6'd${OPTARG}" ;;
+        c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=8'd${OPTARG}" ;;
         D ) OPTIONS="$OPTIONS -D ${OPTARG}" ;;
         h ) helpFunction ;;
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent

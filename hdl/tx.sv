@@ -56,6 +56,14 @@ module tx (
     assign ext_led_app_out_fifo_wr_o = wr_out_fifo_en_o;
 `endif
 
+`ifndef DATA_PACKETS_COUNT
+    `define DATA_PACKETS_COUNT 8'd1
+`endif
+
+`ifndef DATA_PACKET_PAYLOAD
+    `define DATA_PACKET_PAYLOAD 6'd63
+`endif
+
     // State machines
     localparam STATE_IDLE       = 3'b000;
     localparam STATE_RD         = 3'b001;
@@ -81,9 +89,6 @@ module tx (
     logic [7:0] wr_packets;
     logic [5:0] wr_payload_bytes;
 
-    localparam DATA_PACKETS_COUNT   = 8'd1;
-    localparam DATA_PACKET_PAYLOAD  = 6'd63;
-
     //==================================================================================================================
     // The command handler
     //==================================================================================================================
@@ -98,7 +103,7 @@ module tx (
 
                 if (payload_length == 6'd1) begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36mRx CMD_TEST_START.\033[0;0m");
+                    $display ($time, "\033[0;36m TX:\t--> CMD_TEST_START. \033[0;0m");
 `endif
                     // Reset the test data
                     expected_test_data <= 8'd0;
@@ -108,7 +113,7 @@ module tx (
                     fifo_state_m <= STATE_FIFO_PAYLOAD;
                 end else begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36m[ERROR] Rx CMD_TEST_START payload bytes: %d (expected 1).\033[0;0m", payload_length);
+                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_START payload bytes: %d (expected 1). \033[0;0m", payload_length);
 `endif
                     wr_data_index <= 6'd0;
                     wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -121,7 +126,7 @@ module tx (
 
             `CMD_TEST_DATA: begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36mRx CMD_TEST_DATA payload bytes: %d.\033[0;0m", payload_length);
+                $display ($time, "\033[0;36m TX:\t--> CMD_TEST_DATA payload bytes: %d. \033[0;0m", payload_length);
 `endif
                 if (payload_length > 6'd0) begin
                     rd_payload_bytes <= payload_length;
@@ -134,13 +139,13 @@ module tx (
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 if (payload_length == 6'd0) begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36mRx CMD_TEST_STOP.\033[0;0m");
+                    $display ($time, "\033[0;36m TX:\t--> CMD_TEST_STOP. \033[0;0m");
 `endif
                     wr_data[1] <= `TEST_ERROR_NONE;
 
                 end else begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36m[ERROR] Rx CMD_TEST_STOP payload bytes: %d (expected 0).\033[0;0m", payload_length);
+                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m", payload_length);
 `endif
                     wr_data[1] <= `TEST_ERROR_INVALID_STOP_PAYLOAD;
                 end
@@ -151,7 +156,7 @@ module tx (
 
             default: begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36m[ERROR] Rx invalid command: %d.\033[0;0m", fifo_cmd);
+                $display ($time, "\033[0;36m TX:\t[ERROR] --> invalid command: %d. \033[0;0m", fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -172,7 +177,7 @@ module tx (
             `CMD_TEST_START: begin
                 test_number <= fifo_data;
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36mRx CMD_TEST_START test number: %d.\033[0;0m", fifo_data);
+                $display ($time, "\033[0;36m TX:\t--> CMD_TEST_START test number: %d. \033[0;0m", fifo_data);
 `endif
                 case (fifo_data)
                     `TEST_RECEIVE, `TEST_RECEIVE_SEND: begin
@@ -180,8 +185,8 @@ module tx (
 
                     `TEST_SEND: begin
                         data_to_send <= 1'b1;
-                        wr_payload_bytes <= DATA_PACKET_PAYLOAD;
-                        wr_packets <= DATA_PACKETS_COUNT;
+                        wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
+                        wr_packets <= `DATA_PACKETS_COUNT;
 
                         rd_in_fifo_en_o <= 1'b0;
                         state_m <= STATE_WR;
@@ -202,7 +207,7 @@ module tx (
             `CMD_TEST_DATA: begin
                 if (fifo_data == expected_test_data) begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36mRx: %d.\033[0;0m", fifo_data);
+                    $display ($time, "\033[0;36m TX:\t--> %d. \033[0;0m", fifo_data);
 `endif
                     // For the loop back test write back the byte that was just received.
                     if (test_number == `TEST_RECEIVE_SEND) begin
@@ -218,7 +223,7 @@ module tx (
                     expected_test_data <= expected_test_data + 8'd1;
                 end else begin
 `ifdef D_TX
-                    $display ($time, " TX:\t\033[0;36m[ERROR] CMD_TEST_DATA invalid payload: %d (expected %d).\033[0;0m",
+                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_DATA invalid payload: %d (expected %d). \033[0;0m",
                                 fifo_data, expected_test_data);
 `endif
                     wr_data_index <= 6'd0;
@@ -236,7 +241,7 @@ module tx (
 
             default: begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36m[ERROR] Rx invalid command in handle_payload_task: %d.\033[0;0m", fifo_cmd);
+                $display ($time, "\033[0;36m TX:\t[ERROR] --> invalid command in handle_payload_task: %d. \033[0;0m", fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -256,10 +261,10 @@ module tx (
             wr_out_fifo_en_o <= 1'b0;
             state_m <= STATE_RD;
         end else if (~wr_out_fifo_afull_i && ~wr_out_fifo_full_i) begin
-            if (wr_payload_bytes == DATA_PACKET_PAYLOAD) begin
+            if (wr_payload_bytes == `DATA_PACKET_PAYLOAD) begin
                 // The beginning of a packet
                 wr_out_fifo_en_o <= 1'b1;
-                wr_out_fifo_data_o <= {`CMD_TEST_DATA, DATA_PACKET_PAYLOAD};
+                wr_out_fifo_data_o <= {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD};
             end else if (wr_payload_bytes == 8'd0) begin
                 // The end of a packet
                 wr_out_fifo_en_o <= 1'b0;
@@ -269,7 +274,7 @@ module tx (
                     data_to_send <= 1'b0;
                     state_m <= STATE_RD;
                 end else begin
-                    wr_payload_bytes <= DATA_PACKET_PAYLOAD;
+                    wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
                 end
             end else begin
                 // Send data from the packet
@@ -279,7 +284,7 @@ module tx (
                 wr_payload_bytes <= wr_payload_bytes - 8'd1;
             end
 `ifdef D_TX
-            $display ($time, " TX:\tTX: %d.", expected_test_data);
+            $display ($time, "\033[0;36m TX:\t<--: %d. \033[0;0m", expected_test_data);
 `endif
             expected_test_data <= expected_test_data + 8'd1;
         end else begin
@@ -294,14 +299,14 @@ module tx (
         if (wr_data_index == 6'd0) begin
             if (wr_data[1] == `TEST_ERROR_NONE) begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36m==== TEST OK ====.\033[0;0m");
+                $display ($time, "\033[0;36m TX:\t==== TEST OK ====. \033[0;0m");
 `endif
 `ifdef EXT_ENABLED
                 ext_led_test_ok <= 1'b1;
 `endif
             end else begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36m==== TEST FAILED [code: %d] ====.\033[0;0m", wr_data[1]);
+                $display ($time, "\033[0;36m TX:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
 `endif
 `ifdef EXT_ENABLED
                 ext_led_test_fail <= 1'b1;
@@ -379,14 +384,14 @@ module tx (
     task write_buffer_task (input logic [2:0] next_state_m);
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
 `ifdef D_TX
-            $display ($time, " TX:\t\033[0;36mWrite buffer: Done.\033[0;0m");
+            $display ($time, "\033[0;36m TX:\t[STATE_WR_BUFFER] Done. \033[0;0m");
 `endif
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
         end else begin
             if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36mWrite buffer: [%d]:  %d.\033[0;0m", wr_data_index, wr_data[wr_data_index]);
+                $display ($time, "\033[0;36m TX:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m", wr_data_index, wr_data[wr_data_index]);
 `endif
                 wr_out_fifo_en_o <= 1'b1;
                 wr_out_fifo_data_o <= wr_data[wr_data_index];
@@ -394,7 +399,7 @@ module tx (
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
 `ifdef D_TX
-                $display ($time, " TX:\t\033[0;36mWrite buffer: Full.\033[0;0m");
+                $display ($time, "\033[0;36m TX:\tWrite buffer: Full. \033[0;0m");
 `endif
                 wr_out_fifo_en_o <= 1'b0;
             end
@@ -407,7 +412,7 @@ module tx (
     always @(posedge clk, posedge reset_i) begin
         if (reset_i) begin
 `ifdef D_TX
-            $display ($time, " TX:\t\033[0;36m-- Reset.\033[0;0m");
+            $display ($time, "\033[0;36m TX:\t-- Reset. \033[0;0m");
 `endif
             rd_in_fifo_en_o <= 1'b0;
             wr_out_fifo_en_o <= 1'b0;
