@@ -53,7 +53,7 @@ module ft2232_fifo (
 
     // Reset the FT2232HQ
     assign ft2232_reset_n_o = ~reset_i;
-
+    assign fifo_siwu_o = 1'b1;
     assign wr_in_fifo_clk_o = fifo_clk_i;
     assign rd_out_fifo_clk_o = fifo_clk_i;
 
@@ -95,7 +95,6 @@ module ft2232_fifo (
             // -------------------------------------
             fifo_wr_n_o <= 1'b1;
             fifo_rd_n_o <= 1'b1;
-            fifo_siwu_o <= 1'b1;
 
             wr_in_fifo_en_o <= 1'b0;
             rd_out_fifo_en_o <= 1'b0;
