@@ -1,0 +1,7 @@
+Environment Setup:
+cd ~/Documents/GitHub/ECP5_BGA381_FT2232HQ_FIFO/hdl
+export PATH="$PATH:~/tools-oss-cad-suite-0.1.0/bin"
+
+1. BNC code
+2. Parse wav file in Verilog and play it.
+3. DXX desktop app

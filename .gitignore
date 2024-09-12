@@ -14,3 +14,4 @@ kicad/sym-lib-table
 symbols/*.bak
 
 
+hdl/out.*
