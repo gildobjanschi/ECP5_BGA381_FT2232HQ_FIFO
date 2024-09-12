@@ -251,7 +251,8 @@ module ft2232_fifo (
                         rd_out_fifo_en_o <= 1'b1;
                         if (rd_out_fifo_en_o) begin
 `ifdef D_FT_FIFO
-                            $display ($time, " FT_FIFO:\t<--- [STATE_RD_MAKE_OUT_ROOM] Rd OUT: %d.", rd_out_fifo_data_i);
+                            $display ($time, " FT_FIFO:\t<--- [STATE_RD_MAKE_OUT_ROOM] Rd OUT: %d.",
+                                                rd_out_fifo_data_i);
 `endif
                             fifo_wr_n_o <= 1'b0;
                             // Write data to the FT2232 FIFO.
@@ -301,7 +302,8 @@ module ft2232_fifo (
                         // Write data to the FT2232 FIFO.
                         fifo_data_o <= rd_out_fifo_data_i;
 `ifdef D_FT_FIFO
-                        $display ($time, " FT_FIFO:\t<--- [STATE_WR_DATA] Rd OUT: %d -> STATE_IDLE_WR.", rd_out_fifo_data_i);
+                        $display ($time, " FT_FIFO:\t<--- [STATE_WR_DATA] Rd OUT: %d -> STATE_IDLE_WR.",
+                                            rd_out_fifo_data_i);
 `endif
                         state_m <= STATE_IDLE_WR;
                     end else if (~can_write_to_ft2232_fifo) begin

@@ -17,9 +17,9 @@
 `timescale 1ps/1ps
 `default_nettype none
 
-`include "definitions.svh"
+`include "test_definitions.svh"
 
-module tx (
+module control (
     input logic reset_i,
     input logic clk_24576000_i,
     input logic clk_22579200_i,
@@ -37,9 +37,7 @@ module tx (
     output logic led_test_mode
 `ifdef EXT_ENABLED
     ,
-    output logic ext_led_app_in_fifo_rd_o,
-    output logic ext_led_app_out_fifo_wr_o,
-    output logic ext_led_app_tx_err_o,
+    output logic ext_led_app_ctrl_err_o,
     output logic ext_led_test_ok,
     output logic ext_led_test_fail
 `endif
@@ -50,11 +48,6 @@ module tx (
 
     assign rd_in_fifo_clk_o = clk;
     assign wr_out_fifo_clk_o = clk;
-
-`ifdef EXT_ENABLED
-    assign ext_led_app_in_fifo_rd_o = rd_in_fifo_en_o;
-    assign ext_led_app_out_fifo_wr_o = wr_out_fifo_en_o;
-`endif
 
 `ifndef DATA_PACKETS_COUNT
     `define DATA_PACKETS_COUNT 8'd1
@@ -83,7 +76,6 @@ module tx (
     logic [5:0] wr_data_index;
     logic [7:0] wr_data[0:3];
 
-`ifdef TEST_MODE
     logic [7:0] test_number;
     logic [7:0] expected_test_data;
     logic [7:0] wr_packets;
@@ -102,18 +94,16 @@ module tx (
 `endif
 
                 if (payload_length == 6'd1) begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t--> CMD_TEST_START. \033[0;0m");
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_START. \033[0;0m");
 `endif
                     // Reset the test data
                     expected_test_data <= 8'd0;
                     data_to_send <= 1'b0;
-
-                    rd_payload_bytes <= payload_length;
-                    fifo_state_m <= STATE_FIFO_PAYLOAD;
                 end else begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_START payload bytes: %d (expected 1). \033[0;0m", payload_length);
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_START payload bytes: %d (expected 1). \033[0;0m",
+                                    payload_length);
 `endif
                     wr_data_index <= 6'd0;
                     wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -125,27 +115,24 @@ module tx (
             end
 
             `CMD_TEST_DATA: begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t--> CMD_TEST_DATA payload bytes: %d. \033[0;0m", payload_length);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_DATA payload bytes: %d. \033[0;0m", payload_length);
 `endif
-                if (payload_length > 6'd0) begin
-                    rd_payload_bytes <= payload_length;
-                    fifo_state_m <= STATE_FIFO_PAYLOAD;
-                end
             end
 
             `CMD_TEST_STOP: begin
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 if (payload_length == 6'd0) begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t--> CMD_TEST_STOP. \033[0;0m");
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_STOP. \033[0;0m");
 `endif
                     wr_data[1] <= `TEST_ERROR_NONE;
 
                 end else begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m", payload_length);
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m",
+                                    payload_length);
 `endif
                     wr_data[1] <= `TEST_ERROR_INVALID_STOP_PAYLOAD;
                 end
@@ -155,8 +142,8 @@ module tx (
             end
 
             default: begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t[ERROR] --> invalid command: %d. \033[0;0m", fifo_cmd);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t[ERROR] --> invalid command: %d. \033[0;0m", fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -176,8 +163,8 @@ module tx (
         case (fifo_cmd)
             `CMD_TEST_START: begin
                 test_number <= fifo_data;
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t--> CMD_TEST_START test number: %d. \033[0;0m", fifo_data);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_START test number: %d. \033[0;0m", fifo_data);
 `endif
                 case (fifo_data)
                     `TEST_RECEIVE, `TEST_RECEIVE_SEND: begin
@@ -206,8 +193,8 @@ module tx (
 
             `CMD_TEST_DATA: begin
                 if (fifo_data == expected_test_data) begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t--> %d. \033[0;0m", fifo_data);
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t--> %d. \033[0;0m", fifo_data);
 `endif
                     // For the loop back test write back the byte that was just received.
                     if (test_number == `TEST_RECEIVE_SEND) begin
@@ -222,8 +209,8 @@ module tx (
 
                     expected_test_data <= expected_test_data + 8'd1;
                 end else begin
-`ifdef D_TX
-                    $display ($time, "\033[0;36m TX:\t[ERROR] --> CMD_TEST_DATA invalid payload: %d (expected %d). \033[0;0m",
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_DATA bad payload: %d (expected %d). \033[0;0m",
                                 fifo_data, expected_test_data);
 `endif
                     wr_data_index <= 6'd0;
@@ -240,8 +227,9 @@ module tx (
             end
 
             default: begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t[ERROR] --> invalid command in handle_payload_task: %d. \033[0;0m", fifo_cmd);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t[ERROR] --> invalid command in handle_payload_task: %d. \033[0;0m",
+                                fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -283,8 +271,8 @@ module tx (
 
                 wr_payload_bytes <= wr_payload_bytes - 8'd1;
             end
-`ifdef D_TX
-            $display ($time, "\033[0;36m TX:\t<--: %d. \033[0;0m", expected_test_data);
+`ifdef D_CTRL
+            $display ($time, "\033[0;36m CTRL:\t<--: %d. \033[0;0m", expected_test_data);
 `endif
             expected_test_data <= expected_test_data + 8'd1;
         end else begin
@@ -298,15 +286,15 @@ module tx (
     task handle_error_task;
         if (wr_data_index == 6'd0) begin
             if (wr_data[1] == `TEST_ERROR_NONE) begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t==== TEST OK ====. \033[0;0m");
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t==== TEST OK ====. \033[0;0m");
 `endif
 `ifdef EXT_ENABLED
                 ext_led_test_ok <= 1'b1;
 `endif
             end else begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
 `endif
 `ifdef EXT_ENABLED
                 ext_led_test_fail <= 1'b1;
@@ -318,43 +306,6 @@ module tx (
 
     endtask
 
-`else // TEST_MODE
-    //==================================================================================================================
-    // The command handler
-    //==================================================================================================================
-    task handle_cmd_task (input logic [1:0] fifo_cmd, input logic [5:0] payload_length);
-/*
-        (* parallel_case, full_case *)
-        case (fifo_cmd)
-
-        endcase
-*/
-    endtask
-
-    //==================================================================================================================
-    // The payload handler
-    //==================================================================================================================
-    task handle_payload_task (input logic [1:0] fifo_cmd, input logic [7:0] fifo_data);
-/*
-        case (fifo_cmd)
-
-        endcase
-*/
-    endtask
-
-    //==================================================================================================================
-    // The error handler
-    //==================================================================================================================
-    task handle_error_task;
-    endtask
-
-    //==================================================================================================================
-    // The write data handler
-    //==================================================================================================================
-    task write_data_task;
-    endtask
-`endif // TEST_MODE
-
     //==================================================================================================================
     // The FIFO reader
     //==================================================================================================================
@@ -363,7 +314,12 @@ module tx (
         case (fifo_state_m)
             STATE_FIFO_CMD: begin
                 handle_cmd_task (fifo_data[7:6], fifo_data[5:0]);
-                last_fifo_cmd <= fifo_data[7:6];
+
+                if (fifo_data[5:0] > 6'd0) begin
+                    rd_payload_bytes <= fifo_data[5:0];
+                    last_fifo_cmd <= fifo_data[7:6];
+                    fifo_state_m <= STATE_FIFO_PAYLOAD;
+                end
             end
 
             STATE_FIFO_PAYLOAD: begin
@@ -383,23 +339,24 @@ module tx (
     //==================================================================================================================
     task write_buffer_task (input logic [2:0] next_state_m);
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
-`ifdef D_TX
-            $display ($time, "\033[0;36m TX:\t[STATE_WR_BUFFER] Done. \033[0;0m");
+`ifdef D_CTRL
+            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] Done. \033[0;0m");
 `endif
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
         end else begin
             if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m", wr_data_index, wr_data[wr_data_index]);
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m",
+                                wr_data_index, wr_data[wr_data_index]);
 `endif
                 wr_out_fifo_en_o <= 1'b1;
                 wr_out_fifo_data_o <= wr_data[wr_data_index];
 
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
-`ifdef D_TX
-                $display ($time, "\033[0;36m TX:\tWrite buffer: Full. \033[0;0m");
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\tWrite buffer: Full. \033[0;0m");
 `endif
                 wr_out_fifo_en_o <= 1'b0;
             end
@@ -411,8 +368,8 @@ module tx (
     //==================================================================================================================
     always @(posedge clk, posedge reset_i) begin
         if (reset_i) begin
-`ifdef D_TX
-            $display ($time, "\033[0;36m TX:\t-- Reset. \033[0;0m");
+`ifdef D_CTRL
+            $display ($time, "\033[0;36m CTRL:\t-- Reset. \033[0;0m");
 `endif
             rd_in_fifo_en_o <= 1'b0;
             wr_out_fifo_en_o <= 1'b0;
@@ -420,14 +377,11 @@ module tx (
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
             data_to_send <= 1'b0;
-`ifdef TEST_MODE
+
             led_test_mode <= 1'b1;
-`else
-            led_test_mode <= 1'b0;
-`endif
 
 `ifdef EXT_ENABLED
-            ext_led_app_tx_err_o <= 1'b0;
+            ext_led_app_ctrl_err_o <= 1'b0;
             ext_led_test_ok <= 1'b0;
             ext_led_test_fail <= 1'b0;
 `endif

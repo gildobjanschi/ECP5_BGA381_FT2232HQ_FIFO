@@ -30,17 +30,19 @@ helpFunction()
 # CORE:         Core debug messages.
 # FT_FIFO:      FT2232 FIFO messages.
 # FIFO:         Asynchronous FIFO messages.
-# TX:           Transmitter messages.
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_TX"
+# CTRL:         Controller messages.
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL"
 
 BOARD=""
 OUTPUT_FILE=out.sim
+CONTROL_FILE=""
 
 while getopts 'abt:p:c:hD:' opt; do
     case "$opt" in
         a ) BOARD="BOARD_REV_A" ;;
         b ) BOARD="BOARD_REV_B" ;;
-        t ) OPTIONS="$OPTIONS -D TEST_MODE -D TEST_NUMBER=${OPTARG}" ;;
+        t ) OPTIONS="$OPTIONS -D TEST_MODE -D TEST_NUMBER=${OPTARG}"
+            CONTROL_FILE="test_control.sv" ;;
         p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=6'd${OPTARG}" ;;
         c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=8'd${OPTARG}" ;;
         D ) OPTIONS="$OPTIONS -D ${OPTARG}" ;;
@@ -48,6 +50,10 @@ while getopts 'abt:p:c:hD:' opt; do
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
     esac
 done
+
+if test -z "$CONTROL_FILE"; then
+    CONTROL_FILE="control.sv"
+fi
 
 if test -f "$OUTPUT_FILE"; then
     rm $OUTPUT_FILE
@@ -67,7 +73,7 @@ fi
 echo $OPTIONS
 
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
-            sim_trellis.sv utils.sv async_fifo.sv tx.sv ft2232_fifo.sv audio.sv sim_ft2232.sv sim_top_tx_audio.sv
+            sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_top_tx_audio.sv
 if [ $? -eq 0 ]; then
     vvp $OUTPUT_FILE
 fi

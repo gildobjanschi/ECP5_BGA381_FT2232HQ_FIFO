@@ -17,7 +17,7 @@
 `timescale 1ps/1ps
 `default_nettype none
 
-`include "definitions.svh"
+`include "test_definitions.svh"
 
 module sim_ft2232 (
     input logic ft2232_reset_n_i,
@@ -105,7 +105,8 @@ module sim_ft2232 (
             STATE_OUT_DATA: begin
                 if (rd) begin
 `ifdef D_FT2232
-                    $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_DATA] %d. \033[0;0m", {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD});
+                    $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_DATA] %d. \033[0;0m",
+                                        {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD});
 `endif
                     fifo_data_o <= {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD};
                     out_payload_bytes <= `DATA_PACKET_PAYLOAD;
@@ -117,7 +118,8 @@ module sim_ft2232 (
             STATE_OUT_DATA_PAYLOAD: begin
                 if (rd) begin
 `ifdef D_FT2232
-                    $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_DATA_PAYLOAD] %d (remaining %d). \033[0;0m", out_data, out_payload_bytes - 1);
+                    $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_DATA_PAYLOAD] %d (remaining %d). \033[0;0m",
+                                        out_data, out_payload_bytes - 1);
 `endif
                     fifo_data_o <= out_data;
                     out_data <= out_data + 8'd1;
@@ -165,7 +167,8 @@ module sim_ft2232 (
                     `CMD_TEST_STOPPED: begin
                         fifo_rxf_n_o <= 1'b1;
 `ifdef D_FT2232
-                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] CMD_TEST_STOPPED [payload bytes: %d]. \033[0;0m", fifo_data_i[5:0]);
+                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] CMD_TEST_STOPPED [payload bytes: %d]. \033[0;0m",
+                                        fifo_data_i[5:0]);
 `endif
                         total_in_payload_bytes <= fifo_data_i[5:0];
                         in_payload_bytes <= fifo_data_i[5:0];
@@ -174,7 +177,8 @@ module sim_ft2232 (
 
                     `CMD_TEST_DATA: begin
 `ifdef D_FT2232
-                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] CMD_TEST_DATA [payload bytes: %d]. \033[0;0m", fifo_data_i[5:0]);
+                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] CMD_TEST_DATA [payload bytes: %d]. \033[0;0m",
+                                        fifo_data_i[5:0]);
 `endif
                         total_in_payload_bytes <= fifo_data_i[5:0];
                         in_payload_bytes <= fifo_data_i[5:0];
@@ -183,7 +187,8 @@ module sim_ft2232 (
 
                     default: begin
 `ifdef D_FT2232
-                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] Unknown command %d. \033[0;0m", fifo_data_i[7:6]);
+                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] Unknown command %d. \033[0;0m",
+                                        fifo_data_i[7:6]);
 `endif
                     end
                 endcase
@@ -197,24 +202,28 @@ module sim_ft2232 (
                         case (total_in_payload_bytes - in_payload_bytes)
                             6'd0: begin
 `ifdef D_FT2232
-                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Error code: %d. \033[0;0m", fifo_data_i);
+                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Error code: %d. \033[0;0m",
+                                                    fifo_data_i);
                                 if (fifo_data_i == `TEST_ERROR_NONE) begin
                                     $display ($time, "\033[0;35m FT2232:\t==== TEST OK ====. \033[0;0m");
                                 end else begin
-                                    $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED [code: %d] ====. \033[0;0m", fifo_data_i);
+                                    $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED [code: %d] ====. \033[0;0m",
+                                                    fifo_data_i);
                                 end
 `endif
                             end
 
                             6'd1: begin
 `ifdef D_FT2232
-                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Value received: %d. \033[0;0m", fifo_data_i);
+                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Value received: %d. \033[0;0m",
+                                                    fifo_data_i);
 `endif
                             end
 
                             6'd2: begin
 `ifdef D_FT2232
-                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Value expected: %d. \033[0;0m", fifo_data_i);
+                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_STOPPED: Value expected: %d. \033[0;0m",
+                                                    fifo_data_i);
 `endif
                             end
                         endcase
@@ -222,7 +231,8 @@ module sim_ft2232 (
 
                     `CMD_TEST_DATA: begin
 `ifdef D_FT2232
-                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_DATA: %d. \033[0;0m", fifo_data_i);
+                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_DATA: %d. \033[0;0m",
+                                                fifo_data_i);
 `endif
                     end
                 endcase
@@ -237,7 +247,7 @@ module sim_ft2232 (
             end
         endcase
     endtask
-`else
+`else // TEST_MODE
     //==================================================================================================================
     // The task that output the next byte
     //==================================================================================================================
@@ -261,8 +271,11 @@ module sim_ft2232 (
             out_data <= 8'd0;
 
             fifo_txe_n_o <= 1'b0;
+`ifdef TEST_MODE
             fifo_rxf_n_o <= 1'b0;
-
+`else
+            fifo_rxf_n_o <= 1'b1;
+`endif
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t-- Reset. \033[0;0m");
 `endif

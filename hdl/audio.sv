@@ -67,6 +67,7 @@ module audio (
 
     logic ext_led_app_in_fifo_rd_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_2(.B(extension[2]), .T(1'b0), .I(ext_led_app_in_fifo_rd_o));
+    assign ext_led_app_in_fifo_rd_o = rd_in_fifo_en;
 
     logic ext_led_app_in_fifo_full_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_3(.B(extension[3]), .T(1'b0), .I(ext_led_app_in_fifo_full_o));
@@ -82,6 +83,7 @@ module audio (
 
     logic ext_led_app_out_fifo_wr_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_9(.B(extension[9]), .T(1'b0), .I(ext_led_app_out_fifo_wr_o));
+    assign ext_led_app_out_fifo_wr_o = wr_out_fifo_en;
 
     logic ext_led_app_out_fifo_full_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_10(.B(extension[10]), .T(1'b0), .I(ext_led_app_out_fifo_full_o));
@@ -98,8 +100,9 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_17(.B(extension[17]), .T(1'b0), .I(ext_led_test_fail_o));
 
     // TX
-    logic ext_led_app_tx_err_o;
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_18(.B(extension[18]), .T(1'b0), .I(ext_led_app_tx_err_o));
+    logic ext_led_app_ctrl_err_o;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_18(.B(extension[18]), .T(1'b0), .I(ext_led_app_ctrl_err_o));
+
 `endif
 
     //==================================================================================================================
@@ -192,7 +195,7 @@ module audio (
         );
 
     // Audio transmission module
-    tx tx_m (
+    control control_m (
         .reset_i            (reset),
         .clk_24576000_i     (clk_24576000_i),
         .clk_22579200_i     (clk_22579200_i),
@@ -210,9 +213,7 @@ module audio (
         .led_test_mode       (led_user)
 `ifdef EXT_ENABLED
         ,
-        .ext_led_app_in_fifo_rd_o   (ext_led_app_in_fifo_rd_o),
-        .ext_led_app_out_fifo_wr_o  (ext_led_app_out_fifo_wr_o),
-        .ext_led_app_tx_err_o       (ext_led_app_tx_err_o),
+        .ext_led_app_ctrl_err_o     (ext_led_app_ctrl_err_o),
         .ext_led_test_ok            (ext_led_test_ok_o),
         .ext_led_test_fail          (ext_led_test_fail_o)
 `endif
