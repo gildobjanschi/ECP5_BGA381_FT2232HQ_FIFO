@@ -29,7 +29,7 @@ helpFunction()
 # FT_FIFO:      FT2232 FIFO messages.
 # FIFO:         Asynchronous FIFO messages.
 # TX:           Transmitter messages.
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_TX"
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_FIFO -D D_TX"
 
 BOARD=""
 OUTPUT_FILE=out.sim

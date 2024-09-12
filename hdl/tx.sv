@@ -378,6 +378,9 @@ module tx (
     //==================================================================================================================
     task write_buffer_task (input logic [2:0] next_state_m);
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
+`ifdef D_TX
+            $display ($time, " TX:\t\033[0;36mWrite buffer: Done.\033[0;0m");
+`endif
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
         end else begin
@@ -390,6 +393,9 @@ module tx (
 
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
+`ifdef D_TX
+                $display ($time, " TX:\t\033[0;36mWrite buffer: Full.\033[0;0m");
+`endif
                 wr_out_fifo_en_o <= 1'b0;
             end
         end

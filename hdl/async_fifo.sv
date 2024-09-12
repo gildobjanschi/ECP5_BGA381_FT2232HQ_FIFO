@@ -301,7 +301,7 @@ module fifomem #(
 `ifdef D_FIFO
             always @(posedge rclk) begin
                 if (rclken && ~rempty) begin
-                    $display ($time, " FIFO:\tRd: %h.", mem[raddr]);
+                    $display ($time, " FIFO:\tRd: %d.", mem[raddr]);
                 end
             end
 `endif
@@ -312,7 +312,7 @@ module fifomem #(
                 if (rclken && ~rempty) begin
                     rdata_r <= mem[raddr];
 `ifdef D_FIFO
-                    $display ($time, " FIFO:\tRd: %h @%h.", mem[raddr], raddr);
+                    $display ($time, " FIFO:\tRd: %d @%h.", mem[raddr], raddr);
 `endif
                 end
             end

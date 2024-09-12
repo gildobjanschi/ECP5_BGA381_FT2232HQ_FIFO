@@ -191,6 +191,11 @@ module sim_ft2232 (
                             6'd0: begin
 `ifdef D_FT2232
                                 $display ($time, " FT2232:\t\033[0;35mSTATE_IN_PAYLOAD: CMD_TEST_STOPPED: Error code: %d.\033[0;0m", fifo_data_i);
+                                if (fifo_data_i == `TEST_ERROR_NONE) begin
+                                    $display ($time, " FT2232:\t\033[0;35m==== TEST OK ====.\033[0;0m");
+                                end else begin
+                                    $display ($time, " FT2232:\t\033[0;35m==== TEST FAILED [code: %d] ====.\033[0;0m", fifo_data_i);
+                                end
 `endif
                             end
 
