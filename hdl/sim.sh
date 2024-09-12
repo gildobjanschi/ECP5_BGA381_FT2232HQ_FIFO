@@ -12,10 +12,10 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 -a -b -t <test number> -p <payload 0..63> -c <count of packets 1..255> -h [-D <flag>]"
+    echo "Usage: $0 -a -b -t <test number> -p <payload length> -c <count of packets> -h [-D <flag>]"
     echo "    -a: Tx board Rev A."
     echo "    -b: Tx board Rev B."
-    echo "    -t: Test number."
+    echo "    -t: Test number (0..2)."
     echo "    -p: Test payload length (0..63)."
     echo "    -c: Test number of packets (1..255)."
     echo "    -h: Help."

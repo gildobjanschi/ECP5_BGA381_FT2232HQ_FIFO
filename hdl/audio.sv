@@ -59,7 +59,7 @@ module audio (
     //==================================================================================================================
     logic ext_btn_reset, ext_btn_reset_meta;
     TRELLIS_IO #(.DIR("INPUT")) extension_0(.B(extension[0]), .T(1'b1), .O(ext_btn_reset));
-    DFF_META fpga_reset_meta_m (1'b0, ext_btn_reset, clk, ext_btn_reset_meta);
+    DFF_META extension_fpga_reset_meta_m (1'b0, ext_btn_reset, clk, ext_btn_reset_meta);
 
     // Input FIFO
     logic ext_led_ft2232_in_data;
@@ -100,8 +100,6 @@ module audio (
     // TX
     logic ext_led_app_tx_err_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_18(.B(extension[18]), .T(1'b0), .I(ext_led_app_tx_err_o));
-
-
 `endif
 
     //==================================================================================================================
