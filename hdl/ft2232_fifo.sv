@@ -108,35 +108,32 @@ module ft2232_fifo (
         end else begin
             case (state_m)
                 STATE_IDLE_RD: begin
-                    // Enter this state machine with fifo_oe_n_o = 1'b0
+                    // Enter this state machine with fifo_oe_n_o = 1'b0.
 `ifdef EXT_ENABLED
                     led_ft2232_rd_data_o <= 1'b0;
 `endif
                     wr_in_fifo_en_o <= 1'b0;
                     // Check if there is data to write first
                     if (can_write_to_ft2232_fifo) begin
-                        // OE needs to be high (it is low since a read completed)
+                        // OE needs to be high (it is low since a read completed).
                         fifo_oe_n_o <= 1'b1;
 `ifdef D_FT_FIFO
                         $display ($time, " FT_FIFO:\t[STATE_IDLE_RD] OE: 1.");
 `endif
-
                         // Read from the OUT FIFO.
                         rd_out_fifo_en_o <= 1'b1;
 
                         state_m <= STATE_WR_DATA;
-                    end else if (can_read_from_ft2232_fifo || have_save_data) begin
+                    end else if (have_save_data) begin
+                        // If there is saved data write it to the IN FIFO.
+                        state_m <= STATE_FLUSH_SAVED_DATA;
+                    end else if (can_read_from_ft2232_fifo) begin
 `ifdef D_FT_FIFO
                         $display ($time, " FT_FIFO:\t[STATE_IDLE_RD] RD: 0.");
 `endif
-                        // If there is saved data write it to the IN FIFO
-                        if (have_save_data) begin
-                            state_m <= STATE_FLUSH_SAVED_DATA;
-                        end else begin
-                            // Do another read
-                            fifo_rd_n_o <= 1'b0;
-                            state_m <= STATE_RD_START;
-                        end
+                        // Do another read
+                        fifo_rd_n_o <= 1'b0;
+                        state_m <= STATE_RD_START;
                     end
                 end
 
@@ -272,8 +269,8 @@ module ft2232_fifo (
 `endif
                     if (can_write_to_ft2232_fifo) begin
 `ifdef D_FT_FIFO
-                        $display ($time, " FT_FIFO:\t<--- [STATE_WR_DATA] Rd OUT: %d (OUT empty: %d).",
-                                    rd_out_fifo_data_i, rd_out_fifo_empty_i);
+                        $display ($time, " FT_FIFO:\t<--- [STATE_WR_DATA] Rd OUT: %d.",
+                                        rd_out_fifo_data_i, rd_out_fifo_empty_i);
 `endif
                         fifo_wr_n_o <= 1'b0;
                         // Write data to the FT2232 FIFO.
