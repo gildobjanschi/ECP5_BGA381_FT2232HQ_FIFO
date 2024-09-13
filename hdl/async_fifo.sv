@@ -24,10 +24,7 @@
 //==================================================================================================================
 // Dual port FIFO.
 //==================================================================================================================
-module async_fifo #(
-        parameter DSIZE = 8,
-        parameter ASIZE = 8,
-        parameter FALLTHROUGH = "TRUE")( // First word fall-through without latency
+module async_fifo #(parameter DSIZE = 8, parameter ASIZE = 8, parameter FALLTHROUGH = "TRUE")(
         // Write
         input  wire             wr_clk_i,
         input  wire             wr_reset_i,
@@ -69,16 +66,16 @@ module async_fifo #(
         .wrst_n   (~wr_reset_i));
 
     fifomem #(DSIZE, ASIZE, FALLTHROUGH) fifomem (
-        .rclken (rd_en_i),
-        .rclk   (rd_clk_i),
-        .rdata  (rd_data_o),
-        .rempty (rd_empty_o),
-        .wdata  (wr_data_i),
-        .waddr  (waddr),
-        .raddr  (raddr),
-        .wclken (wr_en_i),
-        .wfull  (wr_full_o),
-        .wclk   (wr_clk_i));
+        .rclken   (rd_en_i),
+        .rclk     (rd_clk_i),
+        .rdata    (rd_data_o),
+        .rempty   (rd_empty_o),
+        .wdata    (wr_data_i),
+        .waddr    (waddr),
+        .raddr    (raddr),
+        .wclken   (wr_en_i),
+        .wfull    (wr_full_o),
+        .wclk     (wr_clk_i));
 
     rptr_empty #(ASIZE) rptr_empty (
         .arempty  (rd_arempty_o),
@@ -108,9 +105,9 @@ module sync_r2w #(parameter ASIZE = 4)(
 `ifdef D_FIFO
             $display ($time, " FIFO:\t-- Wr reset.");
 `endif
-            {wq2_rptr,wq1_rptr} <= 0;
+            {wq2_rptr, wq1_rptr} <= 0;
         end else
-            {wq2_rptr,wq1_rptr} <= {wq1_rptr,rptr};
+            {wq2_rptr, wq1_rptr} <= {wq1_rptr, rptr};
 
     end
 endmodule
@@ -131,9 +128,9 @@ module sync_w2r #(parameter ASIZE = 4)(
 `ifdef D_FIFO
             $display ($time, " FIFO:\t-- Rd reset.");
 `endif
-            {rq2_wptr,rq1_wptr} <= 0;
+            {rq2_wptr, rq1_wptr} <= 0;
         end else
-            {rq2_wptr,rq1_wptr} <= {rq1_wptr,wptr};
+            {rq2_wptr, rq1_wptr} <= {rq1_wptr, wptr};
     end
 endmodule
 
