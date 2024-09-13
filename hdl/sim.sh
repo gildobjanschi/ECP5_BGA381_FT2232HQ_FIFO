@@ -73,7 +73,7 @@ fi
 echo $OPTIONS
 
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
-            sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_top_tx_audio.sv
+            sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
 if [ $? -eq 0 ]; then
     vvp $OUTPUT_FILE
 fi

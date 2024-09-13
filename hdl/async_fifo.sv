@@ -183,13 +183,12 @@ module rptr_empty #(parameter ADDRSIZE = 4)(
         end else begin
             arempty <= arempty_val;
             rempty <= rempty_val;
-/*
+
 `ifdef D_FIFO
-            if (rempty_val) begin
-                $display ($time, " FIFO:\t FIFO is empty.");
+            if (rempty_val && ~rempty) begin
+                $display ($time, " FIFO:\tFIFO is empty.");
             end
 `endif
-*/
         end
     end
 endmodule
@@ -242,16 +241,16 @@ module wptr_full #(parameter ADDRSIZE = 4)(
         end else begin
             awfull <= awfull_val;
             wfull  <= wfull_val;
-/*
+
 `ifdef D_FIFO
-            if (awfull) begin
+            if (awfull_val && ~awfull) begin
                 $display ($time, " FIFO:\tFIFO is almost full.");
             end
-            if (wfull) begin
+            if (wfull_val && ~wfull) begin
                 $display ($time, " FIFO:\tFIFO is full.");
             end
 `endif
-*/
+
         end
     end
 endmodule

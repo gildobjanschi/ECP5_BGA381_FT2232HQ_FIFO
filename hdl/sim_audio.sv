@@ -21,11 +21,12 @@
 `timescale 1ps/1ps
 `default_nettype none
 
-module sim_tx_audio;
+module sim_audio;
     //==================================================================================================================
     // Simulate the external clocks
     //==================================================================================================================
     localparam CLK_24576000_PS = 40690;
+    //localparam CLK_24576000_PS = 10000;
     logic clk_24576000 = 1'b0;
     // Generate the simulator clock
     always #(CLK_24576000_PS/2) clk_24576000 = ~clk_24576000;
@@ -107,7 +108,7 @@ module sim_tx_audio;
         $dumpvars(0, fifo_oe_n);
 `endif
 
-        #15000000000
+        #10000000000
 
         $display($time, " SIM: ---------------------- Simulation end [Timeout] ------------------------");
 

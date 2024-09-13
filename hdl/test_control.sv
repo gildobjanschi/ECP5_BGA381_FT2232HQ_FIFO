@@ -70,8 +70,12 @@ module control (
     localparam STATE_FIFO_PAYLOAD   = 1'b1;
     logic fifo_state_m;
 
+    // Write state machines
+    localparam STATE_WR_CMD         = 1'd0;
+    localparam STATE_WR_PAYLOAD     = 1'd1;
+    logic wr_state_m;
+
     logic [1:0] last_fifo_cmd;
-    logic data_to_send;
     logic [5:0] rd_payload_bytes;
     logic [5:0] wr_data_index;
     logic [7:0] wr_data[0:3];
@@ -95,14 +99,13 @@ module control (
 
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_START. \033[0;0m");
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] CMD_TEST_START. \033[0;0m");
 `endif
                     // Reset the test data
                     expected_test_data <= 8'd0;
-                    data_to_send <= 1'b0;
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_START payload bytes: %d (expected 1). \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] CMD_TEST_START payload bytes: %d (expected 1). \033[0;0m",
                                     payload_length);
 `endif
                     wr_data_index <= 6'd0;
@@ -116,7 +119,7 @@ module control (
 
             `CMD_TEST_DATA: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_DATA payload bytes: %d. \033[0;0m", payload_length);
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] CMD_TEST_DATA payload bytes: %d. \033[0;0m", payload_length);
 `endif
             end
 
@@ -125,13 +128,13 @@ module control (
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 if (payload_length == 6'd0) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_STOP. \033[0;0m");
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] CMD_TEST_STOP. \033[0;0m");
 `endif
                     wr_data[1] <= `TEST_ERROR_NONE;
 
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m",
                                     payload_length);
 `endif
                     wr_data[1] <= `TEST_ERROR_INVALID_STOP_PAYLOAD;
@@ -143,7 +146,7 @@ module control (
 
             default: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t[ERROR] --> invalid command: %d. \033[0;0m", fifo_cmd);
+                $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] invalid command: %d. \033[0;0m", fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -164,18 +167,20 @@ module control (
             `CMD_TEST_START: begin
                 test_number <= fifo_data;
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t--> CMD_TEST_START test number: %d. \033[0;0m", fifo_data);
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD] CMD_TEST_START test number: %d. \033[0;0m",
+                                    fifo_data);
 `endif
                 case (fifo_data)
                     `TEST_RECEIVE, `TEST_RECEIVE_SEND: begin
                     end
 
                     `TEST_SEND: begin
-                        data_to_send <= 1'b1;
                         wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
                         wr_packets <= `DATA_PACKETS_COUNT;
 
                         rd_in_fifo_en_o <= 1'b0;
+
+                        wr_state_m <= STATE_WR_CMD;
                         state_m <= STATE_WR;
                     end
 
@@ -194,7 +199,7 @@ module control (
             `CMD_TEST_DATA: begin
                 if (fifo_data == expected_test_data) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t--> %d. \033[0;0m", fifo_data);
+                    $display ($time, "\033[0;36m CTRL:\t[STATE_FIFO_PAYLOAD] CMD_TEST_DATA ---> %d. \033[0;0m", fifo_data);
 `endif
                     // For the loop back test write back the byte that was just received.
                     if (test_number == `TEST_RECEIVE_SEND) begin
@@ -210,7 +215,7 @@ module control (
                     expected_test_data <= expected_test_data + 8'd1;
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_TEST_DATA bad payload: %d (expected %d). \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_PAYLOAD] CMD_TEST_DATA bad payload: %d (expected %d). \033[0;0m",
                                 fifo_data, expected_test_data);
 `endif
                     wr_data_index <= 6'd0;
@@ -228,7 +233,7 @@ module control (
 
             default: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t[ERROR] --> invalid command in handle_payload_task: %d. \033[0;0m",
+                $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_PAYLOAD] invalid command in handle_payload_task: %d. \033[0;0m",
                                 fifo_cmd);
 `endif
                 wr_data_index <= 6'd0;
@@ -245,40 +250,55 @@ module control (
     // The write data handler
     //==================================================================================================================
     task write_data_task;
-        if (~rd_in_fifo_empty_i) begin
-            wr_out_fifo_en_o <= 1'b0;
-            state_m <= STATE_RD;
-        end else if (~wr_out_fifo_afull_i && ~wr_out_fifo_full_i) begin
-            if (wr_payload_bytes == `DATA_PACKET_PAYLOAD) begin
-                // The beginning of a packet
-                wr_out_fifo_en_o <= 1'b1;
-                wr_out_fifo_data_o <= {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD};
-            end else if (wr_payload_bytes == 8'd0) begin
-                // The end of a packet
-                wr_out_fifo_en_o <= 1'b0;
-
-                wr_packets <= wr_packets - 8'd1;
-                if (wr_packets == 8'd1) begin
-                    data_to_send <= 1'b0;
-                    state_m <= STATE_RD;
-                end else begin
-                    wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
-                end
-            end else begin
-                // Send data from the packet
-                wr_out_fifo_en_o <= 1'b1;
-                wr_out_fifo_data_o <= expected_test_data;
-
-                wr_payload_bytes <= wr_payload_bytes - 8'd1;
-            end
+        if (~wr_out_fifo_afull_i && ~wr_out_fifo_full_i) begin
+            case (wr_state_m)
+                STATE_WR_CMD: begin
+                    // The beginning of a packet
+                    wr_out_fifo_en_o <= 1'b1;
+                    wr_out_fifo_data_o <= {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD};
 `ifdef D_CTRL
-            $display ($time, "\033[0;36m CTRL:\t<--: %d. \033[0;0m", expected_test_data);
+                    $display ($time, "\033[0;36m CTRL:\t<--- [STATE_WR_CMD] CMD_TEST_DATA: %d. \033[0;0m",
+                                {`CMD_TEST_DATA, `DATA_PACKET_PAYLOAD});
 `endif
-            expected_test_data <= expected_test_data + 8'd1;
+                    wr_state_m <= STATE_WR_PAYLOAD;
+                end
+
+                STATE_WR_PAYLOAD: begin
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t<--- [STATE_WR_PAYLOAD] %d. \033[0;0m", expected_test_data);
+`endif
+                    // Send data from the packet
+                    wr_out_fifo_en_o <= 1'b1;
+                    wr_out_fifo_data_o <= expected_test_data;
+
+                    expected_test_data <= expected_test_data + 8'd1;
+
+                    wr_payload_bytes <= wr_payload_bytes - 8'd1;
+                    if (wr_payload_bytes == 8'd1) begin
+                        wr_packets <= wr_packets - 8'd1;
+                        if (wr_packets == 8'd1) begin
+`ifdef D_CTRL
+                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] All packets sent. No more packets to send. \033[0;0m");
+`endif
+                            wr_data_index <= 6'd0;
+                            wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
+                            wr_data[1] <= `TEST_ERROR_NONE;
+
+                            state_m <= STATE_ERROR;
+                        end else begin
+`ifdef D_CTRL
+                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] All packet bytes sent. Sending next packet. \033[0;0m");
+`endif
+                            wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
+                            wr_state_m <= STATE_WR_CMD;
+                        end
+                    end
+                end
+            endcase
         end else begin
             wr_out_fifo_en_o <= 1'b0;
         end
-    endtask
+  endtask
 
     //==================================================================================================================
     // The error handler
@@ -328,6 +348,9 @@ module control (
                 rd_payload_bytes <= rd_payload_bytes - 2'd1;
 
                 if (rd_payload_bytes == 2'd1) begin
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t[STATE_FIFO_PAYLOAD] All payload bytes received. \033[0;0m");
+`endif
                     fifo_state_m <= STATE_FIFO_CMD;
                 end
             end
@@ -347,7 +370,7 @@ module control (
         end else begin
             if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m",
+                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <--- [%d]: %d. \033[0;0m",
                                 wr_data_index, wr_data[wr_data_index]);
 `endif
                 wr_out_fifo_en_o <= 1'b1;
@@ -356,7 +379,7 @@ module control (
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\tWrite buffer: Full. \033[0;0m");
+                //$display ($time, "\033[0;36m CTRL:\tWrite buffer: Full. \033[0;0m");
 `endif
                 wr_out_fifo_en_o <= 1'b0;
             end
@@ -376,7 +399,6 @@ module control (
 
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
-            data_to_send <= 1'b0;
 
             led_test_mode <= 1'b1;
 
@@ -400,10 +422,6 @@ module control (
                     end else begin
                         // Stop reading
                         rd_in_fifo_en_o <= 1'b0;
-                        // Go back to writting
-                        if (data_to_send) begin
-                            state_m <= STATE_WR;
-                        end
                     end
                 end
 

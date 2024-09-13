@@ -48,6 +48,7 @@ module sim_ft2232 (
 
     logic [5:0] in_payload_bytes, total_in_payload_bytes;
     logic [1:0] in_last_cmd;
+    logic [7:0] in_data;
 
 `ifndef DATA_PACKETS_COUNT
     `define DATA_PACKETS_COUNT 8'd1
@@ -67,6 +68,7 @@ module sim_ft2232 (
 
     localparam STATE_IN_CMD             = 2'b00;
     localparam STATE_IN_PAYLOAD         = 2'b01;
+    localparam STATE_IN_IDLE            = 2'b10;
     logic [1:0] in_state_m;
 
 `ifdef TEST_MODE
@@ -76,6 +78,9 @@ module sim_ft2232 (
     task output_data_task (input logic rd);
         case (out_state_m)
             STATE_OUT_START: begin
+                out_data <= 8'd0;
+                in_data <= 8'd0;
+
                 if (rd) begin
 `ifdef D_FT2232
                     $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_START] %d. \033[0;0m", {`CMD_TEST_START, 6'd1});
@@ -98,7 +103,11 @@ module sim_ft2232 (
                     $display ($time, "\033[0;35m FT2232:\t[STATE_OUT_START_PAYLOAD] %d. \033[0;0m", `TEST_NUMBER);
 `endif
                     fifo_data_o <= `TEST_NUMBER;
-                    out_state_m <= STATE_OUT_DATA;
+                    if (`TEST_NUMBER == `TEST_RECEIVE || `TEST_NUMBER == `TEST_RECEIVE_SEND) begin
+                        out_state_m <= STATE_OUT_DATA;
+                    end else begin
+                        out_state_m <= STATE_OUT_IDLE;
+                    end
                 end
             end
 
@@ -187,9 +196,11 @@ module sim_ft2232 (
 
                     default: begin
 `ifdef D_FT2232
-                        $display ($time, "\033[0;35m FT2232:\t[STATE_IN_CMD] Unknown command %d. \033[0;0m",
-                                        fifo_data_i[7:6]);
+                        $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED. [STATE_IN_CMD] Unknown command %d ====. \033[0;0m",
+                                        fifo_data_i);
 `endif
+                        in_state_m <= STATE_IN_IDLE;
+                        out_state_m <= STATE_OUT_IDLE;
                     end
                 endcase
 
@@ -227,6 +238,13 @@ module sim_ft2232 (
 `endif
                             end
                         endcase
+                        in_payload_bytes <= in_payload_bytes - 6'd1;
+                        if (in_payload_bytes == 6'd1) begin
+`ifdef D_FT2232
+                            $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] -> STATE_IN_CMD. \033[0;0m");
+`endif
+                            in_state_m <= STATE_IN_CMD;
+                        end
                     end
 
                     `CMD_TEST_DATA: begin
@@ -234,16 +252,31 @@ module sim_ft2232 (
                         $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] CMD_TEST_DATA: %d. \033[0;0m",
                                                 fifo_data_i);
 `endif
+                        if (in_data == fifo_data_i) begin
+                            in_data <= in_data + 8'd1;
+
+                            in_payload_bytes <= in_payload_bytes - 6'd1;
+                            if (in_payload_bytes == 6'd1) begin
+`ifdef D_FT2232
+                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] -> STATE_IN_CMD. \033[0;0m");
+`endif
+                                in_state_m <= STATE_IN_CMD;
+                            end
+                        end else begin
+`ifdef D_FT2232
+                            $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED. [STATE_IN_PAYLOAD] Received: %d, expected %d.==== \033[0;0m",
+                                                fifo_data_i, in_data);
+`endif
+                            in_state_m <= STATE_IN_IDLE;
+                            out_state_m <= STATE_OUT_IDLE;
+                        end
                     end
                 endcase
+            end
 
-                in_payload_bytes <= in_payload_bytes - 6'd1;
-                if (in_payload_bytes == 6'd1) begin
-`ifdef D_FT2232
-                    $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] -> STATE_IN_CMD. \033[0;0m");
-`endif
-                    in_state_m <= STATE_IN_CMD;
-                end
+            STATE_IN_IDLE: begin
+                // Stop accepting data
+                fifo_txe_n_o <= 1'b1;
             end
         endcase
     endtask
@@ -269,6 +302,7 @@ module sim_ft2232 (
             in_state_m <= STATE_IN_CMD;
 
             out_data <= 8'd0;
+            in_data <= 8'd0;
 
             fifo_txe_n_o <= 1'b0;
 `ifdef TEST_MODE
