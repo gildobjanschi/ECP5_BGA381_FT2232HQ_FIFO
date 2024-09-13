@@ -89,9 +89,9 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_10(.B(extension[10]), .T(1'b0), .I(ext_led_app_out_fifo_full_o));
     assign ext_led_app_out_fifo_full_o = wr_out_fifo_full;
 
-    logic ext_led_app_in_fifo_has_data_o;
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_11(.B(extension[11]), .T(1'b0), .I(ext_led_app_in_fifo_has_data_o));
-    assign ext_led_app_in_fifo_has_data_o = ~rd_out_fifo_empty;
+    logic ext_led_app_out_fifo_has_data_o;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_11(.B(extension[11]), .T(1'b0), .I(ext_led_app_out_fifo_has_data_o));
+    assign ext_led_app_out_fifo_has_data_o = ~rd_out_fifo_empty;
 
     // Test
     logic ext_led_test_ok_o;
@@ -148,7 +148,7 @@ module audio (
         .rd_empty_o         (rd_in_fifo_empty));
 
     // The FIFO used by the FPGA to write to the FT2232 FIFO.
-    async_fifo #(.ASIZE(6)) out_async_fifo_m (
+    async_fifo #(.ASIZE(2)) out_async_fifo_m (
         // Write to FIFO
         .wr_reset_i         (reset),
         .wr_en_i            (wr_out_fifo_en),

@@ -16,7 +16,7 @@
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
- * This is the top module for the audio transmitter simulator. It wraps the audio transmitter top module.
+ * This is the top module for the audio simulator. It wraps the audio transmitter top module.
  **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
