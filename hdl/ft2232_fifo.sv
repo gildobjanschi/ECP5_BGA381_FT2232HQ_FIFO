@@ -21,7 +21,7 @@
 `timescale 1ps/1ps
 `default_nettype none
 
-module ft2232_fifo (
+module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
     input logic reset_i,
     // FT2232HQ FIFO
     input logic fifo_clk_i,
@@ -77,6 +77,11 @@ module ft2232_fifo (
     localparam STATE_WR_DATA            = 3'd7;
     logic [2:0] state_m;
 
+    localparam IN_THRESHOLD = 1<<(IN_FIFO_ASIZE-2);
+    localparam OUT_THRESHOLD = 1<<(OUT_FIFO_ASIZE-2);
+    logic [IN_FIFO_ASIZE-1:0] in_count;
+    logic [OUT_FIFO_ASIZE-1:0] out_count;
+
     logic [7:0] saved_data_0, saved_data_1;
     logic [1:0] saved_data_bits;
     logic have_save_data;
@@ -123,6 +128,7 @@ module ft2232_fifo (
                         // Read from the OUT FIFO.
                         rd_out_fifo_en_o <= 1'b1;
 
+                        out_count <= 0;
                         state_m <= STATE_WR_DATA;
                     end else if (have_save_data) begin
                         // If there is saved data write it to the IN FIFO.
@@ -155,6 +161,7 @@ module ft2232_fifo (
                 end
 
                 STATE_RD_START: begin
+                    in_count <= 0;
                     state_m <= STATE_RD_DATA;
                 end
 
@@ -226,6 +233,17 @@ module ft2232_fifo (
                         $display ($time, " FT_FIFO:\t---> [STATE_RD_DATA] Wr IN: %d (IN afull: %d, full: %d).",
                                                 fifo_data_i, wr_in_fifo_afull_i, wr_in_fifo_full_i);
 `endif
+                        in_count <= in_count + 1;
+                        // If a quarter of the FIFO was writtten check if we can switch to write.
+                        if ((in_count >= IN_THRESHOLD) && can_write_to_ft2232_fifo) begin
+`ifdef D_FT_FIFO_FINE
+                            $display ($time, " FT_FIFO:\t[STATE_RD_DATA] Wrote %d bytes. Switch to write.", in_count);
+`endif
+                            // Stop reading from FT2232 FIFO.
+                            fifo_rd_n_o <= 1'b1;
+
+                            state_m <= STATE_RD_STOP;
+                        end
                     end
                 end
 
@@ -263,6 +281,7 @@ module ft2232_fifo (
                         // Read from the IN FIFO.
                         rd_out_fifo_en_o <= 1'b1;
 
+                        out_count <= 0;
                         state_m <= STATE_WR_DATA;
                     end
                 end
@@ -278,6 +297,18 @@ module ft2232_fifo (
                         fifo_wr_n_o <= 1'b0;
                         // Write data to the FT2232 FIFO.
                         fifo_data_o <= rd_out_fifo_data_i;
+
+                        out_count <= out_count + 1;
+                        // If half of the FIFO was writtten check if we can switch to read.
+                        if (out_count >= OUT_THRESHOLD && can_read_from_ft2232_fifo) begin
+`ifdef D_FT_FIFO_FINE
+                            $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Read %d bytes.", out_count);
+`endif
+                            rd_out_fifo_en_o <= 1'b0;
+
+                            state_m <= STATE_IDLE_WR;
+                        end
+
                     end else begin
                         fifo_wr_n_o <= 1'b1;
                         rd_out_fifo_en_o <= 1'b0;

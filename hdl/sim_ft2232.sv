@@ -36,7 +36,11 @@
  `timescale 1ps/1ps
 `default_nettype none
 
+`ifdef TEST_MODE
 `include "test_definitions.svh"
+`else
+`include "definitions.svh"
+`endif
 
 module sim_ft2232 (
     input logic ft2232_reset_n_i,
@@ -69,13 +73,6 @@ module sim_ft2232 (
     logic [1:0] in_last_cmd;
     logic [7:0] in_data;
 
-`ifndef DATA_PACKETS_COUNT
-    `define DATA_PACKETS_COUNT 8'd1
-`endif
-
-`ifndef DATA_PACKET_PAYLOAD
-    `define DATA_PACKET_PAYLOAD 6'd63
-`endif
 
     localparam STATE_OUT_START          = 3'b000;
     localparam STATE_OUT_START_PAYLOAD  = 3'b001;
@@ -91,15 +88,20 @@ module sim_ft2232 (
     logic [1:0] in_state_m;
 
 `ifdef TEST_MODE
+`ifndef DATA_PACKETS_COUNT
+    `define DATA_PACKETS_COUNT 8'd1
+`endif
+
+`ifndef DATA_PACKET_PAYLOAD
+    `define DATA_PACKET_PAYLOAD 6'd63
+`endif
+
     //==================================================================================================================
     // The task that output the next byte
     //==================================================================================================================
     task output_data_task (input logic rd);
         case (out_state_m)
             STATE_OUT_START: begin
-                out_data <= 8'd0;
-                in_data <= 8'd0;
-
                 if (rd) begin
 `ifdef D_FT2232
                     $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START] %d. \033[0;0m", {`CMD_TEST_START, 6'd1});
@@ -109,6 +111,7 @@ module sim_ft2232 (
 
                     out_packets <= `DATA_PACKETS_COUNT;
                     out_data <= 8'd0;
+                    in_data <= 8'd0;
                 end else begin
 `ifdef D_FT2232
                     $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START] %d [rd=0]. \033[0;0m", 6'd55);
@@ -299,16 +302,232 @@ module sim_ft2232 (
         endcase
     endtask
 `else // TEST_MODE
+`ifndef DATA_PACKETS_COUNT
+    `define DATA_PACKETS_COUNT 8'd1
+`endif
+
+`ifndef DATA_PACKET_PAYLOAD
+    `define DATA_PACKET_PAYLOAD 6'd60
+`endif
+
     //==================================================================================================================
     // The task that output the next byte
     //==================================================================================================================
     task output_data_task (input logic rd);
+        case (out_state_m)
+            STATE_OUT_START: begin
+                if (rd) begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START] %d. \033[0;0m", {`CMD_SETUP_OUTPUT, 6'd1});
+`endif
+                    fifo_data_o <= {`CMD_SETUP_OUTPUT, 6'd1};
+                    out_state_m <= STATE_OUT_START_PAYLOAD;
+
+                    out_packets <= `DATA_PACKETS_COUNT;
+                    out_data <= 8'd0;
+                end else begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START] %d [rd=0]. \033[0;0m", 6'd55);
+`endif
+                end
+            end
+
+            STATE_OUT_START_PAYLOAD: begin
+                if (rd) begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] %d. \033[0;0m",
+                                {`IO_TYPE_BNC, `STREAM_48000_HZ, `BIT_DEPTH_24});
+`endif
+                    fifo_data_o <= {1'b0, `IO_TYPE_BNC, `STREAM_48000_HZ, `BIT_DEPTH_24};
+                    out_state_m <= STATE_OUT_DATA;
+                end
+            end
+
+            STATE_OUT_DATA: begin
+                if (rd) begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_DATA] %d. \033[0;0m",
+                                        {`CMD_STREAM_OUTPUT, `DATA_PACKET_PAYLOAD});
+`endif
+                    fifo_data_o <= {`CMD_STREAM_OUTPUT, `DATA_PACKET_PAYLOAD};
+                    out_payload_bytes <= `DATA_PACKET_PAYLOAD;
+
+                    out_state_m <= STATE_OUT_DATA_PAYLOAD;
+                end
+            end
+
+            STATE_OUT_DATA_PAYLOAD: begin
+                if (rd) begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_DATA_PAYLOAD] %d (remaining %d). \033[0;0m",
+                                        out_data, out_payload_bytes - 1);
+`endif
+                    fifo_data_o <= out_data;
+                    out_data <= out_data + 8'd1;
+
+                    out_payload_bytes <= out_payload_bytes - 6'd1;
+                    if (out_payload_bytes == 6'd1) begin
+                        out_packets <= out_packets - 8'd1;
+                        if (out_packets == 8'd1) begin
+                            out_state_m <= STATE_OUT_STOP;
+                        end else begin
+                            out_state_m <= STATE_OUT_DATA;
+                        end
+                    end
+                end
+            end
+
+            STATE_OUT_STOP: begin
+                if (rd) begin
+`ifdef D_FT2232
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_STOP] %d. \033[0;0m", {`CMD_STOP, 6'd0});
+`endif
+                    fifo_data_o <= {`CMD_STOP, 6'd0};
+
+                    out_state_m <= STATE_OUT_IDLE;
+                end
+            end
+
+            STATE_OUT_IDLE: begin
+                fifo_rxf_n_o <= 1'b1;
+            end
+        endcase
+
     endtask
 
     //==================================================================================================================
     // The task that reads the next byte
     //==================================================================================================================
     task input_data_task;
+        case (in_state_m)
+            STATE_IN_CMD: begin
+                case (fifo_data_i[7:6])
+                    `CMD_STREAM_CFG: begin
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_CMD] CMD_STREAM_CFG [payload bytes: %d]. \033[0;0m",
+                                        fifo_data_i[5:0]);
+`endif
+                        total_in_payload_bytes <= fifo_data_i[5:0];
+                        in_payload_bytes <= fifo_data_i[5:0];
+                        in_state_m <= STATE_IN_PAYLOAD;
+                    end
+
+                    `CMD_STREAM_INPUT: begin
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_CMD] CMD_STREAM_INPUT [payload bytes: %d]. \033[0;0m",
+                                        fifo_data_i[5:0]);
+`endif
+                        total_in_payload_bytes <= fifo_data_i[5:0];
+                        in_payload_bytes <= fifo_data_i[5:0];
+                        in_state_m <= STATE_IN_PAYLOAD;
+                    end
+
+                    `CMD_STOPPED: begin
+                        fifo_rxf_n_o <= 1'b1;
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_CMD] CMD_STOPPED [payload bytes: %d]. \033[0;0m",
+                                        fifo_data_i[5:0]);
+`endif
+                        total_in_payload_bytes <= fifo_data_i[5:0];
+                        in_payload_bytes <= fifo_data_i[5:0];
+                        in_state_m <= STATE_IN_PAYLOAD;
+                    end
+
+                    default: begin
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_CMD] Unknown command %d. \033[0;0m",
+                                        fifo_data_i);
+                        $display ($time, "\033[0;35m FT2232:\t==== PLAYBACK FAILED [Unknown command] ====. \033[0;0m");
+`endif
+                        in_state_m <= STATE_IN_IDLE;
+                        out_state_m <= STATE_OUT_IDLE;
+                    end
+                endcase
+
+                in_last_cmd <= fifo_data_i[7:6];
+            end
+
+            STATE_IN_PAYLOAD: begin
+                case (in_last_cmd)
+                    `CMD_STREAM_CFG: begin
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_STREAM_CFG]: %d. \033[0;0m",
+                                                fifo_data_i);
+`endif
+                        in_state_m <= STATE_IN_CMD;
+                    end
+
+                    `CMD_STREAM_INPUT: begin
+`ifdef D_FT2232
+                        $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_STREAM_INPUT]: %d. \033[0;0m",
+                                                fifo_data_i);
+`endif
+                        if (in_data == fifo_data_i) begin
+                            in_data <= in_data + 8'd1;
+
+                            in_payload_bytes <= in_payload_bytes - 6'd1;
+                            if (in_payload_bytes == 6'd1) begin
+`ifdef D_FT2232_FINE
+                                $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD for CMD_STREAM_INPUT] -> STATE_IN_CMD. \033[0;0m");
+`endif
+                                in_state_m <= STATE_IN_CMD;
+                            end
+                        end else begin
+`ifdef D_FT2232
+                            $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED. [Received: %d, expected %d].==== \033[0;0m",
+                                                fifo_data_i, in_data);
+`endif
+                            in_state_m <= STATE_IN_IDLE;
+                            out_state_m <= STATE_OUT_IDLE;
+                        end
+                    end
+
+                    `CMD_STOPPED: begin
+                        case (total_in_payload_bytes - in_payload_bytes)
+                            6'd0: begin
+`ifdef D_FT2232
+                                $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_STOPPED] Error code: %d. \033[0;0m",
+                                                    fifo_data_i);
+                                if (fifo_data_i == `ERROR_NONE) begin
+                                    $display ($time, "\033[0;35m FT2232:\t==== PLAYBACK OK ====. \033[0;0m");
+                                end else begin
+                                    $display ($time, "\033[0;35m FT2232:\t==== PLAYBACK FAILED [code: %d] ====. \033[0;0m",
+                                                    fifo_data_i);
+                                end
+`endif
+                            end
+
+                            6'd1: begin
+`ifdef D_FT2232
+                                $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_STOPPED] Value received: %d. \033[0;0m",
+                                                    fifo_data_i);
+`endif
+                            end
+
+                            6'd2: begin
+`ifdef D_FT2232
+                                $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_STOPPED] Value expected: %d. \033[0;0m",
+                                                    fifo_data_i);
+`endif
+                            end
+                        endcase
+
+                        in_payload_bytes <= in_payload_bytes - 6'd1;
+                        if (in_payload_bytes == 6'd1) begin
+`ifdef D_FT2232_FINE
+                            $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] -> STATE_IN_CMD. \033[0;0m");
+`endif
+                            in_state_m <= STATE_IN_CMD;
+                        end
+                    end
+                endcase
+            end
+
+            STATE_IN_IDLE: begin
+                // Stop accepting data
+                fifo_txe_n_o <= 1'b1;
+            end
+        endcase
     endtask
 `endif
     //==================================================================================================================
@@ -323,11 +542,7 @@ module sim_ft2232 (
             in_data <= 8'd0;
 
             fifo_txe_n_o <= 1'b0;
-`ifdef TEST_MODE
             fifo_rxf_n_o <= 1'b0;
-`else
-            fifo_rxf_n_o <= 1'b1;
-`endif
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t-- Reset. \033[0;0m");
 `endif

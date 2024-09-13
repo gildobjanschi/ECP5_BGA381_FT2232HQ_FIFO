@@ -280,7 +280,7 @@ module control (
                         wr_packets <= wr_packets - 8'd1;
                         if (wr_packets == 8'd1) begin
 `ifdef D_CTRL_FINE
-                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_CMD] All packets sent. \033[0;0m");
+                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] All packets sent. \033[0;0m");
 `endif
                             wr_data_index <= 6'd0;
                             wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
@@ -289,7 +289,7 @@ module control (
                             state_m <= STATE_ERROR;
                         end else begin
 `ifdef D_CTRL_FINE
-                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_CMD] Packet sent. \033[0;0m");
+                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] Packet sent. \033[0;0m");
 `endif
                             wr_payload_bytes <= `DATA_PACKET_PAYLOAD;
                             wr_state_m <= STATE_WR_CMD;

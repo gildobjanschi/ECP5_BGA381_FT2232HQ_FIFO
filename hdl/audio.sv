@@ -123,6 +123,10 @@ module audio (
     //==================================================================================================================
     // Modules
     //==================================================================================================================
+    // FIFO address sizes.
+    localparam IN_FIFO_ASIZE = 6;
+    localparam OUT_FIFO_ASIZE = 6;
+
     wire wr_in_fifo_en, wr_in_fifo_clk, wr_in_fifo_afull, wr_in_fifo_full;
     wire rd_in_fifo_en, rd_in_fifo_clk, rd_in_fifo_empty;
     wire [7:0] wr_in_fifo_data, rd_in_fifo_data;
@@ -132,7 +136,7 @@ module audio (
     wire [7:0] wr_out_fifo_data, rd_out_fifo_data;
 
     // The FIFO used by the FPGA to read from the FT2232 FIFO.
-    async_fifo #(.ASIZE(6)) in_async_fifo_m (
+    async_fifo #(.ASIZE(IN_FIFO_ASIZE)) in_async_fifo_m (
         // Write to FIFO
         .wr_reset_i         (reset),
         .wr_en_i            (wr_in_fifo_en),
@@ -148,7 +152,7 @@ module audio (
         .rd_empty_o         (rd_in_fifo_empty));
 
     // The FIFO used by the FPGA to write to the FT2232 FIFO.
-    async_fifo #(.ASIZE(2)) out_async_fifo_m (
+    async_fifo #(.ASIZE(OUT_FIFO_ASIZE)) out_async_fifo_m (
         // Write to FIFO
         .wr_reset_i         (reset),
         .wr_en_i            (wr_out_fifo_en),
@@ -164,7 +168,7 @@ module audio (
         .rd_empty_o         (rd_out_fifo_empty));
 
     // FT2232 FIFO
-    ft2232_fifo ft2232_fifo_m (
+    ft2232_fifo #(.IN_FIFO_ASIZE(IN_FIFO_ASIZE), .OUT_FIFO_ASIZE(OUT_FIFO_ASIZE)) ft2232_fifo_m (
         .reset_i            (reset),
         // FT2232HQ FIFO
         .ft2232_reset_n_o   (ft2232_reset_n),

@@ -77,7 +77,7 @@ module control (
             `CMD_SETUP_OUTPUT: begin
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t--> CMD_SETUP_OUTPUT. \033[0;0m");
+                    $display ($time, "\033[0;36m CTRL:\t--> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT. \033[0;0m");
 `endif
                     // Reset the output
 `ifdef EXT_ENABLED
@@ -85,11 +85,11 @@ module control (
 `endif
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> CMD_SETUP_OUTPUT payload bytes: %d (expected 1). \033[0;0m",
-                                    payload_length);
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT payload bytes: %d (expected 1). \033[0;0m",
+                                        payload_length);
 `endif
                     wr_data_index <= 6'd0;
-                    wr_data[0] <= {`CMD_ERROR, 6'h1};
+                    wr_data[0] <= {`CMD_STOPPED, 6'h1};
                     wr_data[1] <= `ERROR_INVALID_SETUP_OUTPUT_PAYLOAD;
 
                     rd_in_fifo_en_o <= 1'b0;
@@ -97,15 +97,32 @@ module control (
                 end
             end
 
+            `CMD_SETUP_INPUT: begin
+                // Not supported yet
+            end
+
             `CMD_STREAM_OUTPUT: begin
             end
 
-            `CMD_SPDIF_CONTROL_OUTPUT: begin
-                // Not supported yet
-            end
+            `CMD_STOP: begin
+                wr_data_index <= 6'd0;
+                wr_data[0] <= {`CMD_STOPPED, 6'h1};
+                if (payload_length == 6'd0) begin
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED. \033[0;0m");
+`endif
+                    wr_data[1] <= `ERROR_NONE;
 
-            `CMD_SETUP_INPUT: begin
-                // Not supported yet
+                end else begin
+`ifdef D_CTRL
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED payload bytes: %d (expected 0). \033[0;0m",
+                                        payload_length);
+`endif
+                    wr_data[1] <= `ERROR_INVALID_STOP_PAYLOAD;
+                end
+
+                rd_in_fifo_en_o <= 1'b0;
+                state_m <= STATE_ERROR;
             end
         endcase
     endtask
@@ -116,17 +133,25 @@ module control (
     task handle_payload_task (input logic [1:0] fifo_cmd, input logic [7:0] fifo_data);
         case (fifo_cmd)
             `CMD_SETUP_OUTPUT: begin
-            end
-
-            `CMD_STREAM_OUTPUT: begin
-            end
-
-            `CMD_SPDIF_CONTROL_OUTPUT: begin
-                // Not supported yet
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_SETUP_OUTPUT] Rd IN: Type: %2b; Sample rate: %3b; Bit depth: %2b. \033[0;0m",
+                                    fifo_data[6:5], fifo_data[4:2], fifo_data[1:0]);
+`endif
             end
 
             `CMD_SETUP_INPUT: begin
                 // Not supported yet
+            end
+
+            `CMD_STREAM_OUTPUT: begin
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_STREAM_OUTPUT] Rd IN: %d. \033[0;0m",
+                                    fifo_data);
+`endif
+            end
+
+            `CMD_STOP: begin
+                // Does not have a payload.
             end
         endcase
     endtask
@@ -135,7 +160,7 @@ module control (
     // The error handler
     //==================================================================================================================
     task handle_error_task;
-        if (wr_data_index == 6'd0) begin
+        if (wr_data_index == 6'd0 && ~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
             if (wr_data[1] == `ERROR_NONE) begin
 `ifdef D_CTRL
                 $display ($time, "\033[0;36m CTRL:\t==== Done ====. \033[0;0m");
@@ -193,7 +218,7 @@ module control (
     //==================================================================================================================
     task write_buffer_task (input logic [2:0] next_state_m);
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
-`ifdef D_CTRL
+`ifdef D_CTRL_FINE
             $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] Done. \033[0;0m");
 `endif
             wr_out_fifo_en_o <= 1'b0;
@@ -209,9 +234,6 @@ module control (
 
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\tWrite buffer: Full. \033[0;0m");
-`endif
                 wr_out_fifo_en_o <= 1'b0;
             end
         end
