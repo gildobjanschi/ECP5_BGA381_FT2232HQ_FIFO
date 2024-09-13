@@ -374,9 +374,6 @@ module control (
 
                 wr_data_index <= wr_data_index + 6'd1;
             end else begin
-`ifdef D_CTRL
-                //$display ($time, "\033[0;36m CTRL:\tWrite buffer: Full. \033[0;0m");
-`endif
                 wr_out_fifo_en_o <= 1'b0;
             end
         end
