@@ -33,11 +33,9 @@ module control (
     output logic wr_out_fifo_en_o,
     output logic [7:0] wr_out_fifo_data_o,
     input logic wr_out_fifo_full_i,
-    input logic wr_out_fifo_afull_i,
-    output logic led_test_mode
+    input logic wr_out_fifo_afull_i
 `ifdef EXT_ENABLED
     ,
-    output logic ext_led_app_ctrl_err_o,
     output logic ext_led_test_ok,
     output logic ext_led_test_fail
 `endif
@@ -58,12 +56,11 @@ module control (
 `endif
 
     // State machines
-    localparam STATE_IDLE       = 3'b000;
-    localparam STATE_RD         = 3'b001;
-    localparam STATE_WR_BUFFER  = 3'b010;
-    localparam STATE_WR         = 3'b011;
-    localparam STATE_ERROR      = 3'b111;
-    logic [2:0] state_m;
+    localparam STATE_IDLE       = 2'b00;
+    localparam STATE_RD         = 2'b01;
+    localparam STATE_WR_BUFFER  = 2'b10;
+    localparam STATE_WR         = 2'b11;
+    logic [1:0] state_m, next_state_m;
 
     // Protocol state machine
     localparam STATE_FIFO_CMD       = 1'b0;
@@ -96,7 +93,6 @@ module control (
                 ext_led_test_ok <= 1'b0;
                 ext_led_test_fail <= 1'b0;
 `endif
-
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_TEST_START. \033[0;0m");
@@ -112,8 +108,9 @@ module control (
                     wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                     wr_data[1] <= `TEST_ERROR_INVALID_START_PAYLOAD;
 
+                    test_fail_task;
+
                     rd_in_fifo_en_o <= 1'b0;
-                    state_m <= STATE_ERROR;
                 end
             end
 
@@ -124,24 +121,24 @@ module control (
             end
 
             `CMD_TEST_STOP: begin
-                wr_data_index <= 6'd0;
-                wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 if (payload_length == 6'd0) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_TEST_STOP. \033[0;0m");
 `endif
-                    wr_data[1] <= `TEST_ERROR_NONE;
-
+                    test_ok_task;
                 end else begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_TEST_STOP payload bytes: %d (expected 0). \033[0;0m",
                                     payload_length);
 `endif
+                    wr_data_index <= 6'd0;
+                    wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                     wr_data[1] <= `TEST_ERROR_INVALID_STOP_PAYLOAD;
+
+                    test_fail_task;
                 end
 
                 rd_in_fifo_en_o <= 1'b0;
-                state_m <= STATE_ERROR;
             end
 
             default: begin
@@ -152,8 +149,9 @@ module control (
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 wr_data[1] <= `TEST_ERROR_INVALID_CMD;
 
+                test_fail_task;
+
                 rd_in_fifo_en_o <= 1'b0;
-                state_m <= STATE_ERROR;
             end
         endcase
     endtask
@@ -190,8 +188,9 @@ module control (
                         wr_data[1] <= `TEST_ERROR_INVALID_TEST_NUM;
                         wr_data[2] <= fifo_data;
 
+                        test_fail_task;
+
                         rd_in_fifo_en_o <= 1'b0;
-                        state_m <= STATE_ERROR;
                     end
                 endcase
             end
@@ -210,7 +209,9 @@ module control (
                         wr_data[1] <= fifo_data;
 
                         rd_in_fifo_en_o <= 1'b0;
+
                         state_m <= STATE_WR_BUFFER;
+                        next_state_m <= STATE_RD;
                     end
 
                     expected_test_data <= expected_test_data + 8'd1;
@@ -227,9 +228,14 @@ module control (
                     // Expected data
                     wr_data[3] <= expected_test_data;
 
+                    test_fail_task;
+
                     rd_in_fifo_en_o <= 1'b0;
-                    state_m <= STATE_ERROR;
                 end
+            end
+
+            `CMD_TEST_STOP: begin
+                // Does not have a payload.
             end
 
             default: begin
@@ -241,8 +247,9 @@ module control (
                 wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
                 wr_data[1] <= `TEST_ERROR_INVALID_LAST_CMD;
 
+                test_fail_task;
+
                 rd_in_fifo_en_o <= 1'b0;
-                state_m <= STATE_ERROR;
             end
         endcase
     endtask
@@ -252,6 +259,7 @@ module control (
     //==================================================================================================================
     task write_data_task;
         if (~wr_out_fifo_afull_i && ~wr_out_fifo_full_i) begin
+            (* parallel_case, full_case *)
             case (wr_state_m)
                 STATE_WR_CMD: begin
                     // The beginning of a packet
@@ -279,14 +287,7 @@ module control (
                     if (wr_payload_bytes == 8'd1) begin
                         wr_packets <= wr_packets - 8'd1;
                         if (wr_packets == 8'd1) begin
-`ifdef D_CTRL_FINE
-                            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] All packets sent. \033[0;0m");
-`endif
-                            wr_data_index <= 6'd0;
-                            wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
-                            wr_data[1] <= `TEST_ERROR_NONE;
-
-                            state_m <= STATE_ERROR;
+                            test_ok_task;
                         end else begin
 `ifdef D_CTRL_FINE
                             $display ($time, "\033[0;36m CTRL:\t[STATE_WR_PAYLOAD] Packet sent. \033[0;0m");
@@ -331,35 +332,9 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The error handler
-    //==================================================================================================================
-    task handle_error_task;
-        if (wr_data_index == 6'd0 && ~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
-            if (wr_data[1] == `TEST_ERROR_NONE) begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t==== TEST OK ====. \033[0;0m");
-`endif
-`ifdef EXT_ENABLED
-                ext_led_test_ok <= 1'b1;
-`endif
-            end else begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
-`endif
-`ifdef EXT_ENABLED
-                ext_led_test_fail <= 1'b1;
-`endif
-            end
-        end
-
-        write_buffer_task(STATE_IDLE);
-
-    endtask
-
-    //==================================================================================================================
     // The FIFO writter
     //==================================================================================================================
-    task write_buffer_task (input logic [2:0] next_state_m);
+    task write_buffer_task;
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
@@ -380,6 +355,38 @@ module control (
     endtask
 
     //==================================================================================================================
+    // The test completed successfully
+    //==================================================================================================================
+    task test_ok_task;
+`ifdef D_CTRL
+        $display ($time, "\033[0;36m CTRL:\t==== TEST OK ====. \033[0;0m");
+`endif
+`ifdef EXT_ENABLED
+        ext_led_test_ok <= 1'b1;
+`endif
+        wr_data_index <= 6'd0;
+        wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
+        wr_data[1] <= `TEST_ERROR_NONE;
+
+        state_m <= STATE_WR_BUFFER;
+        next_state_m <= STATE_RD;
+    endtask
+
+    //==================================================================================================================
+    // The test fail
+    //==================================================================================================================
+    task test_fail_task;
+`ifdef D_CTRL
+        $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
+`endif
+`ifdef EXT_ENABLED
+        ext_led_test_fail <= 1'b1;
+`endif
+        state_m <= STATE_WR_BUFFER;
+        next_state_m <= STATE_IDLE;
+    endtask
+
+    //==================================================================================================================
     // FIFO read/write
     //==================================================================================================================
     always @(posedge clk, posedge reset_i) begin
@@ -393,14 +400,12 @@ module control (
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
 
-            led_test_mode <= 1'b1;
-
 `ifdef EXT_ENABLED
-            ext_led_app_ctrl_err_o <= 1'b0;
             ext_led_test_ok <= 1'b0;
             ext_led_test_fail <= 1'b0;
 `endif
         end else begin
+            (* parallel_case, full_case *)
             case (state_m)
                 STATE_IDLE: begin
                 end
@@ -424,10 +429,6 @@ module control (
 
                 STATE_WR_BUFFER: begin
                     write_buffer_task (STATE_RD);
-                end
-
-                STATE_ERROR: begin
-                    handle_error_task;
                 end
             endcase
         end

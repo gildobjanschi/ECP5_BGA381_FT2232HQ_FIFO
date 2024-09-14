@@ -32,6 +32,9 @@
 `define ERROR_INVALID_SETUP_OUTPUT_PAYLOAD  8'd1
 `define ERROR_INVALID_STOP_PAYLOAD          8'd2
 
+// Number of channels. CMD_SETUP_OUTPUT or CMD_SETUP_INPUT payload byte[0] bit[7].
+`define CHANNELS_MONO       1'b0
+`define CHANNELS_STEREO     1'b1
 
 // CMD_SETUP_OUTPUT or CMD_SETUP_INPUT payload byte[0] bits[6:5].
 `define IO_TYPE_AES3        2'b00

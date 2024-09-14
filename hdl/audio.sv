@@ -77,6 +77,10 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_4(.B(extension[4]), .T(1'b0), .I(ext_led_app_in_fifo_has_data_o));
     assign ext_led_app_in_fifo_has_data_o = ~rd_in_fifo_empty;
 
+    logic ext_led_ft2232_out_fifo_has_data_o;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_5(.B(extension[5]), .T(1'b0), .I(ext_led_ft2232_out_fifo_has_data_o));
+    assign ext_led_ft2232_out_fifo_has_data_o = ~fifo_rxf_n;
+
     // Output FIFO
     logic ext_led_ft2232_out_data;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_8(.B(extension[8]), .T(1'b0), .I(ext_led_ft2232_out_data));
@@ -93,6 +97,10 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_11(.B(extension[11]), .T(1'b0), .I(ext_led_app_out_fifo_has_data_o));
     assign ext_led_app_out_fifo_has_data_o = ~rd_out_fifo_empty;
 
+    logic ext_led_ft2232_in_fifo_is_full_o;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_12(.B(extension[12]), .T(1'b0), .I(ext_led_ft2232_in_fifo_is_full_o));
+    assign ext_led_ft2232_in_fifo_is_full_o = fifo_txe_n;
+
     // Test
     logic ext_led_test_ok_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_16(.B(extension[16]), .T(1'b0), .I(ext_led_test_ok_o));
@@ -105,6 +113,11 @@ module audio (
 
 `endif
 
+`ifdef TEST_MODE
+    assign led_user = 1'b1;
+`else
+    assign led_user = 1'b0;
+`endif
     //==================================================================================================================
     // Definitions
     //==================================================================================================================
@@ -213,14 +226,16 @@ module audio (
         .wr_out_fifo_en_o    (wr_out_fifo_en),
         .wr_out_fifo_full_i  (wr_out_fifo_full),
         .wr_out_fifo_afull_i (wr_out_fifo_afull),
-        .wr_out_fifo_data_o  (wr_out_fifo_data),
-        .led_test_mode       (led_user)
+        .wr_out_fifo_data_o  (wr_out_fifo_data)
 `ifdef EXT_ENABLED
         ,
-        .ext_led_app_ctrl_err_o     (ext_led_app_ctrl_err_o),
+`ifdef TEST_MODE
         .ext_led_test_ok            (ext_led_test_ok_o),
         .ext_led_test_fail          (ext_led_test_fail_o)
-`endif
+`else
+        .ext_led_app_ctrl_err_o     (ext_led_app_ctrl_err_o)
+`endif // TEST_MODE
+`endif // EXT_ENABLED
         );
 
     logic btn_reset_meta;

@@ -82,10 +82,10 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
     logic [IN_FIFO_ASIZE-1:0] in_count;
     logic [OUT_FIFO_ASIZE-1:0] out_count;
 
-    logic [7:0] saved_data_0, saved_data_1;
-    logic [1:0] saved_data_bits;
-    logic have_save_data;
-    assign have_save_data = saved_data_bits[0] || saved_data_bits[1];
+    logic [7:0] saved_rd_data_0, saved_rd_data_1;
+    logic [1:0] saved_rd_data_bits;
+    logic have_saved_rd_data;
+    assign have_saved_rd_data = saved_rd_data_bits[0] || saved_rd_data_bits[1];
     //==================================================================================================================
     // The FIFO state machine
     //==================================================================================================================
@@ -105,7 +105,8 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
             wr_in_fifo_en_o <= 1'b0;
             rd_out_fifo_en_o <= 1'b0;
 
-            saved_data_bits <= 2'b00;
+            saved_rd_data_bits <= 2'b00;
+
 `ifdef EXT_ENABLED
             led_ft2232_rd_data_o <= 1'b0;
             led_ft2232_wr_data_o <= 1'b0;
@@ -130,7 +131,7 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
                         out_count <= 0;
                         state_m <= STATE_WR_DATA;
-                    end else if (have_save_data) begin
+                    end else if (have_saved_rd_data) begin
                         // If there is saved data write it to the IN FIFO.
                         state_m <= STATE_FLUSH_SAVED_RD_DATA;
                     end else if (can_read_from_ft2232_fifo) begin
@@ -145,7 +146,7 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
                 STATE_RD_TURN_AROUND: begin
                     // OE is now 0; read mode is entered. First, check if we need to flush the read saved data.
-                    if (have_save_data) begin
+                    if (have_saved_rd_data) begin
 `ifdef D_FT_FIFO_FINE
                         $display ($time, " FT_FIFO:\t[STATE_RD_TURN_AROUND] -> STATE_FLUSH_SAVED_RD_DATA.");
 `endif
@@ -167,25 +168,25 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
                 STATE_FLUSH_SAVED_RD_DATA: begin
                     if (~wr_in_fifo_afull_i && ~wr_in_fifo_full_i) begin
-                        if (saved_data_bits[0]) begin
-                            saved_data_bits[0] <= 1'b0;
+                        if (saved_rd_data_bits[0]) begin
+                            saved_rd_data_bits[0] <= 1'b0;
 
                             // Write the data to the input FIFO.
                             wr_in_fifo_en_o <= 1'b1;
-                            wr_in_fifo_data_o <= saved_data_0;
+                            wr_in_fifo_data_o <= saved_rd_data_0;
 `ifdef D_FT_FIFO
                             $display ($time, " FT_FIFO:\t---> [STATE_FLUSH_SAVED_RD_DATA] Wr IN: %d (IN afull: %d, full: %d).",
-                                                saved_data_0, wr_in_fifo_afull_i, wr_in_fifo_full_i);
+                                                saved_rd_data_0, wr_in_fifo_afull_i, wr_in_fifo_full_i);
 `endif
-                        end else if (saved_data_bits[1]) begin
-                            saved_data_bits[1] <= 1'b0;
+                        end else if (saved_rd_data_bits[1]) begin
+                            saved_rd_data_bits[1] <= 1'b0;
 
                             // Write the data to the input FIFO.
                             wr_in_fifo_en_o <= 1'b1;
-                            wr_in_fifo_data_o <= saved_data_1;
+                            wr_in_fifo_data_o <= saved_rd_data_1;
 `ifdef D_FT_FIFO
                             $display ($time, " FT_FIFO:\t---> [STATE_FLUSH_SAVED_RD_DATA] Wr IN: %d (IN afull: %d, full: %d).",
-                                                saved_data_1, wr_in_fifo_afull_i, wr_in_fifo_full_i);
+                                                saved_rd_data_1, wr_in_fifo_afull_i, wr_in_fifo_full_i);
 `endif
                         end else begin
                             wr_in_fifo_en_o <= 1'b0;
@@ -217,8 +218,8 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                         wr_in_fifo_en_o <= 1'b0;
 
                         // Save read data so we can write it to the IN FIFO later.
-                        saved_data_bits[0] <= 1'b1;
-                        saved_data_0 <= fifo_data_i;
+                        saved_rd_data_bits[0] <= 1'b1;
+                        saved_rd_data_0 <= fifo_data_i;
 `ifdef D_FT_FIFO
                         $display ($time, " FT_FIFO:\t---> [STATE_RD_DATA] Wr IN delayed [0]: %d (IN afull: %d, full: %d).",
                                             fifo_data_i, wr_in_fifo_afull_i, wr_in_fifo_full_i);
@@ -255,8 +256,8 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 `endif
                         wr_in_fifo_en_o <= 1'b0;
 
-                        saved_data_bits[1] <= 1'b1;
-                        saved_data_1 <= fifo_data_i;
+                        saved_rd_data_bits[1] <= 1'b1;
+                        saved_rd_data_1 <= fifo_data_i;
                     end
 
                     state_m <= STATE_IDLE_RD;
@@ -269,7 +270,7 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 `endif
                     fifo_wr_n_o <= 1'b1;
                     // Check if there is data to read in the FT2232 FIFO.
-                    if (can_read_from_ft2232_fifo || have_save_data) begin
+                    if (can_read_from_ft2232_fifo || have_saved_rd_data) begin
                         // OE needs to be low (it is high since a write completed).
                         fifo_oe_n_o <= 1'b0;
 `ifdef D_FT_FIFO_FINE
@@ -308,7 +309,6 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
                             state_m <= STATE_IDLE_WR;
                         end
-
                     end else begin
                         fifo_wr_n_o <= 1'b1;
                         rd_out_fifo_en_o <= 1'b0;

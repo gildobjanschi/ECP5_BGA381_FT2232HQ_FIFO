@@ -70,7 +70,7 @@ else if [ "$BOARD" = "BOARD_REV_B" ] ; then
 fi
 fi
 
-echo $OPTIONS
+# echo $OPTIONS
 
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
             sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv

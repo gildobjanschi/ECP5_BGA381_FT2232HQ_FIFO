@@ -33,14 +33,11 @@ module control (
     output logic wr_out_fifo_en_o,
     output logic [7:0] wr_out_fifo_data_o,
     input logic wr_out_fifo_full_i,
-    input logic wr_out_fifo_afull_i,
-    output logic led_test_mode
+    input logic wr_out_fifo_afull_i
 `ifdef EXT_ENABLED
     ,
-    output logic ext_led_app_ctrl_err_o,
-    output logic ext_led_test_ok,
-    output logic ext_led_test_fail
-`endif
+    output logic ext_led_app_ctrl_err_o
+`endif // EXT_ENABLED
     );
 
     logic clk;
@@ -50,12 +47,11 @@ module control (
     assign wr_out_fifo_clk_o = clk;
 
     // State machines
-    localparam STATE_IDLE       = 3'b000;
-    localparam STATE_RD         = 3'b001;
-    localparam STATE_WR_BUFFER  = 3'b010;
-    localparam STATE_WR         = 3'b011;
-    localparam STATE_ERROR      = 3'b111;
-    logic [2:0] state_m;
+    localparam STATE_IDLE       = 2'b00;
+    localparam STATE_RD         = 2'b01;
+    localparam STATE_WR_BUFFER  = 2'b10;
+    localparam STATE_WR         = 2'b11;
+    logic [1:0] state_m, next_state_m;
 
     // Protocol state machine
     localparam STATE_FIFO_CMD       = 1'b0;
@@ -63,10 +59,13 @@ module control (
     logic fifo_state_m;
 
     logic [1:0] last_fifo_cmd;
-    logic data_to_send;
     logic [5:0] rd_payload_bytes;
     logic [5:0] wr_data_index;
-    logic [7:0] wr_data[0:3];
+    logic [7:0] wr_data[0:1];
+
+    // Audio configuration
+    logic [2:0] sample_rate;
+    logic [1:0] bit_depth;
 
     //==================================================================================================================
     // The command handler
@@ -80,20 +79,14 @@ module control (
                     $display ($time, "\033[0;36m CTRL:\t--> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT. \033[0;0m");
 `endif
                     // Reset the output
-`ifdef EXT_ENABLED
-                    ext_led_app_ctrl_err_o <= 1'b0;
-`endif
                 end else begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] --> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT payload bytes: %d (expected 1). \033[0;0m",
                                         payload_length);
 `endif
-                    wr_data_index <= 6'd0;
-                    wr_data[0] <= {`CMD_STOPPED, 6'h1};
-                    wr_data[1] <= `ERROR_INVALID_SETUP_OUTPUT_PAYLOAD;
+                    error_task (`ERROR_INVALID_SETUP_OUTPUT_PAYLOAD);
 
                     rd_in_fifo_en_o <= 1'b0;
-                    state_m <= STATE_ERROR;
                 end
             end
 
@@ -102,27 +95,27 @@ module control (
             end
 
             `CMD_STREAM_OUTPUT: begin
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t--> [STATE_FIFO_CMD] Rd IN: CMD_STREAM_OUTPUT (%d payload bytes). \033[0;0m",
+                                        payload_length);
+`endif
             end
 
             `CMD_STOP: begin
-                wr_data_index <= 6'd0;
-                wr_data[0] <= {`CMD_STOPPED, 6'h1};
                 if (payload_length == 6'd0) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED. \033[0;0m");
 `endif
-                    wr_data[1] <= `ERROR_NONE;
-
+                    stopped_task;
                 end else begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED payload bytes: %d (expected 0). \033[0;0m",
                                         payload_length);
 `endif
-                    wr_data[1] <= `ERROR_INVALID_STOP_PAYLOAD;
+                    error_task (`ERROR_INVALID_STOP_PAYLOAD);
                 end
 
                 rd_in_fifo_en_o <= 1'b0;
-                state_m <= STATE_ERROR;
             end
         endcase
     endtask
@@ -131,12 +124,15 @@ module control (
     // The payload handler
     //==================================================================================================================
     task handle_payload_task (input logic [1:0] fifo_cmd, input logic [7:0] fifo_data);
+        (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_SETUP_OUTPUT: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_SETUP_OUTPUT] Rd IN: Type: %2b; Sample rate: %3b; Bit depth: %2b. \033[0;0m",
-                                    fifo_data[6:5], fifo_data[4:2], fifo_data[1:0]);
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_SETUP_OUTPUT] Rd IN: Channels: %1b, type: %2b; sample rate: %3b; bit depth: %2b. \033[0;0m",
+                                    fifo_data[7], fifo_data[6:5], fifo_data[4:2], fifo_data[1:0]);
 `endif
+                sample_rate <= fifo_data[4:2];
+                bit_depth <= fifo_data[1:0];
             end
 
             `CMD_SETUP_INPUT: begin
@@ -157,32 +153,69 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The error handler
-    //==================================================================================================================
-    task handle_error_task;
-        if (wr_data_index == 6'd0 && ~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
-            if (wr_data[1] == `ERROR_NONE) begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t==== Done ====. \033[0;0m");
-`endif
-            end else begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t==== ERROR [code: %d] ====. \033[0;0m", wr_data[1]);
-`endif
-`ifdef EXT_ENABLED
-                ext_led_app_ctrl_err_o <= 1'b1;
-`endif
-            end
-        end
-
-        write_buffer_task(STATE_RD);
-
-    endtask
-
-    //==================================================================================================================
     // The write data handler
     //==================================================================================================================
     task write_data_task;
+    endtask
+
+    //==================================================================================================================
+    // Playback complete task
+    //==================================================================================================================
+    task stopped_task;
+`ifdef D_CTRL
+        $display ($time, "\033[0;36m CTRL:\t==== PLAYBACK STOPPED ====. \033[0;0m");
+`endif
+        wr_data_index <= 6'd0;
+        wr_data[0] <= {`CMD_STOPPED, 6'h1};
+        wr_data[1] <= `ERROR_NONE;
+
+        state_m <= STATE_WR_BUFFER;
+        next_state_m <= STATE_RD;
+    endtask
+
+    //==================================================================================================================
+    // The error handler
+    //==================================================================================================================
+    task error_task (input logic [7:0] error);
+`ifdef D_CTRL
+        $display ($time, "\033[0;36m CTRL:\t==== ERROR [code: %d] ====. \033[0;0m", error);
+`endif
+`ifdef EXT_ENABLED
+        ext_led_app_ctrl_err_o <= 1'b1;
+`endif
+
+        wr_data_index <= 6'd0;
+        wr_data[0] <= {`CMD_STOPPED, 6'h1};
+        wr_data[1] <= error;
+
+        state_m <= STATE_WR_BUFFER;
+        next_state_m <= STATE_IDLE;
+    endtask
+
+    //==================================================================================================================
+    // The FIFO writter
+    //==================================================================================================================
+    task write_buffer_task;
+        if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
+`ifdef D_CTRL_FINE
+            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] Done. \033[0;0m");
+`endif
+            wr_out_fifo_en_o <= 1'b0;
+            state_m <= STATE_RD;
+        end else begin
+            if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m",
+                                wr_data_index, wr_data[wr_data_index]);
+`endif
+                wr_out_fifo_en_o <= 1'b1;
+                wr_out_fifo_data_o <= wr_data[wr_data_index];
+
+                wr_data_index <= wr_data_index + 6'd1;
+            end else begin
+                wr_out_fifo_en_o <= 1'b0;
+            end
+        end
     endtask
 
     //==================================================================================================================
@@ -214,32 +247,6 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The FIFO writter
-    //==================================================================================================================
-    task write_buffer_task (input logic [2:0] next_state_m);
-        if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
-`ifdef D_CTRL_FINE
-            $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] Done. \033[0;0m");
-`endif
-            wr_out_fifo_en_o <= 1'b0;
-            state_m <= next_state_m;
-        end else begin
-            if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
-`ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m",
-                                wr_data_index, wr_data[wr_data_index]);
-`endif
-                wr_out_fifo_en_o <= 1'b1;
-                wr_out_fifo_data_o <= wr_data[wr_data_index];
-
-                wr_data_index <= wr_data_index + 6'd1;
-            end else begin
-                wr_out_fifo_en_o <= 1'b0;
-            end
-        end
-    endtask
-
-    //==================================================================================================================
     // FIFO read/write
     //==================================================================================================================
     always @(posedge clk, posedge reset_i) begin
@@ -252,17 +259,16 @@ module control (
 
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
-            data_to_send <= 1'b0;
-            led_test_mode <= 1'b0;
-
 `ifdef EXT_ENABLED
             ext_led_app_ctrl_err_o <= 1'b0;
-            ext_led_test_ok <= 1'b0;
-            ext_led_test_fail <= 1'b0;
 `endif
         end else begin
+            (* parallel_case, full_case *)
             case (state_m)
                 STATE_IDLE: begin
+                    // Ned to reset the device to make the device operational.
+                    wr_out_fifo_en_o <= 1'b0;
+                    rd_in_fifo_en_o <= 1'b0;
                 end
 
                 STATE_RD: begin
@@ -275,10 +281,6 @@ module control (
                     end else begin
                         // Stop reading
                         rd_in_fifo_en_o <= 1'b0;
-                        // Go back to writting
-                        if (data_to_send) begin
-                            state_m <= STATE_WR;
-                        end
                     end
                 end
 
@@ -287,11 +289,7 @@ module control (
                 end
 
                 STATE_WR_BUFFER: begin
-                    write_buffer_task (STATE_RD);
-                end
-
-                STATE_ERROR: begin
-                    handle_error_task;
+                    write_buffer_task;
                 end
             endcase
         end
