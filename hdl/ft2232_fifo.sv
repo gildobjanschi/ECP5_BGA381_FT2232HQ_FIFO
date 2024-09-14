@@ -238,7 +238,7 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                         // If a quarter of the FIFO was writtten check if we can switch to write.
                         if ((in_count >= IN_THRESHOLD) && can_write_to_ft2232_fifo) begin
 `ifdef D_FT_FIFO_FINE
-                            $display ($time, " FT_FIFO:\t[STATE_RD_DATA] Wrote %d bytes. Switch to write.", in_count);
+                            $display ($time, " FT_FIFO:\t[STATE_RD_DATA] Wrote %d bytes. Switch to read.", in_count);
 `endif
                             // Stop reading from FT2232 FIFO.
                             fifo_rd_n_o <= 1'b1;
