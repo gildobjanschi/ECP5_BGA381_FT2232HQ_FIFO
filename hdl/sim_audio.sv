@@ -16,7 +16,7 @@
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
- * This is the top module for the audio simulator. It wraps the audio transmitter top module.
+ * This is the top module for the audio simulator. It wraps the audio top module.
  **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
@@ -25,8 +25,12 @@ module sim_audio;
     //==================================================================================================================
     // Simulate the external clocks
     //==================================================================================================================
+`ifdef CLK_PERIOD
+    localparam CLK_24576000_PS = `CLK_PERIOD;
+`else
+    // Provide a default. 24.576MHz -> 40690 ps
     localparam CLK_24576000_PS = 40690;
-    //localparam CLK_24576000_PS = 10000;
+`endif
     logic clk_24576000 = 1'b0;
     // Generate the simulator clock
     always #(CLK_24576000_PS/2) clk_24576000 = ~clk_24576000;
@@ -101,6 +105,8 @@ module sim_audio;
     // The initial block
     //==================================================================================================================
     initial begin
+        $display ($time, "INIT:\tClock period %d(ps).", CLK_24576000_PS);
+
 `ifdef GENERATE_VCD
         $dumpfile("out.vcd");
         $dumpvars(0, ft2232_reset_n);

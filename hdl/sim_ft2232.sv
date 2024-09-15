@@ -88,15 +88,26 @@ module sim_ft2232 (
     localparam STATE_IN_IDLE            = 2'b11;
     logic [1:0] in_state_m;
 
-    localparam OUT_EMPTY_CYCLES = 8'd4;
-    localparam IN_FULL_CYCLES = 8'd4;
+`ifdef OUT_EMPTY_CYCLES
+    localparam OUT_EMPTY_CYCLES = `OUT_EMPTY_CYCLES;
+`else
+    localparam OUT_EMPTY_CYCLES = 8'd0;
+`endif
+
+`ifdef IN_FULL_CYCLES
+    localparam IN_FULL_CYCLES = `IN_FULL_CYCLES;
+`else
+    localparam IN_FULL_CYCLES = 8'd0;
+`endif
 
 `ifdef TEST_MODE
 `ifndef DATA_PACKETS_COUNT
+    // Provide a default of one packet.
     `define DATA_PACKETS_COUNT 8'd1
 `endif
 
 `ifndef DATA_PACKET_PAYLOAD
+    // Provide a default of 63 bytes.
     `define DATA_PACKET_PAYLOAD 6'd63
 `endif
 
@@ -153,8 +164,7 @@ module sim_ft2232 (
             STATE_OUT_DATA_PAYLOAD: begin
                 if (rd) begin
                     out_empty_cycles <= OUT_EMPTY_CYCLES;
-
-                    if (out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
+                    if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
                         // Simulate an empty FIFO
 `ifdef D_FT2232
                         $display ($time, "\033[0;35m FT2232:\t++++ [STATE_OUT_DATA_PAYLOAD] Empty OUT FIFO begin. \033[0;0m");
@@ -298,7 +308,7 @@ module sim_ft2232 (
                                 in_state_m <= STATE_IN_CMD;
                             end else begin
                                 in_full_cycles <= IN_FULL_CYCLES;
-                                if (in_full_cycles == IN_FULL_CYCLES && in_payload_bytes == 8'd16) begin
+                                if (in_full_cycles > 0 && in_full_cycles == IN_FULL_CYCLES && in_payload_bytes == total_in_payload_bytes/2) begin
 `ifdef D_FT2232
                                     $display ($time, "\033[0;35m FT2232:\t++++ [STATE_IN_PAYLOAD for CMD_TEST_DATA] Full IN FIFO begin. \033[0;0m");
 `endif
@@ -327,10 +337,12 @@ module sim_ft2232 (
     endtask
 `else // TEST_MODE
 `ifndef DATA_PACKETS_COUNT
+    // Provide a default of one packet.
     `define DATA_PACKETS_COUNT 8'd1
 `endif
 
 `ifndef DATA_PACKET_PAYLOAD
+    // Provide a default of 60 bytes.
     `define DATA_PACKET_PAYLOAD 6'd60
 `endif
 
@@ -342,7 +354,8 @@ module sim_ft2232 (
             STATE_OUT_START_CMD: begin
                 if (rd) begin
 `ifdef D_FT2232
-                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_CMD] %d. \033[0;0m", {`CMD_SETUP_OUTPUT, 6'd1});
+                    $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_CMD] %d. \033[0;0m",
+                                    {`CMD_SETUP_OUTPUT, 6'd1});
 `endif
                     fifo_data_o <= {`CMD_SETUP_OUTPUT, 6'd1};
                     out_state_m <= STATE_OUT_START_PAYLOAD;
@@ -382,7 +395,7 @@ module sim_ft2232 (
 
             STATE_OUT_DATA_PAYLOAD: begin
                 if (rd) begin
-                    if (out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
+                    if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
                         // Simulate an empty FIFO
 `ifdef D_FT2232
                         $display ($time, "\033[0;35m FT2232:\t++++ [STATE_OUT_DATA_PAYLOAD] Empty FIFO begin. \033[0;0m");

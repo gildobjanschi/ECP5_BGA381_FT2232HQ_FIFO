@@ -12,12 +12,15 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 -a -b -t <test number> -p <payload length> -c <count of packets> -h [-D <flag>]"
+    echo "Usage: $0 -a -b -t <test number> -p <payload length> -c <count of packets> -e <empty cycles> -f <full cycles> -s <clock period> -h [-D <flag>]"
     echo "    -a: Tx board Rev A."
     echo "    -b: Tx board Rev B."
-    echo "    -t: Test number (0..2)."
-    echo "    -p: Test payload length (0..63)."
-    echo "    -c: Test number of packets (1..255)."
+    echo "    -t: Test number (0..2). Test 0: Send from FT2232 to FPGA. Test 1: Send from FT2232 to FPGA and loopback from FPGA. Test 2: Send from FPGA to FT2232."
+    echo "    -p: Test payload length (0..63). Default is 63."
+    echo "    -c: Test number of packets (1..255). Default is 1."
+    echo "    -e: Test 1 and 2 only: number of cycles the FT2232 output FIFO is empty (0..255). Default is 0."
+    echo "    -f: Test 2 only: number of cycles the FT2232 input FIFO is full (0..255). Default is 0."
+    echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690."
     echo "    -h: Help."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1
@@ -37,7 +40,7 @@ BOARD=""
 OUTPUT_FILE=out.sim
 CONTROL_FILE=""
 
-while getopts 'abt:p:c:hD:' opt; do
+while getopts 'abt:p:c:e:f:s:D:h' opt; do
     case "$opt" in
         a ) BOARD="BOARD_REV_A" ;;
         b ) BOARD="BOARD_REV_B" ;;
@@ -45,6 +48,9 @@ while getopts 'abt:p:c:hD:' opt; do
             CONTROL_FILE="test_control.sv" ;;
         p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=6'd${OPTARG}" ;;
         c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=8'd${OPTARG}" ;;
+        e ) OPTIONS="$OPTIONS -D OUT_EMPTY_CYCLES=8'd${OPTARG}" ;;
+        f ) OPTIONS="$OPTIONS -D IN_FULL_CYCLES=8'd${OPTARG}" ;;
+        s ) OPTIONS="$OPTIONS -D CLK_PERIOD=${OPTARG}" ;;
         D ) OPTIONS="$OPTIONS -D ${OPTARG}" ;;
         h ) helpFunction ;;
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
@@ -70,7 +76,7 @@ else if [ "$BOARD" = "BOARD_REV_B" ] ; then
 fi
 fi
 
-# echo $OPTIONS
+echo $OPTIONS
 
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
             sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
