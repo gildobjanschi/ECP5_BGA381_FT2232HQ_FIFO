@@ -257,13 +257,12 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                 end
 
                 STATE_RD_STOP: begin
+                    wr_in_fifo_en_o <= 1'b0;
                     if (~fifo_rxf_n_i) begin
 `ifdef D_FT_FIFO
                         $display ($time, " FT_FIFO:\t---> [STATE_RD_STOP] Wr IN delayed [1]: %d (IN afull: %d, full: %d).",
                                                 fifo_data_i, wr_in_fifo_afull_i, wr_in_fifo_full_i);
 `endif
-                        wr_in_fifo_en_o <= 1'b0;
-
                         saved_rd_data_bits[1] <= 1'b1;
                         saved_rd_data_1 <= fifo_data_i;
                     end
