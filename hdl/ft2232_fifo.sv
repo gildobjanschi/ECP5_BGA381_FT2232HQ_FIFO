@@ -327,15 +327,17 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                     led_ft2232_wr_data_o <= 1'b1;
 `endif
                     if (fifo_txe_n_i) begin
-                        // The last value could not be written (the FT2232 IFO became full).
+                        // The last value could not be written (the FT2232 FIFO became full).
 `ifdef D_FT_FIFO
-                        $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232: %d.", saved_wr_data_0);
+                        $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232 [0]: %d, [1] %d.",
+                                        saved_wr_data_0, rd_out_fifo_data_i);
 `endif
                         saved_wr_data_bits[0] <= 1'b1;
-
-                        // Save the data that was read out of the OUT FIFO but cannot be written now to the FT2232 FIFO.
-                        saved_wr_data_1 <= rd_out_fifo_data_i;
-                        saved_wr_data_bits[1] <= 1'b1;
+                        if (~rd_out_fifo_empty_i) begin
+                            // Save the data that was read out of the OUT FIFO but cannot be written now to the FT2232 FIFO.
+                            saved_wr_data_1 <= rd_out_fifo_data_i;
+                            saved_wr_data_bits[1] <= 1'b1;
+                        end
 
                         fifo_wr_n_o <= 1'b1;
                         rd_out_fifo_en_o <= 1'b0;
