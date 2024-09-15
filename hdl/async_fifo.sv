@@ -1,5 +1,6 @@
 /***********************************************************************************************************************
- * Copyright (c) 2024 Virgil Dobjanschi dobjanschivirgil@gmail.com
+ * Source: https://github.com/dpretet/async_fifo/tree/master/rtl
+ * Modified by Virgil Dobjanschi dobjanschivirgil@gmail.com to have all functionality in one file.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -106,9 +107,9 @@ module sync_r2w #(parameter ASIZE = 4)(
             $display ($time, " FIFO:\t-- Wr reset.");
 `endif
             {wq2_rptr, wq1_rptr} <= 0;
-        end else
+        end else begin
             {wq2_rptr, wq1_rptr} <= {wq1_rptr, rptr};
-
+        end
     end
 endmodule
 
@@ -129,8 +130,9 @@ module sync_w2r #(parameter ASIZE = 4)(
             $display ($time, " FIFO:\t-- Rd reset.");
 `endif
             {rq2_wptr, rq1_wptr} <= 0;
-        end else
+        end else begin
             {rq2_wptr, rq1_wptr} <= {rq1_wptr, wptr};
+        end
     end
 endmodule
 
@@ -155,10 +157,8 @@ module rptr_empty #(parameter ADDRSIZE = 4)(
     // GRAYSTYLE2 pointer
     //-------------------
     always @(posedge rclk or negedge rrst_n) begin
-        if (!rrst_n)
-            {rbin, rptr} <= 0;
-        else
-            {rbin, rptr} <= {rbinnext, rgraynext};
+        if (!rrst_n) {rbin, rptr} <= 0;
+        else {rbin, rptr} <= {rbinnext, rgraynext};
     end
 
     // Memory read-address pointer (okay to use binary to address memory)
@@ -209,10 +209,8 @@ module wptr_full #(parameter ADDRSIZE = 4)(
 
     // GRAYSTYLE2 pointer
     always @(posedge wclk or negedge wrst_n) begin
-        if (!wrst_n)
-            {wbin, wptr} <= 0;
-        else
-            {wbin, wptr} <= {wbinnext, wgraynext};
+        if (!wrst_n) {wbin, wptr} <= 0;
+        else {wbin, wptr} <= {wbinnext, wgraynext};
     end
 
     // Memory write-address pointer (okay to use binary to address memory)
@@ -247,7 +245,6 @@ module wptr_full #(parameter ADDRSIZE = 4)(
                 $display ($time, " FIFO:\tFIFO is full.");
             end
 `endif
-
         end
     end
 endmodule
@@ -315,6 +312,5 @@ module fifomem #(
             assign rdata = rdata_r;
         end
     endgenerate
-
 endmodule
 
