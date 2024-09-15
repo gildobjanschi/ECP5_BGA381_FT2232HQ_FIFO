@@ -20,7 +20,7 @@ helpFunction()
     echo "    -c: Test number of packets (1..255). Default is 1."
     echo "    -e: Test 1 and 2 only: number of cycles the FT2232 output FIFO is empty (0..255). Default is 0."
     echo "    -f: Test 2 only: number of cycles the FT2232 input FIFO is full (0..255). Default is 0."
-    echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690."
+    echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690 (24.576MHz)."
     echo "    -h: Help."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1

@@ -15,18 +15,21 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  **********************************************************************************************************************/
 
-// Commands from the host to the FPGA.
+// Command from the host to the FPGA.
 `define CMD_TEST_START          2'b00
+// Command for both directions.
 `define CMD_TEST_DATA           2'b01
+// Command from the FPGA to the host.
 `define CMD_TEST_STOP           2'b10
-// Commands from the FPGA to the host.
+// Command from the FPGA to the host to respond to CMD_TEST_STOP.
 `define CMD_TEST_STOPPED        2'b11
 
+// Test number definitions.
 `define TEST_RECEIVE            8'd0
 `define TEST_RECEIVE_SEND       8'd1
 `define TEST_SEND               8'd2
 
-// Error codes to the host
+// Error codes from the FPGA to the host.
 `define TEST_ERROR_NONE                     8'd0
 `define TEST_ERROR_INVALID_START_PAYLOAD    8'd1
 `define TEST_ERROR_INVALID_STOP_PAYLOAD     8'd2
