@@ -411,9 +411,6 @@ module control (
                 end
 
                 STATE_RD: begin
-                    // For comming from STATE_WR_BUFFER
-                    wr_out_fifo_en_o <= 1'b0;
-
                     if (~rd_in_fifo_empty_i) begin
                         // Read data out of the FIFO
                         rd_in_fifo_en_o <= 1'b1;
