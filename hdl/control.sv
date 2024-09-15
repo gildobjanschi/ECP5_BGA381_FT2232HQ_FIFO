@@ -14,6 +14,11 @@
  * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  **********************************************************************************************************************/
+
+ /***********************************************************************************************************************
+ * This module implements the reading out of the async FIFO at the appropriate audio frequency and sends the audio
+ * samples to the digital audio module. It only supports playback at this time.
+ **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
 
@@ -76,12 +81,12 @@ module control (
             `CMD_SETUP_OUTPUT: begin
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t--> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT. \033[0;0m");
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT. \033[0;0m");
 `endif
                     // Reset the output
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] --> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT payload bytes: %d (expected 1). \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_SETUP_OUTPUT payload bytes: %d (expected 1). \033[0;0m",
                                         payload_length);
 `endif
                     error_task (`ERROR_INVALID_SETUP_OUTPUT_PAYLOAD);
@@ -96,7 +101,7 @@ module control (
 
             `CMD_STREAM_OUTPUT: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t--> [STATE_FIFO_CMD] Rd IN: CMD_STREAM_OUTPUT (%d payload bytes). \033[0;0m",
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_STREAM_OUTPUT (%d payload bytes). \033[0;0m",
                                         payload_length);
 `endif
             end
@@ -153,13 +158,14 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The write data handler
+    // The write to the OUT FIFO (to FT2232) data handler. Use it for host audio input.
     //==================================================================================================================
     task write_data_task;
+        // Not supported yet.
     endtask
 
     //==================================================================================================================
-    // Playback complete task
+    // Playback complete task.
     //==================================================================================================================
     task stopped_task;
 `ifdef D_CTRL
@@ -174,7 +180,7 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The error handler
+    // The error handler.
     //==================================================================================================================
     task error_task (input logic [7:0] error);
 `ifdef D_CTRL
@@ -193,7 +199,7 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The FIFO writter
+    // The FIFO writter sends a small buffer to the host.
     //==================================================================================================================
     task write_buffer_task;
         if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
@@ -205,7 +211,7 @@ module control (
         end else begin
             if (~wr_out_fifo_full_i && ~wr_out_fifo_afull_i) begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t[STATE_WR_BUFFER] <-- [%d]: %d. \033[0;0m",
+                $display ($time, "\033[0;36m CTRL:\t<--- [STATE_WR_BUFFER] [%d]: %d. \033[0;0m",
                                 wr_data_index, wr_data[wr_data_index]);
 `endif
                 wr_out_fifo_en_o <= 1'b1;
@@ -219,7 +225,7 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The FIFO reader
+    // The FIFO reader gets the data from the F2232.
     //==================================================================================================================
     task read_data_task (input logic [7:0] fifo_data);
         (* parallel_case, full_case *)
@@ -247,7 +253,7 @@ module control (
     endtask
 
     //==================================================================================================================
-    // FIFO read/write
+    // The app FIFO processor.
     //==================================================================================================================
     always @(posedge clk, posedge reset_i) begin
         if (reset_i) begin

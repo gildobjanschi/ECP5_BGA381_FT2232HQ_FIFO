@@ -14,8 +14,16 @@
  * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  **********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * This module implements the tests for FT2232:
+ * Test TEST_RECEIVE (0): Receive data from FT2232.
+ * Test TEST_SEND_RECEIVE (1): Receive data from FT2232 and loop it back.
+ * Test TEST_SEND (2): Send data to FT2232.
+ **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
+
 
 `include "test_definitions.svh"
 

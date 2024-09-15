@@ -16,7 +16,7 @@
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
- * This is the top module for the audio simulator. It wraps the audio top module.
+ * This is the top module for the simulator. It wraps the audio top module and creates a FT2232 simulator module.
  **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
