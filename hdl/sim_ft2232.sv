@@ -153,7 +153,9 @@ module sim_ft2232 (
 
             STATE_OUT_DATA_PAYLOAD: begin
                 out_empty_cycles <= OUT_EMPTY_CYCLES;
-                if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
+                if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES &&
+                        (out_payload_bytes == `DATA_PACKET_PAYLOAD/2 ||
+                            out_payload_bytes == `DATA_PACKET_PAYLOAD/4)) begin
                     // Simulate an empty FIFO
 `ifdef D_FT2232
                     $display ($time, "\033[0;35m FT2232:\t++++ [STATE_OUT_DATA_PAYLOAD] Empty OUT FIFO begin. \033[0;0m");
@@ -294,7 +296,9 @@ module sim_ft2232 (
                                 in_state_m <= STATE_IN_CMD;
                             end else begin
                                 in_full_cycles <= IN_FULL_CYCLES;
-                                if (in_full_cycles > 0 && in_full_cycles == IN_FULL_CYCLES && in_payload_bytes == total_in_payload_bytes/2) begin
+                                if (in_full_cycles > 0 && in_full_cycles == IN_FULL_CYCLES &&
+                                    (in_payload_bytes == total_in_payload_bytes/2 ||
+                                        in_payload_bytes == total_in_payload_bytes/4)) begin
 `ifdef D_FT2232
                                     $display ($time, "\033[0;35m FT2232:\t++++ [STATE_IN_PAYLOAD for CMD_TEST_DATA] Full IN FIFO begin. \033[0;0m");
 `endif
@@ -370,7 +374,9 @@ module sim_ft2232 (
             end
 
             STATE_OUT_DATA_PAYLOAD: begin
-                if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES && out_payload_bytes == `DATA_PACKET_PAYLOAD/2) begin
+                if (out_empty_cycles > 0 && out_empty_cycles == OUT_EMPTY_CYCLES &&
+                        (out_payload_bytes == `DATA_PACKET_PAYLOAD/2 ||
+                            out_payload_bytes == `DATA_PACKET_PAYLOAD/4)) begin
                     // Simulate an empty FIFO
 `ifdef D_FT2232
                     $display ($time, "\033[0;35m FT2232:\t++++ [STATE_OUT_DATA_PAYLOAD] Empty FIFO begin. \033[0;0m");
