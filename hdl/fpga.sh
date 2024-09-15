@@ -9,9 +9,9 @@ helpFunction()
     echo "Usage: $0 -a -b -t -p <payload length> -c <count of packets> -h [-D <flag>]"
     echo "    -a: Tx board rev A."
     echo "    -b: Tx board rev B."
-    echo "    -t: Test mode."
-    echo "    -p: TEST_SEND only payload length (0..63)."
-    echo "    -c: TEST_SEND only number of packets (1..255)."
+    echo "    -t: Test mode. The test number is specified by the host code."
+    echo "    -p: Test 2 (TEST_SEND) only payload length (0..63)."
+    echo "    -c: Test 2 (TEST_SEND) only number of packets (1..255)."
     echo "    -h: Help."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1
