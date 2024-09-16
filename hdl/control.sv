@@ -44,7 +44,26 @@ module control (
     output logic i2s_bclk_o,
     output logic i2s_lrck_o,
     output logic i2s_mclk_o,
-    output logic led_app_ctrl_err_o);
+    output logic led_app_ctrl_err_o,
+    // Sample rate LEDs
+    output logic led_sr_48000Hz,
+    output logic led_sr_96000Hz,
+    output logic led_sr_192000Hz,
+    output logic led_sr_384000Hz,
+    output logic led_sr_44100Hz,
+    output logic led_sr_88200Hz,
+    output logic led_sr_176400Hz,
+    output logic led_sr_352800Hz,
+    // Bit depth LEDs
+    output logic led_br_dop,
+    output logic led_br_16_bit,
+    output logic led_br_24_bit,
+    output logic led_br_32_bit,
+    // Output type
+    output logic led_t_spdif,
+    output logic led_t_i2s,
+    // Channels
+    output logic led_stereo);
 
     assign rd_in_fifo_clk_o = clk;
     assign wr_out_fifo_clk_o = clk;
@@ -106,15 +125,15 @@ module control (
     --------------------------------------------------------------------------------------------------------------------
     SR      16-bit      24-bit      32-bit      MCLK
     --------------------------------------------------------------------------------------------------------------------
-    48000   1536000	    2304000	    3072000	    12288000
-    96000   3072000	    4608000	    6144000	    24576000
-    192000  6144000	    9216000	    12288000	49152000
-    384000  12288000	18432000	24576000	98304000
+    48000   1536000     2304000     3072000     12288000
+    96000   3072000     4608000     6144000     24576000
+    192000  6144000     9216000     12288000    49152000
+    384000  12288000    18432000    24576000    98304000
 
-    44100   1411200	    2116800	    2822400	    11289600
-    88200   2822400	    4233600	    5644800	    22579200
-    176400  5644800	    8467200	    11289600	45158400
-    352800  11289600	16934400	22579200	90316800
+    44100   1411200     2116800     2822400     11289600
+    88200   2822400     4233600     5644800     22579200
+    176400  5644800     8467200     11289600    45158400
+    352800  11289600    16934400    22579200    90316800
     ==================================================================================================================*/
 
     // 32 bit @24.576000 MHz
@@ -228,7 +247,7 @@ module control (
     /*==================================================================================================================
     SPDIF bit clock rates
     --------------------------------------------------------------------------------------------------------------------
-    SR      16/24-bit (32x bit data) 2x channels, 2x bi-phase encoding. bit rate = sample rate x 128.
+    SR      16/24-bit (32x bit data) 2x channels, 2x bi-phase encoding. Symbol rate = sample rate x 128.
     --------------------------------------------------------------------------------------------------------------------
     48000   6144000
     96000   12288000
@@ -265,7 +284,7 @@ module control (
                                                             clk_22579200_spdif[sample_rate[1:0]]) : 1'b0;
 
     logic spdif_rd_output_FIFO_clk;
-    // From the FIFO we read 8 bits at the bit clock divided by 8.
+    // From the FIFO we read 8 bits at the symbol clock divided by 16 (/8 bits and /2 for bi-phase encoding).
     divide_by_16 divide_by_16_m (.reset_i(reset_i), .clk_i(spdif_bit_clk), .clk_o(spdif_rd_output_FIFO_clk));
     /*================================================================================================================*/
     logic clk;
@@ -274,10 +293,10 @@ module control (
     assign clk = clk_24576000_i;
 
     // State machines
-    localparam STATE_IDLE       = 2'b00;
-    localparam STATE_RD         = 2'b01;
-    localparam STATE_WR_BUFFER  = 2'b10;
-    localparam STATE_WR         = 2'b11;
+    localparam STATE_IDLE                   = 2'b00;
+    localparam STATE_RD                     = 2'b01;
+    localparam STATE_WR_BUFFER              = 2'b10;
+    localparam STATE_WAIT_OUTPUT_TO_STOP    = 2'b11;
     logic [1:0] state_m, next_state_m;
 
     // Protocol state machine
@@ -295,22 +314,26 @@ module control (
     localparam IO_TYPE_SPDIF_BIT    = 0;
     localparam IO_TYPE_I2S_BIT      = 1;
 
+    logic wr_output_en;
     logic [1:0] io_en;
     logic [1:0] wr_output_FIFO_full;
 
-    logic wr_output_en;
     assign wr_output_FIFO_full = {wr_output_FIFO_afull_i2s || wr_output_FIFO_full_i2s,      // IO_TYPE_I2S_BIT index
                                     wr_output_FIFO_afull_spdif || wr_output_FIFO_full_spdif}; // IO_TYPE_SPDIF_BIT index
+    logic is_wr_output_FIFO_full;
+    assign is_wr_output_FIFO_full = |(wr_output_FIFO_full & io_en);
 
     logic channels;
     logic [2:0] sample_rate;
     logic [1:0] bit_depth;
+    logic [7:0] saved_rd_data;
+    logic have_saved_rd_data;
 
     //==================================================================================================================
     // The SPDIF module
     //==================================================================================================================
     logic [7:0] wr_output_FIFO_data;
-    logic wr_output_FIFO_full_spdif, wr_output_FIFO_afull_spdif, rd_output_FIFO_streaming_spdif;
+    logic wr_output_FIFO_full_spdif, wr_output_FIFO_afull_spdif, output_streaming_spdif;
     tx_spdif tx_spdif_m (
         .reset_i                (reset_i),
         .byte_clk_i             (spdif_rd_output_FIFO_clk),
@@ -324,14 +347,14 @@ module control (
         .wr_output_FIFO_data_i  (wr_output_FIFO_data),
         .wr_output_FIFO_afull_o (wr_output_FIFO_afull_spdif),
         .wr_output_FIFO_full_o  (wr_output_FIFO_full_spdif),
-        .rd_output_FIFO_streaming_o (rd_output_FIFO_streaming_spdif),
+        .output_streaming_o     (output_streaming_spdif),
         // SPDIF output
         .spdif_o                (spdif_o));
 
     //==================================================================================================================
     // The I2S module
     //==================================================================================================================
-    logic wr_output_FIFO_full_i2s, wr_output_FIFO_afull_i2s, rd_output_FIFO_streaming_i2s;
+    logic wr_output_FIFO_full_i2s, wr_output_FIFO_afull_i2s, output_streaming_i2s;
     tx_i2s tx_i2s_m (
         .reset_i                (reset_i),
         .byte_clk_i             (i2s_rd_output_FIFO_clk),
@@ -346,13 +369,39 @@ module control (
         .wr_output_FIFO_data_i  (wr_output_FIFO_data),
         .wr_output_FIFO_afull_o (wr_output_FIFO_afull_i2s),
         .wr_output_FIFO_full_o  (wr_output_FIFO_full_i2s),
-        .rd_output_FIFO_streaming_o (rd_output_FIFO_streaming_i2s),
+        .output_streaming_o     (output_streaming_i2s),
         // I2S outputs
         .sdata_o                (i2s_sdata_o),
         .bclk_o                 (i2s_bclk_o),
         .lrck_o                 (i2s_lrck_o),
         .mclk_o                 (i2s_mclk_o));
 
+    logic output_streaming_meta_spdif, output_streaming_meta_i2s;
+    DFF_META streaming_spdif_m (1'b0, output_streaming_spdif, clk, output_streaming_meta_spdif);
+    DFF_META streaming_i2s_m (1'b0, output_streaming_i2s, clk, output_streaming_meta_i2s);
+
+    logic output_streaming;
+    assign output_streaming = output_streaming_meta_spdif | output_streaming_meta_i2s;
+
+    assign led_sr_48000Hz = |io_en && sample_rate == `STREAM_48000_HZ;
+    assign led_sr_96000Hz = |io_en && sample_rate == `STREAM_96000_HZ;
+    assign led_sr_192000Hz = |io_en && sample_rate == `STREAM_192000_HZ;
+    assign led_sr_384000Hz = |io_en && sample_rate == `STREAM_384000_HZ;
+    assign led_sr_44100Hz = |io_en && sample_rate == `STREAM_44100_HZ;
+    assign led_sr_88200Hz = |io_en && sample_rate == `STREAM_88200_HZ;
+    assign led_sr_176400Hz = |io_en && sample_rate == `STREAM_176400_HZ;
+    assign led_sr_352800Hz = |io_en && sample_rate == `STREAM_352800_HZ;
+
+    // Bit depth LEDs
+    assign led_br_dop = |io_en && bit_depth == `BIT_DEPTH_DOP;
+    assign led_br_16_bit = |io_en && bit_depth == `BIT_DEPTH_16;
+    assign led_br_24_bit = |io_en && bit_depth == `BIT_DEPTH_24;
+    assign led_br_32_bit = |io_en && bit_depth == `BIT_DEPTH_32;
+    // Output type
+    assign led_t_spdif = io_en[IO_TYPE_SPDIF_BIT];
+    assign led_t_i2s = io_en[IO_TYPE_I2S_BIT];
+    // Channels
+    assign led_stereo = channels == |io_en && `CHANNELS_STEREO;
     //==================================================================================================================
     // The command handler
     //==================================================================================================================
@@ -392,7 +441,7 @@ module control (
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED. \033[0;0m");
 `endif
-                    stopped_task;
+                    state_m <= STATE_WAIT_OUTPUT_TO_STOP;
                 end else begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_STOPPED payload bytes: %d (expected 0). \033[0;0m",
@@ -437,11 +486,11 @@ module control (
             end
 
             `CMD_STREAM_OUTPUT: begin
+                if (~is_wr_output_FIFO_full) begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_STREAM_OUTPUT] Rd IN: %d. \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_STREAM_OUTPUT] Rd IN: %d. \033[0;0m",
                                     fifo_data);
 `endif
-                if (~wr_output_FIFO_full) begin
                     wr_output_FIFO_data <= fifo_data;
                     wr_output_en <= 1'b1;
                 end
@@ -451,13 +500,6 @@ module control (
                 // Does not have a payload.
             end
         endcase
-    endtask
-
-    //==================================================================================================================
-    // The write to the OUT FIFO (to FT2232) data handler. Use it for host audio input.
-    //==================================================================================================================
-    task write_data_task;
-        // Not supported yet.
     endtask
 
     //==================================================================================================================
@@ -559,6 +601,7 @@ module control (
 
             io_en <= 2'b00;
             wr_output_en <= 1'b0;
+            have_saved_rd_data <= 1'b0;
 
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
@@ -575,11 +618,32 @@ module control (
                 end
 
                 STATE_RD: begin
-                    if (~rd_in_fifo_empty_i) begin
-                        // Read data out of the FIFO
-                        rd_in_fifo_en_o <= 1'b1;
-                        if (rd_in_fifo_en_o) begin
-                            read_data_task (rd_in_fifo_data_i);
+                    if (have_saved_rd_data) begin
+                        if (~is_wr_output_FIFO_full) begin
+`ifdef D_CTRL
+                            $display ($time, "\033[0;36m CTRL:\t[STATE_RD] Wr saved: %d. \033[0;0m", saved_rd_data);
+`endif
+                            read_data_task (saved_rd_data);
+                            have_saved_rd_data <= 1'b0;
+                        end
+                    end else if (~rd_in_fifo_empty_i) begin
+                        if (~is_wr_output_FIFO_full) begin
+                            // Read data out of the FIFO
+                            rd_in_fifo_en_o <= 1'b1;
+                            if (rd_in_fifo_en_o) begin
+                                read_data_task (rd_in_fifo_data_i);
+                            end
+                        end else begin
+                            if (rd_in_fifo_en_o) begin
+                                // Save the value that was read so you can write it to output later.
+                                saved_rd_data <= rd_in_fifo_data_i;
+                                have_saved_rd_data <= 1'b1;
+`ifdef D_CTRL
+                                $display ($time, "\033[0;36m CTRL:\t[STATE_RD] Saved: %d. \033[0;0m", rd_in_fifo_data_i);
+`endif
+                                // Stop reading
+                                rd_in_fifo_en_o <= 1'b0;
+                            end
                         end
                     end else begin
                         // Stop reading
@@ -587,8 +651,10 @@ module control (
                     end
                 end
 
-                STATE_WR: begin
-                    write_data_task;
+                STATE_WAIT_OUTPUT_TO_STOP: begin
+                    if (~output_streaming) begin
+                        stopped_task;
+                    end
                 end
 
                 STATE_WR_BUFFER: begin

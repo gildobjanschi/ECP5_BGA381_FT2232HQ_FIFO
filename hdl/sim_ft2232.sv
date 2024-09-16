@@ -368,9 +368,9 @@ module sim_ft2232 (
             STATE_OUT_START_PAYLOAD: begin
 `ifdef D_FT2232
                 $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] %d. \033[0;0m",
-                            {`IO_TYPE_BNC, `STREAM_48000_HZ, `BIT_DEPTH_24});
-`endif
-                fifo_data_o <= {`CHANNELS_STEREO, `IO_TYPE_BNC, `STREAM_48000_HZ, `BIT_DEPTH_24};
+                            //{`IO_TYPE_BNC, `STREAM_48000_HZ, `BIT_DEPTH_24});
+`endif                         {`IO_TYPE_I2S, `STREAM_48000_HZ, `BIT_DEPTH_16});
+                fifo_data_o <= {`CHANNELS_STEREO, `IO_TYPE_I2S, `STREAM_48000_HZ, `BIT_DEPTH_16};
                 out_state_m <= STATE_OUT_DATA_CMD;
             end
 
@@ -421,6 +421,7 @@ module sim_ft2232 (
 `endif
                 fifo_data_o <= {`CMD_STOP, 6'd0};
 
+                //fifo_rxf_n_o <= 1'b1;
                 out_state_m <= STATE_OUT_IDLE;
             end
 

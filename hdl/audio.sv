@@ -60,10 +60,14 @@ module audio (
     logic ext_led_app_out_fifo_wr_o;
     logic ext_led_app_out_fifo_full_o;
     logic ext_led_app_out_fifo_has_data_o;
-    logic ext_led_test_ok_o;
-    logic ext_led_test_fail_o;
+    logic ext_led_test_ok_o, ext_led_test_fail_o;
     logic ext_led_app_ctrl_err_o;
     logic spdif, i2s_sdata, i2s_bclk, i2s_lrck, i2s_mclk;
+    logic ext_led_sr_48000Hz, ext_led_sr_96000Hz, ext_led_sr_192000Hz, ext_led_sr_384000Hz;
+    logic ext_led_sr_44100Hz, ext_led_sr_88200Hz, ext_led_sr_176400Hz, ext_led_sr_352800Hz;
+    logic ext_led_br_dop, ext_led_br_16_bit, ext_led_br_24_bit, ext_led_br_32_bit;
+    logic ext_led_t_spdif, ext_led_t_i2s;
+    logic ext_led_stereo;
 
 `ifdef EXT_A_ENABLED
     //==================================================================================================================
@@ -118,6 +122,29 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_21(.B(extension[21]), .T(1'b0), .I(i2s_bclk));
     TRELLIS_IO #(.DIR("OUTPUT")) extension_22(.B(extension[22]), .T(1'b0), .I(i2s_lrck));
     TRELLIS_IO #(.DIR("OUTPUT")) extension_23(.B(extension[23]), .T(1'b0), .I(i2s_mclk));
+
+    // Sample rate LEDs
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_24(.B(extension[24]), .T(1'b0), .I(ext_led_sr_48000Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_25(.B(extension[25]), .T(1'b0), .I(ext_led_sr_96000Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_26(.B(extension[26]), .T(1'b0), .I(ext_led_sr_192000Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_27(.B(extension[27]), .T(1'b0), .I(ext_led_sr_384000Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_28(.B(extension[28]), .T(1'b0), .I(ext_led_sr_44100Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_29(.B(extension[29]), .T(1'b0), .I(ext_led_sr_88200Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_30(.B(extension[30]), .T(1'b0), .I(ext_led_sr_176400Hz));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_31(.B(extension[31]), .T(1'b0), .I(ext_led_sr_352800Hz));
+
+    // Bit rate LEDs
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_32(.B(extension[32]), .T(1'b0), .I(ext_led_br_dop));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_33(.B(extension[33]), .T(1'b0), .I(ext_led_br_16_bit));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_34(.B(extension[34]), .T(1'b0), .I(ext_led_br_24_bit));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_35(.B(extension[35]), .T(1'b0), .I(ext_led_br_32_bit));
+
+    // Output type LEDs
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_36(.B(extension[36]), .T(1'b0), .I(ext_led_t_spdif));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_37(.B(extension[37]), .T(1'b0), .I(ext_led_t_i2s));
+
+    // Mono/stereo
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_38(.B(extension[38]), .T(1'b0), .I(ext_led_stereo));
 `endif
 
 `ifdef TEST_MODE
@@ -236,14 +263,31 @@ module audio (
         .i2s_sdata_o            (i2s_sdata),
         .i2s_bclk_o             (i2s_bclk),
         .i2s_lrck_o             (i2s_lrck),
-        .i2s_mclk_o             (i2s_mclk)
+        .i2s_mclk_o             (i2s_mclk),
 `ifdef TEST_MODE
-        ,
         .led_test_ok            (ext_led_test_ok_o),
         .led_test_fail          (ext_led_test_fail_o)
 `else
-        ,
-        .led_app_ctrl_err_o     (ext_led_app_ctrl_err_o)
+        .led_app_ctrl_err_o     (ext_led_app_ctrl_err_o),
+        // Sample rate LEDs
+        .led_sr_48000Hz         (ext_led_sr_48000Hz),
+        .led_sr_96000Hz         (ext_led_sr_96000Hz),
+        .led_sr_192000Hz        (ext_led_sr_192000Hz),
+        .led_sr_384000Hz        (ext_led_sr_384000Hz),
+        .led_sr_44100Hz         (ext_led_sr_44100Hz),
+        .led_sr_88200Hz         (ext_led_sr_88200Hz),
+        .led_sr_176400Hz        (ext_led_sr_176400Hz),
+        .led_sr_352800Hz        (ext_led_sr_352800Hz),
+        // Bit depth LEDs
+        .led_br_dop             (ext_led_br_dop),
+        .led_br_16_bit          (ext_led_br_16_bit),
+        .led_br_24_bit          (ext_led_br_24_bit),
+        .led_br_32_bit          (ext_led_br_32_bit),
+        // Output type
+        .led_t_spdif            (ext_led_t_spdif),
+        .led_t_i2s              (ext_led_t_i2s),
+        // Channels
+        .led_stereo             (ext_led_stereo)
 `endif // TEST_MODE
         );
 
