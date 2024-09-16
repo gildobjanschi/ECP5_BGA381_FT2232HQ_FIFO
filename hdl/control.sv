@@ -63,7 +63,10 @@ module control (
     output logic led_t_spdif,
     output logic led_t_i2s,
     // Channels
-    output logic led_stereo);
+    output logic led_stereo,
+    // Streaming status
+    output logic led_streaming_spdif,
+    output logic led_streaming_i2s);
 
     assign rd_in_fifo_clk_o = clk;
     assign wr_out_fifo_clk_o = clk;
@@ -383,6 +386,7 @@ module control (
     logic output_streaming;
     assign output_streaming = output_streaming_meta_spdif | output_streaming_meta_i2s;
 
+    // Sample rate LEDs
     assign led_sr_48000Hz = |io_en && sample_rate == `STREAM_48000_HZ;
     assign led_sr_96000Hz = |io_en && sample_rate == `STREAM_96000_HZ;
     assign led_sr_192000Hz = |io_en && sample_rate == `STREAM_192000_HZ;
@@ -400,8 +404,12 @@ module control (
     // Output type
     assign led_t_spdif = io_en[IO_TYPE_SPDIF_BIT];
     assign led_t_i2s = io_en[IO_TYPE_I2S_BIT];
-    // Channels
+    // Channels LEDs
     assign led_stereo = channels == |io_en && `CHANNELS_STEREO;
+    // Streaming status LEDs
+    assign led_streaming_spdif = output_streaming_meta_spdif;
+    assign led_streaming_i2s = output_streaming_meta_i2s;
+
     //==================================================================================================================
     // The command handler
     //==================================================================================================================

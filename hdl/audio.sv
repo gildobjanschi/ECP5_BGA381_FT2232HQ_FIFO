@@ -50,16 +50,10 @@ module audio (
     output logic led_reset,
     output logic led_user);
 
-    logic ext_led_ft2232_in_data_o;
-    logic ext_led_app_in_fifo_rd_o;
-    logic ext_led_app_in_fifo_full_o;
-    logic ext_led_app_in_fifo_has_data_o;
-    logic ext_led_ft2232_out_fifo_has_data_o;
-    logic ext_led_ft2232_in_fifo_is_full_o;
-    logic ext_led_ft2232_out_data_o;
-    logic ext_led_app_out_fifo_wr_o;
-    logic ext_led_app_out_fifo_full_o;
-    logic ext_led_app_out_fifo_has_data_o;
+    logic ext_led_app_in_fifo_rd_o, ext_led_app_in_fifo_full_o, ext_led_app_in_fifo_has_data_o;
+    logic ext_led_ft2232_in_data_o, ext_led_ft2232_out_fifo_has_data_o, ext_led_ft2232_in_fifo_is_full_o,
+            ext_led_ft2232_out_data_o;
+    logic ext_led_app_out_fifo_wr_o, ext_led_app_out_fifo_full_o, ext_led_app_out_fifo_has_data_o;
     logic ext_led_test_ok_o, ext_led_test_fail_o;
     logic ext_led_app_ctrl_err_o;
     logic spdif, i2s_sdata, i2s_bclk, i2s_lrck, i2s_mclk;
@@ -68,6 +62,7 @@ module audio (
     logic ext_led_br_dop, ext_led_br_16_bit, ext_led_br_24_bit, ext_led_br_32_bit;
     logic ext_led_t_spdif, ext_led_t_i2s;
     logic ext_led_stereo;
+    logic ext_led_streaming_spdif, ext_led_streaming_i2s;
 
 `ifdef EXT_A_ENABLED
     //==================================================================================================================
@@ -110,8 +105,11 @@ module audio (
 
     // Test
     TRELLIS_IO #(.DIR("OUTPUT")) extension_16(.B(extension[16]), .T(1'b0), .I(ext_led_test_ok_o));
-
     TRELLIS_IO #(.DIR("OUTPUT")) extension_17(.B(extension[17]), .T(1'b0), .I(ext_led_test_fail_o));
+`ifndef TEST_MODE
+    assign ext_led_test_ok_o = 1'b0;
+    assign ext_led_test_fail_o = 1'b0;
+`endif
 
     // TX
     TRELLIS_IO #(.DIR("OUTPUT")) extension_18(.B(extension[18]), .T(1'b0), .I(ext_led_app_ctrl_err_o));
@@ -143,8 +141,12 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_36(.B(extension[36]), .T(1'b0), .I(ext_led_t_spdif));
     TRELLIS_IO #(.DIR("OUTPUT")) extension_37(.B(extension[37]), .T(1'b0), .I(ext_led_t_i2s));
 
-    // Mono/stereo
+    // Mono/stereo LEDs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_38(.B(extension[38]), .T(1'b0), .I(ext_led_stereo));
+
+    // Streaming LEDs
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_39(.B(extension[39]), .T(1'b0), .I(ext_led_streaming_spdif));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_40(.B(extension[40]), .T(1'b0), .I(ext_led_streaming_i2s));
 `endif
 
 `ifdef TEST_MODE
@@ -287,7 +289,9 @@ module audio (
         .led_t_spdif            (ext_led_t_spdif),
         .led_t_i2s              (ext_led_t_i2s),
         // Channels
-        .led_stereo             (ext_led_stereo)
+        .led_stereo             (ext_led_stereo),
+        .led_streaming_spdif    (ext_led_streaming_spdif),
+        .led_streaming_i2s      (ext_led_streaming_i2s)
 `endif // TEST_MODE
         );
 
