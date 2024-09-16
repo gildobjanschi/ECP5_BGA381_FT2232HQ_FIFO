@@ -344,6 +344,7 @@ module control (
         // Streaming configuration
         .sample_rate_i          (sample_rate),
         .bit_depth_i            (bit_depth),
+        .channels_i             (channels),
         // Clock to write to the output FIFO
         .wr_output_FIFO_clk_i   (clk),
         .wr_output_FIFO_en_i    (io_en[IO_TYPE_SPDIF_BIT] && wr_output_en),
@@ -366,6 +367,7 @@ module control (
         // Streaming configuration
         .sample_rate_i          (sample_rate),
         .bit_depth_i            (bit_depth),
+        .channels_i             (channels),
         // Clock to write to the output FIFO
         .wr_output_FIFO_clk_i   (clk),
         .wr_output_FIFO_en_i    (io_en[IO_TYPE_I2S_BIT] && wr_output_en),

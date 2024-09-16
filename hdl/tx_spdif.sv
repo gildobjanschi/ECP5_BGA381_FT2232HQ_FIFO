@@ -26,6 +26,7 @@ module tx_spdif (
     // Streaming configuration
     input logic [2:0] sample_rate_i,
     input logic [1:0] bit_depth_i,
+    input logic channels_i,
     // Output FIFO ports
     input logic wr_output_FIFO_clk_i,
     input logic wr_output_FIFO_en_i,
@@ -138,13 +139,12 @@ module tx_spdif (
                         2'd1: begin
                             if (sample_sel) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
-                                parity_r <= ^rd_output_FIFO_data ^ parity_r;
+                                sample_r[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
                                 sample_l[15:8] <= rd_output_FIFO_data;
-                                parity_l <= ^rd_output_FIFO_data ^ parity_l;
+                                sample_l[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
-                            // TODO: Compute the parity
                             // Stop reading from the FIFO.
                             pause_rd_FIFO <= 1'b1;
 
@@ -156,16 +156,17 @@ module tx_spdif (
                         end
 
                         2'd3: begin
-                            // The control bits
-                            if (sample_sel) sample_r[7:0] <= {1'b1, 1'b0, 1'b0, parity_r, 4'h0};
-                            else sample_l[7:0] <= {1'b1, 1'b0, 1'b0, parity_l, 4'h0};
 `ifdef D_SPDIF
                             $display ($time, " SPDIF:\t16-bit sample: %h [%4b]",
                                             sample_sel ? sample_r[23:8] : sample_l[23:8],
-                                            {1'b1, 1'b0, 1'b0, sample_sel ? parity_r : parity_l});
+                                            sample_sel ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            sample_sel <= ~sample_sel;
+                            if (channels_i == `CHANNELS_MONO) begin
+                                sample_l <= sample_r;
+                            end else begin
+                                sample_sel <= ~sample_sel;
+                            end
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -206,10 +207,10 @@ module tx_spdif (
                         2'd2: begin
                             if (sample_sel) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
-                                parity_r <= ^rd_output_FIFO_data ^ parity_r;
+                                sample_r[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
                                 sample_l[15:8] <= rd_output_FIFO_data;
-                                parity_l <= ^rd_output_FIFO_data ^ parity_l;
+                                sample_l[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
                             // Stop reading from the FIFO.
@@ -219,16 +220,17 @@ module tx_spdif (
                         end
 
                         2'd3: begin
-                            // The control bits
-                            if (sample_sel) sample_r[7:0] <= {1'b1, 1'b0, 1'b0, parity_r, 4'h0};
-                            else sample_l[7:0] <= {1'b1, 1'b0, 1'b0, parity_l, 4'h0};
 `ifdef D_SPDIF
                             $display ($time, " SPDIF:\t24-bit sample : %h [%4b]",
                                                 sample_sel ? sample_r[31:8] : sample_l[31:8],
-                                                {1'b1, 1'b0, 1'b0, sample_sel ? parity_r : parity_l});
+                                                sample_sel ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            sample_sel <= ~sample_sel;
+                            if (channels_i == `CHANNELS_MONO) begin
+                                sample_l <= sample_r;
+                            end else begin
+                                sample_sel <= ~sample_sel;
+                            end
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;

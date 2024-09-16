@@ -27,6 +27,7 @@ module tx_i2s (
     // Streaming configuration
     input logic [2:0] sample_rate_i,
     input logic [1:0] bit_depth_i,
+    input logic channels_i,
     // Output FIFO ports
     input logic wr_output_FIFO_clk_i,
     input logic wr_output_FIFO_en_i,

@@ -3,7 +3,6 @@ cd ~/Documents/GitHub/ECP5_BGA381_FT2232HQ_FIFO/hdl
 export PATH="$PATH:~/tools-oss-cad-suite-0.1.0/bin"
 
 TODO
-1. For mono recordings replicate on both channels
 
 Next steps
 Week 1
