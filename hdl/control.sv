@@ -43,12 +43,8 @@ module control (
     output logic i2s_sdata_o,
     output logic i2s_bclk_o,
     output logic i2s_lrck_o,
-    output logic i2s_mclk_o
-`ifdef EXT_ENABLED
-    ,
-    output logic ext_led_app_ctrl_err_o
-`endif // EXT_ENABLED
-    );
+    output logic i2s_mclk_o,
+    output logic led_app_ctrl_err_o);
 
     assign rd_in_fifo_clk_o = clk;
     assign wr_out_fifo_clk_o = clk;
@@ -486,9 +482,7 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== ERROR [code: %d] ====. \033[0;0m", error);
 `endif
-`ifdef EXT_ENABLED
-        ext_led_app_ctrl_err_o <= 1'b1;
-`endif
+        led_app_ctrl_err_o <= 1'b1;
 
         wr_data_index <= 6'd0;
         wr_data[0] <= {`CMD_STOPPED, 6'h1};
@@ -568,9 +562,7 @@ module control (
 
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
-`ifdef EXT_ENABLED
-            ext_led_app_ctrl_err_o <= 1'b0;
-`endif
+            led_app_ctrl_err_o <= 1'b0;
         end else begin
             wr_output_en <= 1'b0;
 

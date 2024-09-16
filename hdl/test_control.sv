@@ -24,7 +24,6 @@
 `timescale 1ps/1ps
 `default_nettype none
 
-
 `include "test_definitions.svh"
 
 module control (
@@ -41,13 +40,9 @@ module control (
     output logic wr_out_fifo_en_o,
     output logic [7:0] wr_out_fifo_data_o,
     input logic wr_out_fifo_full_i,
-    input logic wr_out_fifo_afull_i
-`ifdef EXT_ENABLED
-    ,
-    output logic ext_led_test_ok,
-    output logic ext_led_test_fail
-`endif
-    );
+    input logic wr_out_fifo_afull_i,
+    output logic led_test_ok,
+    output logic led_test_fail);
 
     logic clk;
     assign clk = clk_24576000_i;
@@ -97,10 +92,9 @@ module control (
         (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_TEST_START: begin
-`ifdef EXT_ENABLED
                 ext_led_test_ok <= 1'b0;
                 ext_led_test_fail <= 1'b0;
-`endif
+
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_TEST_START. \033[0;0m");
@@ -369,9 +363,8 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== TEST OK ====. \033[0;0m");
 `endif
-`ifdef EXT_ENABLED
         ext_led_test_ok <= 1'b1;
-`endif
+
         wr_data_index <= 6'd0;
         wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
         wr_data[1] <= `TEST_ERROR_NONE;
@@ -387,9 +380,8 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
 `endif
-`ifdef EXT_ENABLED
         ext_led_test_fail <= 1'b1;
-`endif
+
         state_m <= STATE_WR_BUFFER;
         next_state_m <= STATE_IDLE;
     endtask
@@ -408,10 +400,8 @@ module control (
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
 
-`ifdef EXT_ENABLED
             ext_led_test_ok <= 1'b0;
             ext_led_test_fail <= 1'b0;
-`endif
         end else begin
             (* parallel_case, full_case *)
             case (state_m)

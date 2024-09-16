@@ -20,17 +20,17 @@
 `include "definitions.svh"
 
 module tx_i2s (
-    input wire reset_i,
-    input wire byte_clk_i,
-    input wire bit_clk_i,
-    input wire mclk_i,
+    input logic reset_i,
+    input logic byte_clk_i,
+    input logic bit_clk_i,
+    input logic mclk_i,
     // Streaming configuration
-    input wire [2:0] sample_rate_i,
-    input wire [1:0] bit_depth_i,
+    input logic [2:0] sample_rate_i,
+    input logic [1:0] bit_depth_i,
     // Output FIFO ports
-    input wire wr_output_FIFO_clk_i,
-    input wire wr_output_FIFO_en_i,
-    input wire [7:0] wr_output_FIFO_data_i,
+    input logic wr_output_FIFO_clk_i,
+    input logic wr_output_FIFO_en_i,
+    input logic [7:0] wr_output_FIFO_data_i,
     output logic wr_output_FIFO_afull_o,
     output logic wr_output_FIFO_full_o,
     output logic rd_output_FIFO_streaming_o,

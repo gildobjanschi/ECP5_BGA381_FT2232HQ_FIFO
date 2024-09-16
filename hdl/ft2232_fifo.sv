@@ -43,12 +43,9 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
     output logic rd_out_fifo_clk_o,
     output logic rd_out_fifo_en_o,
     input logic [7:0] rd_out_fifo_data_i,
-    input logic rd_out_fifo_empty_i
-`ifdef EXT_ENABLED
-    ,
+    input logic rd_out_fifo_empty_i,
     output logic led_ft2232_rd_data_o,
     output logic led_ft2232_wr_data_o
-`endif
     );
 
     // Reset the FT2232HQ
@@ -113,17 +110,15 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
             saved_rd_data_bits <= 2'b00;
             saved_wr_data_bits <= 2'b00;
-`ifdef EXT_ENABLED
+
             led_ft2232_rd_data_o <= 1'b0;
             led_ft2232_wr_data_o <= 1'b0;
-`endif
         end else begin
             case (state_m)
                 STATE_IDLE_RD: begin
                     // Enter this state machine with fifo_oe_n_o = 1'b0.
-`ifdef EXT_ENABLED
                     led_ft2232_rd_data_o <= 1'b0;
-`endif
+
                     wr_in_fifo_en_o <= 1'b0;
                     // Check if there is data to write first
                     if (~fifo_txe_n_i && have_saved_wr_data) begin
@@ -207,9 +202,7 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                 end
 
                 STATE_RD_DATA: begin
-`ifdef EXT_ENABLED
                     led_ft2232_rd_data_o <= 1'b1;
-`endif
                     // If the FIFO is almost full now it will become full with the value written in the previous cycle
                     // and therefore a new value cannot be written to the FIFO in this cycle.
                     if (fifo_rxf_n_i) begin
@@ -272,9 +265,8 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
                 STATE_IDLE_WR: begin
                     // Enter this state machine with fifo_oe_n_o = 1'b1
-`ifdef EXT_ENABLED
                     led_ft2232_wr_data_o <= 1'b0;
-`endif
+
                     fifo_wr_n_o <= 1'b1;
                     // Check if there is data to read in the FT2232 FIFO.
                     if (can_read_from_ft2232_fifo || have_saved_rd_data) begin
@@ -323,9 +315,8 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
                 end
 
                 STATE_WR_DATA: begin
-`ifdef EXT_ENABLED
                     led_ft2232_wr_data_o <= 1'b1;
-`endif
+
                     if (fifo_txe_n_i) begin
                         // The last value could not be written (the FT2232 FIFO became full).
 `ifdef D_FT_FIFO

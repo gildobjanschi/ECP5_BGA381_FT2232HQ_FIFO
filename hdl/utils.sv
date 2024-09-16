@@ -20,7 +20,7 @@
 //======================================================================================================================
 // Metastability flip-flop
 //======================================================================================================================
-module DFF_META (input wire reset, input wire D, input wire clk, output logic Q);
+module DFF_META (input logic reset, input logic D, input logic clk, output logic Q);
     logic Q_pipe = 1'b0;
     always @(posedge clk) begin
         if (reset) begin

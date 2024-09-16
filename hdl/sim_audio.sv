@@ -40,7 +40,7 @@ module sim_audio;
     // Generate the simulator clock
     always #(CLK_22579200_PS/2) clk_22579200 = ~clk_22579200;
 
-    wire fifo_clk;
+    logic fifo_clk;
     logic btn_reset = 1'b0;
     logic ft2232_reset_n, fifo_oe_n, fifo_siwu, fifo_wr_n, fifo_rd_n, fifo_txe_n, fifo_rxf_n;
     wire [7:0] fifo_data;
@@ -48,9 +48,8 @@ module sim_audio;
     logic uart_rxd, uart_txd;
 `endif
     logic led_uart_tx_overflow, led_uart_rx_overflow, led_reset, led_user;
-`ifdef EXT_ENABLED
     logic [45:0] extension;
-`endif
+
     //==================================================================================================================
     // Create the top module
     //==================================================================================================================
@@ -77,10 +76,8 @@ module sim_audio;
         .led_uart_tx_overflow   (led_uart_tx_overflow),
         .led_uart_rx_overflow   (led_uart_rx_overflow),
 `endif
-`ifdef EXT_ENABLED
         // Extension
         .extension              (extension),
-`endif
         // LEDs
         .led_reset              (led_reset),
         .led_user               (led_user));
