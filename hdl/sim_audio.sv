@@ -77,15 +77,13 @@ module sim_audio;
         .led_uart_tx_overflow   (led_uart_tx_overflow),
         .led_uart_rx_overflow   (led_uart_rx_overflow),
 `endif
+`ifdef EXT_ENABLED
+        // Extension
+        .extension              (extension),
+`endif
         // LEDs
         .led_reset              (led_reset),
-        .led_user               (led_user)
-`ifdef EXT_ENABLED
-        ,
-        // Extension
-        .extension              (extension)
-`endif
-        );
+        .led_user               (led_user));
 
     //==================================================================================================================
     // Simulate the FT2232 in sync FIFO mode.

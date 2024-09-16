@@ -34,7 +34,8 @@ helpFunction()
 # FT_FIFO:      FT2232 FIFO messages.
 # FIFO:         Asynchronous FIFO messages.
 # CTRL:         Controller messages.
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL"
+# SPDIF:        SPDIF messages.
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
 
 BOARD=""
 OUTPUT_FILE=out.sim
@@ -79,7 +80,7 @@ fi
 echo $OPTIONS
 
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
-            sim_trellis.sv utils.sv async_fifo.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
+            sim_trellis.sv utils.sv divider.sv async_fifo.sv tx_spdif.sv tx_i2s.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
 if [ $? -eq 0 ]; then
     vvp $OUTPUT_FILE
 fi

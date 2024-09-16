@@ -111,6 +111,18 @@ module audio (
     logic ext_led_app_ctrl_err_o;
     TRELLIS_IO #(.DIR("OUTPUT")) extension_18(.B(extension[18]), .T(1'b0), .I(ext_led_app_ctrl_err_o));
 
+    // Audio outputs
+    logic spdif;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_19(.B(extension[19]), .T(1'b0), .I(spdif));
+    logic i2s_sdata;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_20(.B(extension[20]), .T(1'b0), .I(i2s_sdata));
+    logic i2s_bclk;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_21(.B(extension[21]), .T(1'b0), .I(i2s_bclk));
+    logic i2s_lrck;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_22(.B(extension[22]), .T(1'b0), .I(i2s_lrck));
+    logic i2s_mclk;
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_23(.B(extension[23]), .T(1'b0), .I(i2s_mclk));
+
 `endif
 
 `ifdef TEST_MODE
@@ -213,27 +225,35 @@ module audio (
 
     // Audio transmission module
     control control_m (
-        .reset_i            (reset),
-        .clk_24576000_i     (clk_24576000_i),
-        .clk_22579200_i     (clk_22579200_i),
+        .reset_i                (reset),
+        .clk_24576000_i         (clk_24576000_i),
+        .clk_22579200_i         (clk_22579200_i),
         // Input FIFO ports
-        .rd_in_fifo_clk_o   (rd_in_fifo_clk),
-        .rd_in_fifo_en_o    (rd_in_fifo_en),
-        .rd_in_fifo_empty_i (rd_in_fifo_empty),
-        .rd_in_fifo_data_i  (rd_in_fifo_data),
+        .rd_in_fifo_clk_o       (rd_in_fifo_clk),
+        .rd_in_fifo_en_o        (rd_in_fifo_en),
+        .rd_in_fifo_empty_i     (rd_in_fifo_empty),
+        .rd_in_fifo_data_i      (rd_in_fifo_data),
         // Output FIFO ports
-        .wr_out_fifo_clk_o   (wr_out_fifo_clk),
-        .wr_out_fifo_en_o    (wr_out_fifo_en),
-        .wr_out_fifo_full_i  (wr_out_fifo_full),
-        .wr_out_fifo_afull_i (wr_out_fifo_afull),
-        .wr_out_fifo_data_o  (wr_out_fifo_data)
+        .wr_out_fifo_clk_o      (wr_out_fifo_clk),
+        .wr_out_fifo_en_o       (wr_out_fifo_en),
+        .wr_out_fifo_full_i     (wr_out_fifo_full),
+        .wr_out_fifo_afull_i    (wr_out_fifo_afull),
+        .wr_out_fifo_data_o     (wr_out_fifo_data)
 `ifdef EXT_ENABLED
         ,
+        // Audio ouputs
+        .spdif_o                (spdif),
+        .i2s_sdata_o            (i2s_sdata),
+        .i2s_bclk_o             (i2s_bclk),
+        .i2s_lrck_o             (i2s_lrck),
+        .i2s_mclk_o             (i2s_mclk)
 `ifdef TEST_MODE
-        .ext_led_test_ok            (ext_led_test_ok_o),
-        .ext_led_test_fail          (ext_led_test_fail_o)
+        ,
+        .ext_led_test_ok        (ext_led_test_ok_o),
+        .ext_led_test_fail      (ext_led_test_fail_o)
 `else
-        .ext_led_app_ctrl_err_o     (ext_led_app_ctrl_err_o)
+        ,
+        .ext_led_app_ctrl_err_o (ext_led_app_ctrl_err_o)
 `endif // TEST_MODE
 `endif // EXT_ENABLED
         );
