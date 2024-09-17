@@ -62,6 +62,7 @@ module audio (
     logic ext_led_br_dop, ext_led_br_16_bit, ext_led_br_24_bit, ext_led_br_32_bit;
     logic ext_led_t_spdif, ext_led_t_i2s;
     logic ext_led_streaming_spdif, ext_led_streaming_i2s;
+    logic ext_tp_control_0, ext_tp_control_1;
 
 `ifdef EXT_A_ENABLED
     //==================================================================================================================
@@ -143,6 +144,11 @@ module audio (
     // Streaming LEDs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_38(.B(extension[38]), .T(1'b0), .I(ext_led_streaming_spdif));
     TRELLIS_IO #(.DIR("OUTPUT")) extension_39(.B(extension[39]), .T(1'b0), .I(ext_led_streaming_i2s));
+
+    // Control test points
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_40(.B(extension[40]), .T(1'b0), .I(ext_tp_control_0));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_41(.B(extension[41]), .T(1'b0), .I(ext_tp_control_1));
+
 `endif
 
 `ifdef TEST_MODE
@@ -286,7 +292,9 @@ module audio (
         .led_t_i2s              (ext_led_t_i2s),
         // Streaming status LEDs
         .led_streaming_spdif    (ext_led_streaming_spdif),
-        .led_streaming_i2s      (ext_led_streaming_i2s)
+        .led_streaming_i2s      (ext_led_streaming_i2s),
+        .tp_control_0_o         (ext_tp_control_0),
+        .tp_control_1_o         (ext_tp_control_1)
 `endif // TEST_MODE
         );
 
