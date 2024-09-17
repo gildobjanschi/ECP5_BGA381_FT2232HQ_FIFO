@@ -121,14 +121,14 @@ module tx_i2s (
             case (bit_depth_i)
                 `BIT_DEPTH_16: begin
                     case (sample_byte_index)
-                        0: begin
+                        2'd0: begin
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd1;
                         end
 
-                        1: begin
+                        2'd1: begin
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
 
@@ -147,21 +147,21 @@ module tx_i2s (
 
                 `BIT_DEPTH_24, `BIT_DEPTH_DOP: begin
                     case (sample_byte_index)
-                        0: begin
+                        2'd0: begin
                             if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
                             else sample_l[23:16] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd1;
                         end
 
-                        1: begin
+                        2'd1: begin
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd2;
                         end
 
-                        2: begin
+                        2'd2: begin
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
 
@@ -181,28 +181,28 @@ module tx_i2s (
 
                 `BIT_DEPTH_32: begin
                     case (sample_byte_index)
-                        0: begin
+                        2'd0: begin
                             if (sample_sel) sample_r[31:24] <= rd_output_FIFO_data;
                             else sample_l[31:24] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd1;
                         end
 
-                        1: begin
+                        2'd1: begin
                             if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
                             else sample_l[23:16] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd2;
                         end
 
-                        2: begin
+                        2'd2: begin
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
 
                             sample_byte_index <= 2'd3;
                         end
 
-                        3: begin
+                        2'd3: begin
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
 
