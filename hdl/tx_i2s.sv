@@ -116,7 +116,9 @@ module tx_i2s (
         end else if (rd_output_FIFO_en) begin
             if (tx_reset) tx_reset <= 1'b0;
 
+`ifdef D_I2S
             prev_time <= $time;
+`endif
             (* parallel_case, full_case *)
             case (bit_depth_i)
                 `BIT_DEPTH_16: begin

@@ -73,7 +73,7 @@ module tx_spdif (
     // The byte_clk_i and bit clock are synchronized (bit clock is divided by 32 to obtain byte_clk_i).
     logic tx_reset;
     // 1'b0 left channel, 1'b1 right channel
-    logic sample_sel;
+    logic r_channel_sample;
     // Left and right channel samples are used as ping pong buffers with the TX 'always' block.
     logic [31:0] sample_l, sample_r;
 
@@ -85,7 +85,7 @@ module tx_spdif (
         bclk_en <= 1'b0;
         rd_output_FIFO_en <= 1'b0;
         pause_rd_FIFO <= 1'b0;
-        sample_sel <= 1'b0;
+        r_channel_sample <= 1'b0;
         sample_byte_index <= 2'd0;
         stream_stopping_clocks <= 3'd0;
     endtask
@@ -123,12 +123,12 @@ module tx_spdif (
                 `BIT_DEPTH_16: begin
                     case (sample_byte_index)
                         2'd0: begin
-                            if (sample_sel) begin
+                            if (r_channel_sample) begin
                                 sample_r[31:24] <= 8'h0;
                                 sample_r[23:16] <= rd_output_FIFO_data;
                                 parity_r <= ^rd_output_FIFO_data;
                             end else begin
-                                sample_r[31:24] <= 8'h0;
+                                sample_l[31:24] <= 8'h0;
                                 sample_l[23:16] <= rd_output_FIFO_data;
                                 parity_l <= ^rd_output_FIFO_data;
                             end
@@ -137,7 +137,7 @@ module tx_spdif (
                         end
 
                         2'd1: begin
-                            if (sample_sel) begin
+                            if (r_channel_sample) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
@@ -158,11 +158,11 @@ module tx_spdif (
                         2'd3: begin
 `ifdef D_SPDIF
                             $display ($time, " SPDIF:\t16-bit sample: %h [%4b]",
-                                            sample_sel ? sample_r[23:8] : sample_l[23:8],
-                                            sample_sel ? sample_r[7:4] : sample_l[7:4]);
+                                            r_channel_sample ? sample_r[23:8] : sample_l[23:8],
+                                            r_channel_sample ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            sample_sel <= ~sample_sel;
+                            r_channel_sample <= ~r_channel_sample;
 
                             bclk_en <= 1'b1;
 
@@ -179,7 +179,7 @@ module tx_spdif (
                 `BIT_DEPTH_24: begin
                     case (sample_byte_index)
                         2'd0: begin
-                            if (sample_sel) begin
+                            if (r_channel_sample) begin
                                 sample_r[31:24] <= rd_output_FIFO_data;
                                 parity_r <= ^rd_output_FIFO_data;
                             end else begin
@@ -191,7 +191,7 @@ module tx_spdif (
                         end
 
                         2'd1: begin
-                            if (sample_sel) begin
+                            if (r_channel_sample) begin
                                 sample_r[23:16] <= rd_output_FIFO_data;
                                 parity_r <= ^rd_output_FIFO_data ^ parity_r;
                             end else begin
@@ -203,7 +203,7 @@ module tx_spdif (
                         end
 
                         2'd2: begin
-                            if (sample_sel) begin
+                            if (r_channel_sample) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
@@ -220,11 +220,11 @@ module tx_spdif (
                         2'd3: begin
 `ifdef D_SPDIF
                             $display ($time, " SPDIF:\t24-bit sample : %h [%4b]",
-                                                sample_sel ? sample_r[31:8] : sample_l[31:8],
-                                                sample_sel ? sample_r[7:4] : sample_l[7:4]);
+                                                r_channel_sample ? sample_r[31:8] : sample_l[31:8],
+                                                r_channel_sample ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            sample_sel <= ~sample_sel;
+                            r_channel_sample <= ~r_channel_sample;
 
                             bclk_en <= 1'b1;
 
@@ -261,13 +261,13 @@ module tx_spdif (
 `ifdef D_SPDIF
     time prev_time_bit = 0;
 `endif
-    logic prev_sample_sel, first_channel;
+    logic prev_r_channel_sample, first_channel;
     logic [7:0] preamble;
     logic [31:0] tx_sample;
     logic [8:0] sub_frame_count;
-    logic [5:0] clk_count;
+    logic [5:0] clk_count, bit_index;
 
-    // Preambles
+    // Preambles (in the order in which bits are sent on the wire).
     localparam PREAMBLE_B_0 = 8'b00010111;
     localparam PREAMBLE_B_1 = 8'b11101000;
 
@@ -291,17 +291,17 @@ module tx_spdif (
 `ifdef D_SPDIF
         $display ($time, " SPDIF:\t--TX reset.");
 `endif
-        prev_sample_sel <= 1'b0;
-        sub_frame_count <= 9'd0;
-        first_channel <= 1'b1;
+        prev_r_channel_sample <= 1'b0;
+        sub_frame_count <= 9'd383;
+        first_channel <= 1'b0;
         state_m <= TX_SUB_FRAME_BEGIN;
-        spdif_o <= 1'b0;
+        spdif_o <= 1'b1;
     endtask
 
     //==================================================================================================================
     // SPDIF encoder processor.
     //==================================================================================================================
-    always @(posedge bclk_i, posedge reset_i, posedge tx_reset) begin
+    always @(posedge bit_clk_i, posedge reset_i, posedge tx_reset) begin
         if (reset_i) begin
             tx_reset_task;
         end else if (tx_reset) begin
@@ -310,32 +310,29 @@ module tx_spdif (
             (* parallel_case, full_case *)
             case (state_m)
                 TX_SUB_FRAME_BEGIN: begin
-                    prev_sample_sel <= sample_sel;
-                    if (prev_sample_sel != sample_sel) begin
+                    prev_r_channel_sample <= r_channel_sample;
+                    if (prev_r_channel_sample != r_channel_sample) begin
 `ifdef D_SPDIF
                         prev_time_bit <= $time;
                         $display ($time,
-                                " SPDIF:\tTX_SUB_FRAME_BEGIN: sub-frame: %h + ctrl: %h. PREAMBLE[7] bit: %0d | %0d Hz",
-                                prev_sample_sel ? sample_r[31:8] : sample_l[31:8],
-                                prev_sample_sel ? sample_r[7:4] : sample_l[7:4],
+                                " SPDIF:\tTX_SUB_FRAME_BEGIN: sub-frame: %h [ctrl: %4b]. PREAMBLE[7] bit: %0d | %0d Hz",
+                                prev_r_channel_sample ? sample_r[31:8] : sample_l[31:8],
+                                prev_r_channel_sample ? sample_r[7:4] : sample_l[7:4],
                                 ~spdif_o,
                                 1000000000000 / ($time - prev_time_bit));
 `endif
                         // Prepare the preamble.
-                        sub_frame_count <= sub_frame_count + 9'd1;
-
                         if (sub_frame_count == 9'd383) begin
                             // This is the beginning of a block of 192 frames (384 sub-frames).
                             sub_frame_count <= 9'd0;
 
-                            if (first_channel) begin
-                                preamble <= spdif_o ? PREAMBLE_B_0 : PREAMBLE_B_1;
-                            end else begin
-                                preamble <= spdif_o ? PREAMBLE_W_0 : PREAMBLE_W_1;
-                            end
+                            preamble <= spdif_o ? PREAMBLE_B_0 : PREAMBLE_B_1;
 
-                            first_channel <= 1'b1;
+                            // Next channel
+                            first_channel <= 1'b0;
                         end else begin
+                            sub_frame_count <= sub_frame_count + 9'd1;
+
                             if (first_channel) begin
                                 preamble <= spdif_o ? PREAMBLE_M_0 : PREAMBLE_M_1;
                             end else begin
@@ -346,7 +343,7 @@ module tx_spdif (
                         end
 
                         // Store the 24-bit sample bits to send in a sub-frame.
-                        tx_sample <= prev_sample_sel ? sample_r : sample_l;
+                        tx_sample <= prev_r_channel_sample ? sample_r : sample_l;
 
                         // First bit of the preamble is always the negated previous bit.
                         spdif_o <= ~spdif_o;
@@ -372,6 +369,7 @@ module tx_spdif (
                     if (clk_count == 6'd0) begin
                         // Send 24 bits in 48 clocks.
                         clk_count <= 6'd47;
+                        bit_index <= 6'd8;
                         state_m <= TX_SAMPLE;
                     end else begin
                         clk_count <= clk_count - 6'd1;
@@ -383,16 +381,21 @@ module tx_spdif (
                         spdif_o <= ~spdif_o;
 `ifdef D_SPDIF
                         prev_time_bit <= $time;
-                        $display ($time, " SPDIF:\tSAMPLE[%0d] bit: %h. | %0d Hz", clk_count>>1, tx_sample[clk_count>>1],
+                        $display ($time, " SPDIF:\tSAMPLE[%0d] bit: %h. | %0d Hz", bit_index, tx_sample[bit_index],
                                                     1000000000000 / ($time - prev_time_bit));
 `endif
                     end else begin
-                        spdif_o <= tx_sample[clk_count>>1] ? ~spdif_o : spdif_o;
+                        // Send the LSB first.
+                        spdif_o <= tx_sample[bit_index] ? ~spdif_o : spdif_o;
+                        bit_index <= bit_index + 6'd1;
                     end
 
                     if (clk_count == 6'd0) begin
                         // Send 4 bits in 8 clocks (starting at index 7).
+                        // Pretend that 8 bits are sent but stop after 4 bits were sent.
                         clk_count <= 6'd15;
+                        // Index of the first control bit to be sent in tx_sample.
+                        bit_index <= 6'd7;
                         state_m <= TX_CONTROL;
                     end else begin
                         clk_count <= clk_count - 6'd1;
@@ -404,11 +407,14 @@ module tx_spdif (
                         spdif_o <= ~spdif_o;
 `ifdef D_SPDIF
                         prev_time_bit <= $time;
-                        $display ($time, " SPDIF:\tCONTROL[%0d] bit: %h. | %0d Hz", clk_count>>1 - 4,
-                                                    tx_sample[clk_count>>1], 1000000000000 / ($time - prev_time_bit));
+                        // Print the index in the control buffer.
+                        $display ($time, " SPDIF:\tCONTROL[%0d] bit: %h. | %0d Hz", bit_index,
+                                                    tx_sample[bit_index], 1000000000000 / ($time - prev_time_bit));
 `endif
                     end else begin
-                        spdif_o <= tx_sample[clk_count>>1] ? ~spdif_o : spdif_o;
+                        // Bit 7, 6, 5, 4 in this order (from Validity to Parity).
+                        spdif_o <= tx_sample[bit_index] ? ~spdif_o : spdif_o;
+                        bit_index <= bit_index - 6'd1;
                     end
 
                     if (clk_count == 6'd8) begin
@@ -417,7 +423,6 @@ module tx_spdif (
                         clk_count <= clk_count - 6'd1;
                     end
                 end
-
             endcase
         end
     end
