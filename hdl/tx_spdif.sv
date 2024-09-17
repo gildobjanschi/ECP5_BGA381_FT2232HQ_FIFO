@@ -65,7 +65,7 @@ module tx_spdif (
     time time_now;
 `endif
 
-    logic pause_rd_FIFO, parity_r, parity_l;
+    logic bclk_en, pause_rd_FIFO, parity_r, parity_l;
     logic [1:0] sample_byte_index;
     logic [2:0] stream_stopping_clocks;
 
@@ -82,6 +82,7 @@ module tx_spdif (
     //==================================================================================================================
     task reset_task;
         tx_reset <= 1'b0;
+        bclk_en <= 1'b0;
         rd_output_FIFO_en <= 1'b0;
         pause_rd_FIFO <= 1'b0;
         sample_sel <= 1'b0;
@@ -138,10 +139,10 @@ module tx_spdif (
                         2'd1: begin
                             if (sample_sel) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
-                                sample_r[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
+                                sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
                                 sample_l[15:8] <= rd_output_FIFO_data;
-                                sample_l[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
+                                sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
                             // Stop reading from the FIFO.
@@ -162,6 +163,8 @@ module tx_spdif (
 `endif
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
+
+                            bclk_en <= 1'b1;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -202,10 +205,10 @@ module tx_spdif (
                         2'd2: begin
                             if (sample_sel) begin
                                 sample_r[15:8] <= rd_output_FIFO_data;
-                                sample_r[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
+                                sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
                                 sample_l[15:8] <= rd_output_FIFO_data;
-                                sample_l[7:0] <= {1'b1, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
+                                sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
                             // Stop reading from the FIFO.
@@ -222,6 +225,8 @@ module tx_spdif (
 `endif
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
+
+                            bclk_en <= 1'b1;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -247,6 +252,173 @@ module tx_spdif (
         end else begin
             // The FIFO is empty and not even one full sample was received.
             // This happens at the beginning of a stream.
+        end
+    end
+
+    //==================================================================================================================
+    // SPDIF encoder.
+    //==================================================================================================================
+`ifdef D_SPDIF
+    time prev_time_bit = 0;
+`endif
+    logic prev_sample_sel, first_channel;
+    logic [7:0] preamble;
+    logic [31:0] tx_sample;
+    logic [8:0] sub_frame_count;
+    logic [5:0] clk_count;
+
+    // Preambles
+    localparam PREAMBLE_B_0 = 8'b00010111;
+    localparam PREAMBLE_B_1 = 8'b11101000;
+
+    localparam PREAMBLE_M_0 = 8'b00011101;
+    localparam PREAMBLE_M_1 = 8'b11100010;
+
+    localparam PREAMBLE_W_0 = 8'b00011011;
+    localparam PREAMBLE_W_1 = 8'b11100100;
+
+    // State machines
+    localparam TX_SUB_FRAME_BEGIN   = 2'b00;
+    localparam TX_PREAMBLE          = 2'b01;
+    localparam TX_SAMPLE            = 2'b10;
+    localparam TX_CONTROL           = 2'b11;
+    logic [1:0] state_m;
+
+    //==================================================================================================================
+    // The TX reset task
+    //==================================================================================================================
+    task tx_reset_task;
+`ifdef D_SPDIF
+        $display ($time, " SPDIF:\t--TX reset.");
+`endif
+        prev_sample_sel <= 1'b0;
+        sub_frame_count <= 9'd0;
+        first_channel <= 1'b1;
+        state_m <= TX_SUB_FRAME_BEGIN;
+        spdif_o <= 1'b0;
+    endtask
+
+    //==================================================================================================================
+    // SPDIF encoder processor.
+    //==================================================================================================================
+    always @(posedge bclk_i, posedge reset_i, posedge tx_reset) begin
+        if (reset_i) begin
+            tx_reset_task;
+        end else if (tx_reset) begin
+            tx_reset_task;
+        end else if (bclk_en) begin
+            (* parallel_case, full_case *)
+            case (state_m)
+                TX_SUB_FRAME_BEGIN: begin
+                    prev_sample_sel <= sample_sel;
+                    if (prev_sample_sel != sample_sel) begin
+`ifdef D_SPDIF
+                        prev_time_bit <= $time;
+                        $display ($time,
+                                " SPDIF:\tTX_SUB_FRAME_BEGIN: sub-frame: %h + ctrl: %h. PREAMBLE[7] bit: %0d | %0d Hz",
+                                prev_sample_sel ? sample_r[31:8] : sample_l[31:8],
+                                prev_sample_sel ? sample_r[7:4] : sample_l[7:4],
+                                ~spdif_o,
+                                1000000000000 / ($time - prev_time_bit));
+`endif
+                        // Prepare the preamble.
+                        sub_frame_count <= sub_frame_count + 9'd1;
+
+                        if (sub_frame_count == 9'd383) begin
+                            // This is the beginning of a block of 192 frames (384 sub-frames).
+                            sub_frame_count <= 9'd0;
+
+                            if (first_channel) begin
+                                preamble <= spdif_o ? PREAMBLE_B_0 : PREAMBLE_B_1;
+                            end else begin
+                                preamble <= spdif_o ? PREAMBLE_W_0 : PREAMBLE_W_1;
+                            end
+
+                            first_channel <= 1'b1;
+                        end else begin
+                            if (first_channel) begin
+                                preamble <= spdif_o ? PREAMBLE_M_0 : PREAMBLE_M_1;
+                            end else begin
+                                preamble <= spdif_o ? PREAMBLE_W_0 : PREAMBLE_W_1;
+                            end
+
+                            first_channel <= ~first_channel;
+                        end
+
+                        // Store the 24-bit sample bits to send in a sub-frame.
+                        tx_sample <= prev_sample_sel ? sample_r : sample_l;
+
+                        // First bit of the preamble is always the negated previous bit.
+                        spdif_o <= ~spdif_o;
+                        // Send 4 bits of preamble in 8 clocks (first one was sent above).
+                        clk_count <= 6'd6;
+                        state_m <= TX_PREAMBLE;
+                    end else begin
+`ifdef D_SPDIF
+                        prev_time_bit <= $time;
+                        $display ($time, " SPDIF:\tTX_SUB_FRAME_BEGIN: Error -- no data --. | %0d Hz",
+                                                    1000000000000 / ($time - prev_time_bit));
+`endif
+                    end
+                end
+
+                TX_PREAMBLE: begin
+`ifdef D_SPDIF
+                    prev_time_bit <= $time;
+                    $display ($time, " SPDIF:\tPREAMBLE[%0d] bit: %h. | %0d Hz", clk_count, preamble[clk_count],
+                                                1000000000000 / ($time - prev_time_bit));
+`endif
+                    spdif_o <= preamble[clk_count];
+                    if (clk_count == 6'd0) begin
+                        // Send 24 bits in 48 clocks.
+                        clk_count <= 6'd47;
+                        state_m <= TX_SAMPLE;
+                    end else begin
+                        clk_count <= clk_count - 6'd1;
+                    end
+                end
+
+                TX_SAMPLE: begin
+                    if (clk_count[0]) begin
+                        spdif_o <= ~spdif_o;
+`ifdef D_SPDIF
+                        prev_time_bit <= $time;
+                        $display ($time, " SPDIF:\tSAMPLE[%0d] bit: %h. | %0d Hz", clk_count>>1, tx_sample[clk_count>>1],
+                                                    1000000000000 / ($time - prev_time_bit));
+`endif
+                    end else begin
+                        spdif_o <= tx_sample[clk_count>>1] ? ~spdif_o : spdif_o;
+                    end
+
+                    if (clk_count == 6'd0) begin
+                        // Send 4 bits in 8 clocks (starting at index 7).
+                        clk_count <= 6'd15;
+                        state_m <= TX_CONTROL;
+                    end else begin
+                        clk_count <= clk_count - 6'd1;
+                    end
+                end
+
+                TX_CONTROL: begin
+                    if (clk_count[0]) begin
+                        spdif_o <= ~spdif_o;
+`ifdef D_SPDIF
+                        prev_time_bit <= $time;
+                        $display ($time, " SPDIF:\tCONTROL[%0d] bit: %h. | %0d Hz", clk_count>>1 - 4,
+                                                    tx_sample[clk_count>>1], 1000000000000 / ($time - prev_time_bit));
+`endif
+                    end else begin
+                        spdif_o <= tx_sample[clk_count>>1] ? ~spdif_o : spdif_o;
+                    end
+
+                    if (clk_count == 6'd8) begin
+                        state_m <= TX_SUB_FRAME_BEGIN;
+                    end else begin
+                        clk_count <= clk_count - 6'd1;
+                    end
+                end
+
+            endcase
         end
     end
 
