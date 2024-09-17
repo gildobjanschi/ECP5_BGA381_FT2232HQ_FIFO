@@ -26,7 +26,6 @@ module tx_spdif (
     // Streaming configuration
     input logic [2:0] sample_rate_i,
     input logic [1:0] bit_depth_i,
-    input logic channels_i,
     // Output FIFO ports
     input logic wr_output_FIFO_clk_i,
     input logic wr_output_FIFO_en_i,
@@ -162,11 +161,7 @@ module tx_spdif (
                                             sample_sel ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            if (channels_i == `CHANNELS_MONO) begin
-                                sample_l <= sample_r;
-                            end else begin
-                                sample_sel <= ~sample_sel;
-                            end
+                            sample_sel <= ~sample_sel;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -226,11 +221,7 @@ module tx_spdif (
                                                 sample_sel ? sample_r[7:4] : sample_l[7:4]);
 `endif
                             sample_byte_index <= 2'd0;
-                            if (channels_i == `CHANNELS_MONO) begin
-                                sample_l <= sample_r;
-                            end else begin
-                                sample_sel <= ~sample_sel;
-                            end
+                            sample_sel <= ~sample_sel;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;

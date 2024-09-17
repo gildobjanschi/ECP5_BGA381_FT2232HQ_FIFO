@@ -27,7 +27,6 @@ module tx_i2s (
     // Streaming configuration
     input logic [2:0] sample_rate_i,
     input logic [1:0] bit_depth_i,
-    input logic channels_i,
     // Output FIFO ports
     input logic wr_output_FIFO_clk_i,
     input logic wr_output_FIFO_en_i,
@@ -117,6 +116,7 @@ module tx_i2s (
         end else if (rd_output_FIFO_en) begin
             if (tx_reset) tx_reset <= 1'b0;
 
+            prev_time <= $time;
             (* parallel_case, full_case *)
             case (bit_depth_i)
                 `BIT_DEPTH_16: begin

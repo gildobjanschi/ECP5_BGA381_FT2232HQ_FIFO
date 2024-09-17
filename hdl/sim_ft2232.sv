@@ -366,10 +366,11 @@ module sim_ft2232 (
             end
 
             STATE_OUT_START_PAYLOAD: begin
+                fifo_data_o = {`OUTPUT_D, 1'b0, `STREAM_192000_HZ, `BIT_DEPTH_24};
 `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] %d. \033[0;0m",
-`endif                         {`IO_TYPE_I2S, `STREAM_48000_HZ, `BIT_DEPTH_32});
-                fifo_data_o <= {`CHANNELS_STEREO, `IO_TYPE_I2S, `STREAM_48000_HZ, `BIT_DEPTH_32};
+                // OUTPUT_A & OUTPUT_B: I2S; OUTPUT_C & OUTPUT_D: SPDIF. SPDIF: max 24-bit 192KHz.
+                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] %d. \033[0;0m", fifo_data_o);
+`endif
                 out_state_m <= STATE_OUT_DATA_CMD;
             end
 

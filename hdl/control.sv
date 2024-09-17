@@ -62,8 +62,6 @@ module control (
     // Output type
     output logic led_t_spdif,
     output logic led_t_i2s,
-    // Channels
-    output logic led_stereo,
     // Streaming status
     output logic led_streaming_spdif,
     output logic led_streaming_i2s);
@@ -283,7 +281,7 @@ module control (
     assign clk_24576000_spdif[0] = clk_24576000_32[1];
 
     logic spdif_bit_clk;
-    assign spdif_bit_clk = io_en[IO_TYPE_SPDIF_BIT]? (sample_rate[2] ? clk_24576000_spdif[sample_rate[1:0]] :
+    assign spdif_bit_clk = io_en[IO_TYPE_SPDIF_BIT] ? (sample_rate[2] ? clk_24576000_spdif[sample_rate[1:0]] :
                                                             clk_22579200_spdif[sample_rate[1:0]]) : 1'b0;
 
     logic spdif_rd_output_FIFO_clk;
@@ -326,7 +324,6 @@ module control (
     logic is_wr_output_FIFO_full;
     assign is_wr_output_FIFO_full = |(wr_output_FIFO_full & io_en);
 
-    logic channels;
     logic [2:0] sample_rate;
     logic [1:0] bit_depth;
     logic [7:0] saved_rd_data;
@@ -344,7 +341,6 @@ module control (
         // Streaming configuration
         .sample_rate_i          (sample_rate),
         .bit_depth_i            (bit_depth),
-        .channels_i             (channels),
         // Clock to write to the output FIFO
         .wr_output_FIFO_clk_i   (clk),
         .wr_output_FIFO_en_i    (io_en[IO_TYPE_SPDIF_BIT] && wr_output_en),
@@ -367,7 +363,6 @@ module control (
         // Streaming configuration
         .sample_rate_i          (sample_rate),
         .bit_depth_i            (bit_depth),
-        .channels_i             (channels),
         // Clock to write to the output FIFO
         .wr_output_FIFO_clk_i   (clk),
         .wr_output_FIFO_en_i    (io_en[IO_TYPE_I2S_BIT] && wr_output_en),
@@ -406,8 +401,6 @@ module control (
     // Output type
     assign led_t_spdif = io_en[IO_TYPE_SPDIF_BIT];
     assign led_t_i2s = io_en[IO_TYPE_I2S_BIT];
-    // Channels LEDs
-    assign led_stereo = channels == |io_en && `CHANNELS_STEREO;
     // Streaming status LEDs
     assign led_streaming_spdif = output_streaming_meta_spdif;
     assign led_streaming_i2s = output_streaming_meta_i2s;
@@ -466,27 +459,25 @@ module control (
     endtask
 
     //==================================================================================================================
-    // The payload handler
+    // The payload handler.
     //==================================================================================================================
     task handle_payload_task (input logic [1:0] fifo_cmd, input logic [7:0] fifo_data);
         (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_SETUP_OUTPUT: begin
 `ifdef D_CTRL
-                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_SETUP_OUTPUT] Rd IN: Channels: %1b, type: %2b; sample rate: %3b; bit depth: %2b. \033[0;0m",
-                                    fifo_data[7], fifo_data[6:5], fifo_data[4:2], fifo_data[1:0]);
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_SETUP_OUTPUT] Rd IN: Type: %2b; sample rate: %3b; bit depth: %2b. \033[0;0m",
+                                    fifo_data[6:5], fifo_data[4:2], fifo_data[1:0]);
 `endif
-                // For now the IO_TYPEs are mapped to SPDIF or I2S. The code can use the IO_TYPEs for additional
-                // meanings for example: physical output, special handling in SPDIF for AES3.
+                // The inputs are mapped to SPDIF or I2S types.
                 (* parallel_case, full_case *)
                 case (fifo_data[7:6])
-                    `IO_TYPE_AES3: io_en <= 2'b01; // IO_TYPE_SPDIF_BIT set
-                    `IO_TYPE_BNC: io_en <= 2'b01; // IO_TYPE_SPDIF_BIT set
-                    `IO_TYPE_TOSLINK: io_en <= 2'b01; // IO_TYPE_SPDIF_BIT set
-                    `IO_TYPE_I2S: io_en <= 2'b10; // IO_TYPE_I2S_BIT set
+                    `OUTPUT_A: begin io_en[IO_TYPE_I2S_BIT] <= 1'b1; io_en[IO_TYPE_SPDIF_BIT] <= 1'b0; end
+                    `OUTPUT_B: begin io_en[IO_TYPE_I2S_BIT] <= 1'b1; io_en[IO_TYPE_SPDIF_BIT] <= 1'b0; end
+                    `OUTPUT_C: begin io_en[IO_TYPE_I2S_BIT] <= 1'b0; io_en[IO_TYPE_SPDIF_BIT] <= 1'b1; end
+                    `OUTPUT_D: begin io_en[IO_TYPE_I2S_BIT] <= 1'b0; io_en[IO_TYPE_SPDIF_BIT] <= 1'b1; end
                 endcase
 
-                channels <= fifo_data[5];
                 sample_rate <= fifo_data[4:2];
                 bit_depth <= fifo_data[1:0];
             end

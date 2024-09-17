@@ -32,15 +32,11 @@
 `define ERROR_INVALID_SETUP_OUTPUT_PAYLOAD  8'd1
 `define ERROR_INVALID_STOP_PAYLOAD          8'd2
 
-// Number of channels. CMD_SETUP_OUTPUT or CMD_SETUP_INPUT payload byte[0] bit[7].
-`define CHANNELS_MONO       1'b0
-`define CHANNELS_STEREO     1'b1
-
 // CMD_SETUP_OUTPUT or CMD_SETUP_INPUT payload byte[0] bits[6:5].
-`define IO_TYPE_AES3        2'b00
-`define IO_TYPE_BNC         2'b01
-`define IO_TYPE_TOSLINK     2'b10
-`define IO_TYPE_I2S         2'b11
+`define OUTPUT_A     2'b00
+`define OUTPUT_B     2'b01
+`define OUTPUT_C     2'b10
+`define OUTPUT_D     2'b11
 
 // CMD_SETUP_OUTPUT payload byte[0] bits[4:2]
 `define STREAM_44100_HZ    3'b000

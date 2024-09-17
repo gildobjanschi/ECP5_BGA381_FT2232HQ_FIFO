@@ -61,7 +61,6 @@ module audio (
     logic ext_led_sr_44100Hz, ext_led_sr_88200Hz, ext_led_sr_176400Hz, ext_led_sr_352800Hz;
     logic ext_led_br_dop, ext_led_br_16_bit, ext_led_br_24_bit, ext_led_br_32_bit;
     logic ext_led_t_spdif, ext_led_t_i2s;
-    logic ext_led_stereo;
     logic ext_led_streaming_spdif, ext_led_streaming_i2s;
 
 `ifdef EXT_A_ENABLED
@@ -141,12 +140,9 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_36(.B(extension[36]), .T(1'b0), .I(ext_led_t_spdif));
     TRELLIS_IO #(.DIR("OUTPUT")) extension_37(.B(extension[37]), .T(1'b0), .I(ext_led_t_i2s));
 
-    // Mono/stereo LEDs
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_38(.B(extension[38]), .T(1'b0), .I(ext_led_stereo));
-
     // Streaming LEDs
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_39(.B(extension[39]), .T(1'b0), .I(ext_led_streaming_spdif));
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_40(.B(extension[40]), .T(1'b0), .I(ext_led_streaming_i2s));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_38(.B(extension[38]), .T(1'b0), .I(ext_led_streaming_spdif));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_39(.B(extension[39]), .T(1'b0), .I(ext_led_streaming_i2s));
 `endif
 
 `ifdef TEST_MODE
@@ -288,8 +284,7 @@ module audio (
         // Output type
         .led_t_spdif            (ext_led_t_spdif),
         .led_t_i2s              (ext_led_t_i2s),
-        // Channels
-        .led_stereo             (ext_led_stereo),
+        // Streaming status LEDs
         .led_streaming_spdif    (ext_led_streaming_spdif),
         .led_streaming_i2s      (ext_led_streaming_i2s)
 `endif // TEST_MODE
