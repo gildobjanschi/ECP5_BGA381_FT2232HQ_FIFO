@@ -51,8 +51,8 @@ module audio (
     output logic led_user);
 
     logic ext_led_app_in_fifo_rd_o, ext_led_app_in_fifo_full_o, ext_led_app_in_fifo_has_data_o;
-    logic ext_led_ft2232_in_data_o, ext_led_ft2232_out_fifo_has_data_o, ext_led_ft2232_in_fifo_is_full_o,
-            ext_led_ft2232_out_data_o;
+    logic ext_led_rd_ft2232_data_o, ext_led_ft2232_out_fifo_has_data_o, ext_led_ft2232_in_fifo_is_full_o,
+            ext_led_wr_ft2232_data_o;
     logic ext_led_app_out_fifo_wr_o, ext_led_app_out_fifo_full_o, ext_led_app_out_fifo_has_data_o;
     logic ext_led_test_ok_o, ext_led_test_fail_o;
     logic ext_led_app_ctrl_err_o;
@@ -62,7 +62,7 @@ module audio (
     logic ext_led_br_dop, ext_led_br_16_bit, ext_led_br_24_bit, ext_led_br_32_bit;
     logic ext_led_t_spdif, ext_led_t_i2s;
     logic ext_led_streaming_spdif, ext_led_streaming_i2s;
-    logic ext_tp_control_0, ext_tp_control_1;
+    logic ext_tp_control_1, ext_tp_control_2;
 
 `ifdef EXT_A_ENABLED
     //==================================================================================================================
@@ -74,7 +74,7 @@ module audio (
     DFF_META extension_fpga_reset_meta_m (1'b0, ext_btn_reset, clk, ext_btn_reset_meta);
 
     // Input FIFO
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_1(.B(extension[1]), .T(1'b0), .I(ext_led_ft2232_in_data_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_1(.B(extension[1]), .T(1'b0), .I(ext_led_rd_ft2232_data_o));
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_2(.B(extension[2]), .T(1'b0), .I(ext_led_app_in_fifo_rd_o));
     assign ext_led_app_in_fifo_rd_o = rd_in_fifo_en;
@@ -89,7 +89,7 @@ module audio (
     assign ext_led_ft2232_out_fifo_has_data_o = ~fifo_rxf_n;
 
     // Output FIFO
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_8(.B(extension[8]), .T(1'b0), .I(ext_led_ft2232_out_data_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_8(.B(extension[8]), .T(1'b0), .I(ext_led_wr_ft2232_data_o));
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_9(.B(extension[9]), .T(1'b0), .I(ext_led_app_out_fifo_wr_o));
     assign ext_led_app_out_fifo_wr_o = wr_out_fifo_en;
@@ -146,8 +146,8 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_39(.B(extension[39]), .T(1'b0), .I(ext_led_streaming_i2s));
 
     // Control test points
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_40(.B(extension[40]), .T(1'b0), .I(ext_tp_control_0));
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_41(.B(extension[41]), .T(1'b0), .I(ext_tp_control_1));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_40(.B(extension[40]), .T(1'b0), .I(ext_tp_control_1));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_41(.B(extension[41]), .T(1'b0), .I(ext_tp_control_2));
 
 `endif
 
@@ -242,8 +242,8 @@ module audio (
         .rd_out_fifo_en_o    (rd_out_fifo_en),
         .rd_out_fifo_data_i  (rd_out_fifo_data),
         .rd_out_fifo_empty_i (rd_out_fifo_empty),
-        .led_ft2232_rd_data_o   (ext_led_ft2232_in_data_o),
-        .led_ft2232_wr_data_o   (ext_led_ft2232_out_data_o)
+        .led_ft2232_rd_data_o   (ext_led_rd_ft2232_data_o),
+        .led_ft2232_wr_data_o   (ext_led_wr_ft2232_data_o)
         );
 
     // Audio transmission module
@@ -293,8 +293,8 @@ module audio (
         // Streaming status LEDs
         .led_streaming_spdif    (ext_led_streaming_spdif),
         .led_streaming_i2s      (ext_led_streaming_i2s),
-        .tp_control_0_o         (ext_tp_control_0),
-        .tp_control_1_o         (ext_tp_control_1)
+        .tp_control_1_o         (ext_tp_control_1),
+        .tp_control_2_o         (ext_tp_control_2)
 `endif // TEST_MODE
         );
 

@@ -65,7 +65,7 @@ module tx_spdif (
     time time_now;
 `endif
 
-    logic bclk_en, pause_rd_FIFO, parity_r, parity_l;
+    logic bit_clk_en, pause_rd_FIFO, parity_r, parity_l;
     logic [1:0] sample_byte_index;
     logic [2:0] stream_stopping_clocks;
 
@@ -82,7 +82,7 @@ module tx_spdif (
     //==================================================================================================================
     task reset_task;
         tx_reset <= 1'b0;
-        bclk_en <= 1'b0;
+        bit_clk_en <= 1'b0;
         rd_output_FIFO_en <= 1'b0;
         pause_rd_FIFO <= 1'b0;
         r_channel_sample <= 1'b0;
@@ -164,7 +164,7 @@ module tx_spdif (
                             sample_byte_index <= 2'd0;
                             r_channel_sample <= ~r_channel_sample;
 
-                            bclk_en <= 1'b1;
+                            bit_clk_en <= 1'b1;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -226,7 +226,7 @@ module tx_spdif (
                             sample_byte_index <= 2'd0;
                             r_channel_sample <= ~r_channel_sample;
 
-                            bclk_en <= 1'b1;
+                            bit_clk_en <= 1'b1;
 
                             if (rd_output_FIFO_empty) begin
                                 stream_stopping_clocks <= 3'd4;
@@ -261,6 +261,9 @@ module tx_spdif (
 `ifdef D_SPDIF
     time prev_time_bit = 0;
 `endif
+    logic gated_bit_clk_i;
+    assign gated_bit_clk_i = bit_clk_en ? bit_clk_i : 1'b0;
+
     logic prev_r_channel_sample, first_channel;
     logic [7:0] preamble;
     logic [31:0] tx_sample;
@@ -301,12 +304,12 @@ module tx_spdif (
     //==================================================================================================================
     // SPDIF encoder processor.
     //==================================================================================================================
-    always @(posedge bit_clk_i, posedge reset_i, posedge tx_reset) begin
+    always @(posedge gated_bit_clk_i, posedge reset_i, posedge tx_reset) begin
         if (reset_i) begin
             tx_reset_task;
         end else if (tx_reset) begin
             tx_reset_task;
-        end else if (bclk_en) begin
+        end else begin
             (* parallel_case, full_case *)
             case (state_m)
                 TX_SUB_FRAME_BEGIN: begin

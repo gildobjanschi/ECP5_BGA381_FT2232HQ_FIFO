@@ -40,8 +40,8 @@ module tx_i2s (
     output logic lrck_o,
     output logic mclk_o);
 
-    assign bclk_o = bclk_en ? bit_clk_i : 1'b1;
-    assign mclk_o = bclk_en ? mclk_i : 1'b0;
+    assign bclk_o = bit_clk_en ? bit_clk_i : 1'b1;
+    assign mclk_o = bit_clk_en ? mclk_i : 1'b0;
 
     //==================================================================================================================
     // The output FIFO containing audio data.
@@ -66,7 +66,7 @@ module tx_i2s (
     // The module using this signal will have to use a metastability FF to read this bit in a different clock domain.
     assign output_streaming_o = rd_output_FIFO_en;
 
-    logic bclk_en;
+    logic bit_clk_en;
     logic [1:0] sample_byte_index;
     logic [2:0] stream_stopping_clocks;
 
@@ -88,7 +88,7 @@ module tx_i2s (
     //==================================================================================================================
     task reset_task;
         tx_reset <= 1'b0;
-        bclk_en <= 1'b0;
+        bit_clk_en <= 1'b0;
         rd_output_FIFO_en <= 1'b0;
         // Start with the left channel
         sample_sel <= 1'b0;
@@ -137,7 +137,7 @@ module tx_i2s (
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
-                            bclk_en <= 1'b1;
+                            bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
                             $display ($time, " I2S:\t16-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[15:8] : sample_l[15:8], rd_output_FIFO_data},
@@ -170,7 +170,7 @@ module tx_i2s (
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
-                            bclk_en <= 1'b1;
+                            bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
                             $display ($time, " I2S:\t24-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[23:8] : sample_l[23:8], rd_output_FIFO_data},
@@ -211,7 +211,7 @@ module tx_i2s (
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
-                            bclk_en <= 1'b1;
+                            bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
                             $display ($time, " I2S:\t32-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[31:8] : sample_l[31:8], rd_output_FIFO_data},
@@ -245,4 +245,102 @@ module tx_i2s (
         end
     end
 
+`ifdef D_I2S_BC
+    time prev_time_bit = 0;
+`endif
+    logic prev_sample_sel;
+    logic [4:0] next_bit_to_send;
+    logic [31:0] tx_sample;
+
+    //==================================================================================================================
+    // TX reset task
+    //==================================================================================================================
+    task tx_reset_task;
+`ifdef D_I2S_BC
+        //$display ($time, " I2C_BC:\tTX reset.");
+`endif
+        prev_sample_sel <= 1'b0;
+        sdata_o <= 1'b1;
+        // Make the lrck signal go low before the first bit.
+        next_bit_to_send <= 5'd31;
+    endtask
+
+    //==================================================================================================================
+    // Audio sample transmitter
+    //==================================================================================================================
+    always @(posedge bclk_o, posedge reset_i, posedge tx_reset) begin
+        if (reset_i) begin
+            tx_reset_task;
+        end else if (tx_reset) begin
+            tx_reset_task;
+        end else begin
+            prev_sample_sel <= sample_sel;
+            if (prev_sample_sel != sample_sel) begin
+                tx_sample <= prev_sample_sel ? sample_r : sample_l;
+
+                (* parallel_case, full_case *)
+                case (bit_depth_i)
+                    `BIT_DEPTH_16: begin
+`ifdef D_I2S_BC
+                        prev_time_bit <= $time;
+                        $display ($time, " I2S_BC:\t16-bit sample: %h. Sending bit: 15 | %0d Hz",
+                                                    prev_sample_sel ? sample_r[15:0] : sample_l[15:0],
+                                                    1000000000000 / ($time - prev_time_bit));
+`endif
+                        sdata_o <= prev_sample_sel ? sample_r[5'd15] : sample_l[5'd15];
+                        next_bit_to_send <= 5'd14;
+                    end
+
+                    `BIT_DEPTH_24, `BIT_DEPTH_DOP: begin
+`ifdef D_I2S_BC
+                        prev_time_bit <= $time;
+                        $display ($time, " I2S_BC:\t24-bit sample: %h. Sending bit: 23 | %0d Hz",
+                                                    prev_sample_sel ? sample_r[23:0] : sample_l[23:0],
+                                                    1000000000000 / ($time - prev_time_bit));
+`endif
+                        sdata_o <= prev_sample_sel ? sample_r[5'd23] : sample_l[5'd23];
+
+                        next_bit_to_send <= 5'd22;
+                    end
+
+                    `BIT_DEPTH_32: begin
+`ifdef D_I2S_BC
+                        prev_time_bit <= $time;
+                        $display ($time, " I2S_BC:\t32-bit sample: %h. Sending bit: 31 | %0d Hz",
+                                                    prev_sample_sel ? sample_r : sample_l,
+                                                    1000000000000 / ($time - prev_time_bit));
+`endif
+                        sdata_o <= prev_sample_sel ? sample_r[5'd31] : sample_l[5'd31];
+
+                        next_bit_to_send <= 5'd30;
+                    end
+                endcase
+            end else begin
+`ifdef D_I2S_BC
+                prev_time_bit <= $time;
+                $display ($time, " I2S_BC:\tSending bit: %0d | %0d Hz", next_bit_to_send,
+                                            1000000000000 / ($time - prev_time_bit));
+`endif
+                sdata_o <= tx_sample[next_bit_to_send];
+                // After bit 0 is sent next_bit_to_send == 5'd31. See below the generation of lrck_o.
+                next_bit_to_send <= next_bit_to_send - 5'd1;
+            end
+        end
+    end
+
+    //==================================================================================================================
+    // Generate the left/right clock.
+    //==================================================================================================================
+    always @(negedge bclk_o, posedge reset_i, posedge tx_reset) begin
+        if (reset_i) begin
+            lrck_o <= 1'b1;
+        end else if (tx_reset) begin
+            lrck_o <= 1'b1;
+        end else if (next_bit_to_send == 5'd31) begin
+`ifdef D_I2S_BC
+            $display ($time, " I2S_BC:\tlrck %h.", ~lrck_o);
+`endif
+            lrck_o <= ~lrck_o;
+        end
+    end
 endmodule
