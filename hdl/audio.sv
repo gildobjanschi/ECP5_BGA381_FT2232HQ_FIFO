@@ -101,7 +101,7 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_41(.B(extension[41]), .T(1'b0), .I(ext_led_app_out_fifo_has_data_o));
     assign ext_led_app_out_fifo_has_data_o = ~rd_out_fifo_empty;
 
-    // TX
+    // Control
     TRELLIS_IO #(.DIR("OUTPUT")) extension_29(.B(extension[29]), .T(1'b0), .I(ext_led_app_ctrl_err_o));
 
     // Audio outputs
