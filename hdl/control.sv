@@ -39,12 +39,12 @@ module control (
     output logic [7:0] wr_out_fifo_data_o,
     input logic wr_out_fifo_full_i,
     input logic wr_out_fifo_afull_i,
+    output logic led_app_ctrl_err_o,
     output logic spdif_o,
     output logic i2s_sdata_o,
     output logic i2s_bclk_o,
     output logic i2s_lrck_o,
     output logic i2s_mclk_o,
-    output logic led_app_ctrl_err_o,
     // Sample rate LEDs
     output logic led_sr_48000Hz,
     output logic led_sr_96000Hz,
@@ -59,9 +59,6 @@ module control (
     output logic led_br_16_bit,
     output logic led_br_24_bit,
     output logic led_br_32_bit,
-    // Output type
-    output logic led_t_spdif,
-    output logic led_t_i2s,
     // Streaming status
     output logic led_streaming_spdif,
     output logic led_streaming_i2s,
@@ -406,9 +403,6 @@ module control (
     assign led_br_16_bit = |io_en && bit_depth == `BIT_DEPTH_16;
     assign led_br_24_bit = |io_en && bit_depth == `BIT_DEPTH_24;
     assign led_br_32_bit = |io_en && bit_depth == `BIT_DEPTH_32;
-    // Output type
-    assign led_t_spdif = io_en[IO_TYPE_SPDIF_BIT];
-    assign led_t_i2s = io_en[IO_TYPE_I2S_BIT];
     // Streaming status LEDs
     assign led_streaming_spdif = output_streaming_meta_spdif;
     assign led_streaming_i2s = output_streaming_meta_i2s;
