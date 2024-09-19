@@ -11,4 +11,6 @@ Next steps
 
 After board is received
 1. [FT2232 setup] MPROG use on Windows laptop
-2. [HDMI testing] S.M.S.L M400 to test HDMI and COAX
+2. [RCA testing] Digital RCA coaxial cable.
+3. [HDMI testing] S.M.S.L M400 to test HDMI and COAX
+4. [HDMI testing] Short HDMI cable.

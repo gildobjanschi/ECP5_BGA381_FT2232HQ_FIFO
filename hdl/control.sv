@@ -46,22 +46,22 @@ module control (
     output logic i2s_lrck_o,
     output logic i2s_mclk_o,
     // Sample rate LEDs
-    output logic led_sr_48000Hz,
-    output logic led_sr_96000Hz,
-    output logic led_sr_192000Hz,
-    output logic led_sr_384000Hz,
-    output logic led_sr_44100Hz,
-    output logic led_sr_88200Hz,
-    output logic led_sr_176400Hz,
-    output logic led_sr_352800Hz,
+    output logic led_sr_48000Hz_o,
+    output logic led_sr_96000Hz_o,
+    output logic led_sr_192000Hz_o,
+    output logic led_sr_384000Hz_o,
+    output logic led_sr_44100Hz_o,
+    output logic led_sr_88200Hz_o,
+    output logic led_sr_176400Hz_o,
+    output logic led_sr_352800Hz_o,
     // Bit depth LEDs
-    output logic led_br_dop,
-    output logic led_br_16_bit,
-    output logic led_br_24_bit,
-    output logic led_br_32_bit,
+    output logic led_br_dop_o,
+    output logic led_br_16_bit_o,
+    output logic led_br_24_bit_o,
+    output logic led_br_32_bit_o,
     // Streaming status
-    output logic led_streaming_spdif,
-    output logic led_streaming_i2s,
+    output logic led_streaming_spdif_o,
+    output logic led_streaming_i2s_o,
     // Test point
     output logic tp_control_1_o,
     output logic tp_control_2_o
@@ -150,7 +150,7 @@ module control (
     divide_by_2 divide_by_2_1_m (reset_i, clk_24576000_32[3], clk_24576000_32[2]);
     // 96 KHz 32 bit: 6144000 Hz
     divide_by_2 divide_by_2_2_m (reset_i, clk_24576000_32[2], clk_24576000_32[1]);
-    // 48 KHz 32 bit: 3072000
+    // 48 KHz 32 bit: 3072000 Hz
     divide_by_2 divide_by_2_3_m (reset_i, clk_24576000_32[1], clk_24576000_32[0]);
 
     // 24 bit @24.576000 MHz
@@ -183,7 +183,7 @@ module control (
     divide_by_2 divide_by_2_8_m (reset_i, clk_24576000_mclk[3], clk_24576000_mclk[2]);
     // 96 KHz MCLK: 24576000 Hz
     assign clk_24576000_mclk[1] = clk_24576000_i;
-    // 48 KHZ MCLK: 12288000 hz
+    // 48 KHZ MCLK: 12288000 Hz
     assign clk_24576000_mclk[0] = clk_24576000_32[2];
 
     // 32 bit @22.579200 MHz
@@ -227,7 +227,7 @@ module control (
     divide_by_2 divide_by_2_27_m (reset_i, clk_22579200_mclk[3], clk_22579200_mclk[2]);
     // 88.2 KHz MCLK: 22579200 Hz
     assign clk_22579200_mclk[1] = clk_22579200_i;
-    // 44.1 KHz MCLK: 11289600 hz
+    // 44.1 KHz MCLK: 11289600 Hz
     assign clk_22579200_mclk[0] = clk_22579200_32[2];
 
     // The I2S bit clock
@@ -389,23 +389,23 @@ module control (
     assign output_streaming = output_streaming_meta_spdif | output_streaming_meta_i2s;
 
     // Sample rate LEDs
-    assign led_sr_48000Hz = |io_en && sample_rate == `STREAM_48000_HZ;
-    assign led_sr_96000Hz = |io_en && sample_rate == `STREAM_96000_HZ;
-    assign led_sr_192000Hz = |io_en && sample_rate == `STREAM_192000_HZ;
-    assign led_sr_384000Hz = |io_en && sample_rate == `STREAM_384000_HZ;
-    assign led_sr_44100Hz = |io_en && sample_rate == `STREAM_44100_HZ;
-    assign led_sr_88200Hz = |io_en && sample_rate == `STREAM_88200_HZ;
-    assign led_sr_176400Hz = |io_en && sample_rate == `STREAM_176400_HZ;
-    assign led_sr_352800Hz = |io_en && sample_rate == `STREAM_352800_HZ;
+    assign led_sr_48000Hz_o = |io_en && sample_rate == `STREAM_48000_HZ;
+    assign led_sr_96000Hz_o = |io_en && sample_rate == `STREAM_96000_HZ;
+    assign led_sr_192000Hz_o = |io_en && sample_rate == `STREAM_192000_HZ;
+    assign led_sr_384000Hz_o = |io_en && sample_rate == `STREAM_384000_HZ;
+    assign led_sr_44100Hz_o = |io_en && sample_rate == `STREAM_44100_HZ;
+    assign led_sr_88200Hz_o = |io_en && sample_rate == `STREAM_88200_HZ;
+    assign led_sr_176400Hz_o = |io_en && sample_rate == `STREAM_176400_HZ;
+    assign led_sr_352800Hz_o = |io_en && sample_rate == `STREAM_352800_HZ;
 
     // Bit depth LEDs
-    assign led_br_dop = |io_en && bit_depth == `BIT_DEPTH_DOP;
-    assign led_br_16_bit = |io_en && bit_depth == `BIT_DEPTH_16;
-    assign led_br_24_bit = |io_en && bit_depth == `BIT_DEPTH_24;
-    assign led_br_32_bit = |io_en && bit_depth == `BIT_DEPTH_32;
+    assign led_br_dop_o = |io_en && bit_depth == `BIT_DEPTH_DOP;
+    assign led_br_16_bit_o = |io_en && bit_depth == `BIT_DEPTH_16;
+    assign led_br_24_bit_o = |io_en && bit_depth == `BIT_DEPTH_24;
+    assign led_br_32_bit_o = |io_en && bit_depth == `BIT_DEPTH_32;
     // Streaming status LEDs
-    assign led_streaming_spdif = output_streaming_meta_spdif;
-    assign led_streaming_i2s = output_streaming_meta_i2s;
+    assign led_streaming_spdif_o = output_streaming_meta_spdif;
+    assign led_streaming_i2s_o = output_streaming_meta_i2s;
 
     //==================================================================================================================
     // The command handler
