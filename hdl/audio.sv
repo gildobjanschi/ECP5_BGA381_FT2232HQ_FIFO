@@ -107,10 +107,10 @@ module audio (
     // Audio outputs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_4(.B(extension[4]), .T(1'b0), .I(spdif_o));
 
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_6(.B(extension[6]), .T(1'b0), .I(i2s_sdata_o));
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_8(.B(extension[8]), .T(1'b0), .I(i2s_bclk_o));
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_10(.B(extension[10]), .T(1'b0), .I(i2s_lrck_o));
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_12(.B(extension[12]), .T(1'b0), .I(i2s_mclk_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_12(.B(extension[12]), .T(1'b0), .I(i2s_sdata_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_10(.B(extension[10]), .T(1'b0), .I(i2s_bclk_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_8(.B(extension[8]), .T(1'b0), .I(i2s_lrck_o));
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_6(.B(extension[6]), .T(1'b0), .I(i2s_mclk_o));
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_9(.B(extension[9]), .T(1'b0), .I(mute_o));
     assign mute = 1'b0;
