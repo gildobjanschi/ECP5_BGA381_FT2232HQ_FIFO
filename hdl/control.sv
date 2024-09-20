@@ -64,8 +64,7 @@ module control (
     output logic led_streaming_i2s_o,
     // Test point
     output logic tp_control_1_o,
-    output logic tp_control_2_o
-    );
+    output logic tp_control_2_o);
 
     // Assign test points as needed
     assign tp_control_1_o = spdif_rd_output_FIFO_clk;

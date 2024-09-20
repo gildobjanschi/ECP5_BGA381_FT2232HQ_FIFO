@@ -12,7 +12,7 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 -a -b -t <test number> -p <payload length> -c <count of packets> -e <empty cycles> -f <full cycles> -s <clock period> -h [-D <flag>]"
+    echo "Usage: $0 -a -b -t <test number> -p <payload length> -c <count of packets> -e <empty cycles> -f <full cycles> -s <clock period> -u -h [-D <flag>]"
     echo "    -a: Tx board Rev A."
     echo "    -b: Tx board Rev B."
     echo "    -t: Test number (0..2). Test 0: Send from FT2232 to FPGA. Test 1: Send from FT2232 to FPGA and loopback from FPGA. Test 2: Send from FPGA to FT2232."
@@ -21,6 +21,7 @@ helpFunction()
     echo "    -e: Test 1 and 2 only: number of cycles the FT2232 output FIFO is empty (0..255). Default is 0."
     echo "    -f: Test 2 only: number of cycles the FT2232 input FIFO is full (0..255). Default is 0."
     echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690 (24.576MHz)."
+    echo "    -u: Enable UART debugging."
     echo "    -h: Help."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1
@@ -36,31 +37,26 @@ helpFunction()
 # CTRL:         Controller messages.
 # SPDIF:        SPDIF messages.
 OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
-
 BOARD=""
 OUTPUT_FILE=out.sim
-CONTROL_FILE=""
 
-while getopts 'abt:p:c:e:f:s:D:h' opt; do
+while getopts 'abt:p:c:e:f:s:D:uh' opt; do
     case "$opt" in
         a ) BOARD="BOARD_REV_A" ;;
         b ) BOARD="BOARD_REV_B" ;;
         t ) OPTIONS="$OPTIONS -D TEST_MODE -D TEST_NUMBER=${OPTARG}"
-            CONTROL_FILE="test_control.sv" ;;
+            TEST_MODE="yes" ;;
         p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=6'd${OPTARG}" ;;
         c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=8'd${OPTARG}" ;;
         e ) OPTIONS="$OPTIONS -D OUT_EMPTY_CYCLES=8'd${OPTARG}" ;;
         f ) OPTIONS="$OPTIONS -D IN_FULL_CYCLES=8'd${OPTARG}" ;;
         s ) OPTIONS="$OPTIONS -D CLK_PERIOD=${OPTARG}" ;;
+        u ) OPTIONS="$OPTIONS -D ENABLE_UART" ;;
         D ) OPTIONS="$OPTIONS -D ${OPTARG}" ;;
         h ) helpFunction ;;
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
     esac
 done
-
-if test -z "$CONTROL_FILE"; then
-    CONTROL_FILE="control.sv"
-fi
 
 if test -f "$OUTPUT_FILE"; then
     rm $OUTPUT_FILE
@@ -79,8 +75,15 @@ fi
 
 echo $OPTIONS
 
-iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
-            sim_trellis.sv utils.sv divider.sv async_fifo.sv tx_spdif.sv tx_i2s.sv $CONTROL_FILE ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
+if test -z "$TEST_MODE"; then
+    # Normal mode
+    iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
+            sim_trellis.sv uart_tx.sv uart_rx.sv utils.sv divider.sv async_fifo.sv tx_spdif.sv tx_i2s.sv control.sv ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
+else
+    # Test mode
+    iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
+            sim_trellis.sv uart_tx.sv uart_rx.sv utils.sv async_fifo.sv test_control.sv ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
+fi
 if [ $? -eq 0 ]; then
     vvp $OUTPUT_FILE
 fi

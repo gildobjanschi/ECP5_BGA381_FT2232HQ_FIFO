@@ -46,7 +46,28 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
     input logic rd_out_fifo_empty_i,
     output logic led_ft2232_rd_data_o,
     output logic led_ft2232_wr_data_o
+`ifdef ENABLE_UART
+    ,
+    output logic tx_stb_o,
+    output logic [7:0] tx_data_o
+`endif // ENABLE_UART
     );
+
+`ifdef ENABLE_UART
+    logic [7:0] last_uart_data;
+    //==================================================================================================================
+    // Send a byte over UART
+    //==================================================================================================================
+    task send_uart_byte_task (input logic [7:0] tx_byte);
+        if (last_uart_data != tx_byte) begin
+            // Send UART byte
+            tx_stb_o <= 1'b1;
+            tx_data_o <= tx_byte;
+
+            last_uart_data <= tx_byte;
+        end
+    endtask
+`endif // ENABLE_UART
 
     // Reset the FT2232HQ
     assign ft2232_reset_n_o = ~reset_i;
@@ -113,7 +134,18 @@ module ft2232_fifo #(parameter IN_FIFO_ASIZE=4, parameter OUT_FIFO_ASIZE=4)(
 
             led_ft2232_rd_data_o <= 1'b0;
             led_ft2232_wr_data_o <= 1'b0;
+`ifdef ENABLE_UART
+            // Reset the UART
+            tx_stb_o <= 1'b0;
+            last_uart_data <= 8'hff;
+`endif
         end else begin
+`ifdef ENABLE_UART
+            // Reset the UART
+            if (tx_stb_o) tx_stb_o <= 1'b0;
+            // Example of how to send UART data to the host for debugging.
+            send_uart_byte_task (state_m);
+`endif
             case (state_m)
                 STATE_IDLE_RD: begin
                     // Enter this state machine with fifo_oe_n_o = 1'b0.

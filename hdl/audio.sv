@@ -113,10 +113,10 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_6(.B(extension[6]), .T(1'b0), .I(i2s_mclk_o));
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_9(.B(extension[9]), .T(1'b0), .I(mute_o));
-    assign mute = 1'b0;
+    assign mute_o = 1'b0;
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_11(.B(extension[11]), .T(1'b0), .I(dsd_o));
-    assign dsd = 1'b0;
+    assign dsd_o = 1'b0;
 
     // Sample rate LEDs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_32(.B(extension[32]), .T(1'b0), .I(ext_led_sr_48000Hz_o));
@@ -167,6 +167,38 @@ module audio (
     //==================================================================================================================
     // Modules
     //==================================================================================================================
+`ifdef ENABLE_UART
+    // The 60 MHz clock is used as the UART clock.
+    localparam CLK_FREQUENCY_HZ = 60000000;
+    localparam BAUD_RATE_HZ = 3000000;
+    //==================================================================================================================
+    // Instantiate the UART TX
+    //==================================================================================================================
+    logic tx_stb_o;
+    logic [7:0] tx_data_o;
+    uart_tx #(.CLK_FREQUENCY_HZ(CLK_FREQUENCY_HZ), .BAUD_RATE_HZ(BAUD_RATE_HZ), .FIFO_BITS(6)) uart_tx_m (
+        .reset_i        (reset),
+        .clk_i          (fifo_clk),
+        .stb_i          (tx_stb_o),
+        .data_i         (tx_data_o),
+        .led_tx_err_o   (led_uart_tx_overflow),
+        .uart_txd_o     (uart_txd));
+
+    //==================================================================================================================
+    // Instantiate the UART RX
+    //==================================================================================================================
+    logic rx_stb_o;
+    logic [7:0] rx_data_i;
+    uart_rx #(.CLK_FREQUENCY_HZ(CLK_FREQUENCY_HZ), .BAUD_RATE_HZ(BAUD_RATE_HZ), .FIFO_BITS(6)) uart_rx_m (
+        .reset_i        (reset),
+        .clk_i          (fifo_clk),
+        .stb_i          (rx_stb_o),
+        .data_o         (rx_data_i),
+        .led_rx_err_o   (led_uart_rx_overflow),
+        .uart_rxd_i     (uart_rxd));
+
+`endif // ENABLE_UART
+
     // FIFO address sizes.
     localparam IN_FIFO_ASIZE = 6;
     localparam OUT_FIFO_ASIZE = 6;
@@ -179,7 +211,9 @@ module audio (
     logic rd_out_fifo_en, rd_out_fifo_clk, rd_out_fifo_empty;
     logic [7:0] wr_out_fifo_data, rd_out_fifo_data;
 
+    //==================================================================================================================
     // The FIFO used by the FPGA to read from the FT2232 FIFO.
+    //==================================================================================================================
     async_fifo #(.ASIZE(IN_FIFO_ASIZE)) in_async_fifo_m (
         // Write to FIFO
         .wr_reset_i         (reset),
@@ -195,7 +229,9 @@ module audio (
         .rd_data_o          (rd_in_fifo_data),
         .rd_empty_o         (rd_in_fifo_empty));
 
+    //==================================================================================================================
     // The FIFO used by the FPGA to write to the FT2232 FIFO.
+    //==================================================================================================================
     async_fifo #(.ASIZE(OUT_FIFO_ASIZE)) out_async_fifo_m (
         // Write to FIFO
         .wr_reset_i         (reset),
@@ -211,7 +247,9 @@ module audio (
         .rd_data_o          (rd_out_fifo_data),
         .rd_empty_o         (rd_out_fifo_empty));
 
-    // FT2232 FIFO
+    //==================================================================================================================
+    // This module implements the FT2232 synchronous FIFO interface.
+    //==================================================================================================================
     ft2232_fifo #(.IN_FIFO_ASIZE(IN_FIFO_ASIZE), .OUT_FIFO_ASIZE(OUT_FIFO_ASIZE)) ft2232_fifo_m (
         .reset_i            (reset),
         // FT2232HQ FIFO
@@ -237,8 +275,16 @@ module audio (
         .rd_out_fifo_empty_i (rd_out_fifo_empty),
         .led_ft2232_rd_data_o   (ext_led_rd_ft2232_data_o),
         .led_ft2232_wr_data_o   (ext_led_wr_ft2232_data_o)
+`ifdef ENABLE_UART
+        ,
+        .tx_stb_o            (tx_stb_o),
+        .tx_data_o           (tx_data_o)
+`endif // ENABLE_UART
         );
 
+    //==================================================================================================================
+    // The control module sends and receives data from FT2232 using two asynchronous FIFOs.
+    //==================================================================================================================
     // Audio transmission module
     control control_m (
         .reset_i                (reset),

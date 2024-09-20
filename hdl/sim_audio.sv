@@ -71,11 +71,11 @@ module sim_audio;
         .fifo_data              (fifo_data),
 `ifdef ENABLE_UART
         //  UART
-        .ftdi_rxd               (uart_rxd),
-        .ftdi_txd               (uart_txd),
+        .uart_rxd               (uart_rxd),
+        .uart_txd               (uart_txd),
         .led_uart_tx_overflow   (led_uart_tx_overflow),
         .led_uart_rx_overflow   (led_uart_rx_overflow),
-`endif
+`endif // ENABLE_UART
         // Extension
         .extension              (extension),
         // LEDs
