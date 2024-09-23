@@ -38,6 +38,8 @@ while getopts 'abtp:c:uhD:' opt; do
     esac
 done
 
+ OPTIONS="$OPTIONS -D BIG_ENDIAN_SAMPLES"
+
 if test -z "$BOARD"; then
     BOARD="BOARD_REV_A"
 fi

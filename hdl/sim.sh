@@ -36,7 +36,7 @@ helpFunction()
 # FIFO:         Asynchronous FIFO messages.
 # CTRL:         Controller messages.
 # SPDIF:        SPDIF messages.
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
+OPTIONS="-D SIMULATION -D BIG_ENDIAN_SAMPLES -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
 BOARD=""
 OUTPUT_FILE=out.sim
 

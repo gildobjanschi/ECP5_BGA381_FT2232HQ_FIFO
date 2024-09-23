@@ -19,6 +19,7 @@
 
 `include "definitions.svh"
 
+
 module tx_spdif (
     input logic reset_i,
     input logic byte_clk_i,
@@ -125,11 +126,19 @@ module tx_spdif (
                         2'd0: begin
                             if (r_channel_sample) begin
                                 sample_r[31:24] <= 8'h0;
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_r[23:16] <= rd_output_FIFO_data;
+`else
+                                sample_r[15:8] <= rd_output_FIFO_data;
+`endif
                                 parity_r <= ^rd_output_FIFO_data;
                             end else begin
                                 sample_l[31:24] <= 8'h0;
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_l[23:16] <= rd_output_FIFO_data;
+`else
+                                sample_l[15:8] <= rd_output_FIFO_data;
+`endif
                                 parity_l <= ^rd_output_FIFO_data;
                             end
 
@@ -138,10 +147,18 @@ module tx_spdif (
 
                         2'd1: begin
                             if (r_channel_sample) begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_r[15:8] <= rd_output_FIFO_data;
+`else
+                                sample_r[23:16] <= rd_output_FIFO_data;
+`endif
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_l[15:8] <= rd_output_FIFO_data;
+`else
+                                sample_l[23:16] <= rd_output_FIFO_data;
+`endif
                                 sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
@@ -180,10 +197,18 @@ module tx_spdif (
                     case (sample_byte_index)
                         2'd0: begin
                             if (r_channel_sample) begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_r[31:24] <= rd_output_FIFO_data;
+`else
+                                sample_r[15:8] <= rd_output_FIFO_data;
+`endif
                                 parity_r <= ^rd_output_FIFO_data;
                             end else begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_l[31:24] <= rd_output_FIFO_data;
+`else
+                                sample_l[15:8] <= rd_output_FIFO_data;
+`endif
                                 parity_l <= ^rd_output_FIFO_data;
                             end
 
@@ -204,10 +229,18 @@ module tx_spdif (
 
                         2'd2: begin
                             if (r_channel_sample) begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_r[15:8] <= rd_output_FIFO_data;
+`else
+                                sample_r[31:24] <= rd_output_FIFO_data;
+`endif
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
+`ifdef BIG_ENDIAN_SAMPLES
                                 sample_l[15:8] <= rd_output_FIFO_data;
+`else
+                                sample_l[31:24] <= rd_output_FIFO_data;
+`endif
                                 sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 

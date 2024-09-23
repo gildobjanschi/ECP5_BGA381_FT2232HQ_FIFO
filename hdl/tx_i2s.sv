@@ -124,16 +124,24 @@ module tx_i2s (
                 `BIT_DEPTH_16: begin
                     case (sample_byte_index)
                         2'd0: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
-
+`else
+                            if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
+                            else sample_l[7:0] <= rd_output_FIFO_data;
+`endif
                             sample_byte_index <= 2'd1;
                         end
 
                         2'd1: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
-
+`else
+                            if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
+                            else sample_l[15:8] <= rd_output_FIFO_data;
+`endif
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
@@ -150,23 +158,30 @@ module tx_i2s (
                 `BIT_DEPTH_24, `BIT_DEPTH_DOP: begin
                     case (sample_byte_index)
                         2'd0: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
                             else sample_l[23:16] <= rd_output_FIFO_data;
-
+`else
+                            if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
+                            else sample_l[7:0] <= rd_output_FIFO_data;
+`endif
                             sample_byte_index <= 2'd1;
                         end
 
                         2'd1: begin
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
-
                             sample_byte_index <= 2'd2;
                         end
 
                         2'd2: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
-
+`else
+                            if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
+                            else sample_l[23:16] <= rd_output_FIFO_data;
+`endif
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
@@ -184,29 +199,49 @@ module tx_i2s (
                 `BIT_DEPTH_32: begin
                     case (sample_byte_index)
                         2'd0: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[31:24] <= rd_output_FIFO_data;
                             else sample_l[31:24] <= rd_output_FIFO_data;
+`else
+                            if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
+                            else sample_l[7:0] <= rd_output_FIFO_data;
+`endif
 
                             sample_byte_index <= 2'd1;
                         end
 
                         2'd1: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
                             else sample_l[23:16] <= rd_output_FIFO_data;
+`else
+                            if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
+                            else sample_l[15:8] <= rd_output_FIFO_data;
+`endif
 
                             sample_byte_index <= 2'd2;
                         end
 
                         2'd2: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
+`else
+                            if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
+                            else sample_l[23:16] <= rd_output_FIFO_data;
+`endif
 
                             sample_byte_index <= 2'd3;
                         end
 
                         2'd3: begin
+`ifdef BIG_ENDIAN_SAMPLES
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
+`else
+                            if (sample_sel) sample_r[31:24] <= rd_output_FIFO_data;
+                            else sample_l[31:24] <= rd_output_FIFO_data;
+`endif
 
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
