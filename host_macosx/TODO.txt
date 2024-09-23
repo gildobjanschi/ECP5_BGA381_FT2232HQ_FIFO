@@ -1,2 +1,13 @@
-Setup
-1. export DYLD_LIBRARY_PATH=/usr/local/lib
+1. Should the samples be sent in little endian or big endian
+
+
+
+
+    /*
+     * Test reading the file.
+    unsigned int tx_bytes_to_send = 0;
+    unsigned char tx_buffer[TX_BUFFER_SIZE];
+    do {
+        tx_data (fp, wh, output, tx_buffer, &tx_bytes_to_send);
+    } while (tx_bytes_to_send > 0);
+    */

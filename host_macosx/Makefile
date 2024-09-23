@@ -20,8 +20,8 @@ all: $(APP)
 
 test: $(TEST_APP)
 
-$(APP): main.c	
-	$(CC) main.c -o $(APP) $(CFLAGS)
+$(APP): main.c wav_reader.c
+	$(CC) wav_reader.c main.c -o $(APP) $(CFLAGS)
 
 $(TEST_APP): main_test.c
 	$(CC) main_test.c -o $(TEST_APP) $(CFLAGS)

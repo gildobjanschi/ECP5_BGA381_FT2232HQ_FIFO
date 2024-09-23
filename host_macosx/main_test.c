@@ -7,32 +7,37 @@
 #include "ftd2xx.h"
 
 //======================================================================================================================
-BOOL check_rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped);
+BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped);
 BOOL tx_data (int test_number, unsigned char send_payload_length, unsigned int send_packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
 
+//======================================================================================================================
+#define RX_BUFFER_SIZE 64
+
 unsigned int payload_received = 0;
-unsigned int rx_payload_length = 0;
 unsigned char next_rx_value = 0;
+unsigned int rx_payload_length = 0;
 unsigned char last_rx_cmd;
 
 // Commands from the FPGA to the host.
-#define CMD_RX_TEST_DATA          0x40
-#define CMD_RX_TEST_STOPPED       0xc0
+#define CMD_RX_TEST_DATA           0x40
+#define CMD_RX_TEST_STOPPED        0xc0
 
 #define STATE_RX_CMD               1
 #define STATE_RX_STREAM_PAYLOAD    2
 #define STATE_RX_STOPPED_PAYLOAD   3
+#define STATE_RX_DONE              4
 unsigned char rx_state_m = STATE_RX_CMD;
-
-#define RX_BUFFER_SIZE 64
 //======================================================================================================================
+#define TX_BUFFER_SIZE 64
+
 unsigned char next_tx_value = 0;
 unsigned int packets_sent = 0;
+
 // Command byte bits[7:6]. Bits[5:0] represent the length of the frame.
-#define CMD_TX_TEST_START         0x00
-#define CMD_TX_TEST_DATA          0x40
-#define CMD_TX_TEST_STOP          0x80
+#define CMD_TX_TEST_START          0x00
+#define CMD_TX_TEST_DATA           0x40
+#define CMD_TX_TEST_STOP           0x80
 
 
 #define STATE_TX_START_CMD         1
@@ -40,8 +45,6 @@ unsigned int packets_sent = 0;
 #define STATE_TX_STOP_CMD          3
 #define STATE_TX_DONE              4
 unsigned char tx_state_m = STATE_TX_START_CMD;
-
-#define TX_BUFFER_SIZE 64
 //======================================================================================================================
 int main(int argc, char *argv[])
 {
@@ -132,23 +135,23 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            if (FALSE == check_rx_data (rx_buffer, rx_bytes, &rx_stopped)) {
+            if (FALSE == rx_data (rx_buffer, rx_bytes, &rx_stopped)) {
                 FT_Close(ftHandle);
                 return 1;
             }
         }
 
-        /* Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
-         * Synchronous FIFO mode.
-         */
         if (tx_bytes_to_send == 0) {
             tx_data (test_number, send_payload_length, send_packet_count, tx_buffer, &tx_bytes_to_send);
         }
 
+        /* Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
+         * Synchronous FIFO mode.
+         */
         if (tx_bytes_to_send > 0 && 512 - tx_bytes >= tx_bytes_to_send) {
             ftStatus = FT_Write(ftHandle, tx_buffer, tx_bytes_to_send, &tx_bytes_written);
             if (ftStatus != FT_OK || tx_bytes_written != tx_bytes_to_send) {
-                printf("FT_Write FAILED! ftStatus = %d; Bytes to send: %d, Bytes sent: %d\r\n",
+                printf("FT_Write failed! ftStatus = %d; Bytes to send: %d, Bytes sent: %d\r\n",
                                     ftStatus, tx_bytes_to_send, tx_bytes_written);
                 FT_Close(ftHandle);
                 return 1;
@@ -165,7 +168,7 @@ int main(int argc, char *argv[])
 }
 
 //======================================================================================================================
-BOOL check_rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
+BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
     *pStopped = FALSE;
 
     for (unsigned int i = 0; i < rx_bytes; i++) {
@@ -222,10 +225,15 @@ BOOL check_rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStop
                 if (rx_buffer[i] == 0) {
                     printf("===== Test OK =====\r\n");
                 } else {
-                    printf("===== Test FAILED (error code %d) =====\r\n", rx_buffer[i]);
+                    printf("===== Test failed (error code %d) =====\r\n", rx_buffer[i]);
                 }
 
-                rx_state_m = STATE_RX_CMD;
+                rx_state_m = STATE_RX_DONE;
+                *pStopped = TRUE;
+                break;
+            }
+
+            case STATE_RX_DONE: {
                 *pStopped = TRUE;
                 break;
             }
