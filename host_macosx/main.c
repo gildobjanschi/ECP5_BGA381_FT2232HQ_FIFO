@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
         while ((opt = getopt(argc, argv, "f:o:")) != -1) {
             switch (opt) {
                 case 'f': filename = argv[2]; break;
-                case 'o': output = strtol (argv[4], NULL, 10);
+                case 'o': output = strtol (argv[4], NULL, 10); break;
                 default: {
-                    printf("Usage: %s -f file name [-o output 0..3]\r\n", argv[0]);
+                    printf("Usage: %s -f file name [-o output 0..3] (char %c)\r\n", argv[0], opt);
                     return 1;
                 }
             }
@@ -104,7 +104,21 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    /*
+     * Generate a file containg all the commands and audio for the specified wav file which is
+     * used for simulation.
+     */
+    /*
+    unsigned int tx_bytes_to_send_t = 0;
+    unsigned char tx_buffer_t[TX_BUFFER_SIZE];
+    FILE* fpb = fopen("spdif_192000_16bit.bin", "wb");
+    do {
+        tx_data (fp, wh, output, tx_buffer_t, &tx_bytes_to_send_t);
+        fwrite(tx_buffer_t, 1, tx_bytes_to_send_t, fpb);
+    } while (tx_bytes_to_send_t > 0);
 
+    fclose(fpb);
+    */
     ftStatus = FT_Open(0, &ftHandle);
     if(ftStatus != FT_OK) {
         // FT_Open failed return;
