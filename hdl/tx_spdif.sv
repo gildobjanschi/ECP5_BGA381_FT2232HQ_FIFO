@@ -115,7 +115,7 @@ module tx_spdif (
             prev_time <= $time;
             if (~pause_rd_FIFO) begin
                 time_now = $time;
-                $display (time_now, " SPDIF:\tByte: %d | %0d Hz", rd_output_FIFO_data,
+                $display (time_now, " SPDIF:\tByte: %02h | %0d Hz", rd_output_FIFO_data,
                                             1000000000000 / (time_now - prev_time));
             end
 `endif
@@ -152,6 +152,8 @@ module tx_spdif (
 `else
                                 sample_r[23:16] <= rd_output_FIFO_data;
 `endif
+                                // The V, C, U bits are included in the parity calculation but since those bits
+                                // are unused (all 0's) the bits are ignored when it comes to parity.
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
 `ifdef BIG_ENDIAN_SAMPLES
@@ -159,6 +161,8 @@ module tx_spdif (
 `else
                                 sample_l[23:16] <= rd_output_FIFO_data;
 `endif
+                                // The V, C, U bits are included in the parity calculation but since those bits
+                                // are unused (all 0's) the bits are ignored when it comes to parity.
                                 sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
@@ -234,6 +238,8 @@ module tx_spdif (
 `else
                                 sample_r[31:24] <= rd_output_FIFO_data;
 `endif
+                                // The V, C, U bits are included in the parity calculation but since those bits
+                                // are unused (all 0's) the bits are ignored when it comes to parity.
                                 sample_r[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_r, 4'h0};
                             end else begin
 `ifdef BIG_ENDIAN_SAMPLES
@@ -241,6 +247,8 @@ module tx_spdif (
 `else
                                 sample_l[31:24] <= rd_output_FIFO_data;
 `endif
+                                // The V, C, U bits are included in the parity calculation but since those bits
+                                // are unused (all 0's) the bits are ignored when it comes to parity.
                                 sample_l[7:0] <= {1'b0, 1'b0, 1'b0, ^rd_output_FIFO_data ^ parity_l, 4'h0};
                             end
 
@@ -348,7 +356,7 @@ module tx_spdif (
                 TX_SUB_FRAME_BEGIN: begin
                     prev_r_channel_sample <= r_channel_sample;
                     if (prev_r_channel_sample != r_channel_sample) begin
-`ifdef D_SPDIF
+`ifdef D_SPDIF_BC
                         prev_time_bit <= $time;
                         $display ($time,
                                 " SPDIF:\tTX_SUB_FRAME_BEGIN: sub-frame: %h [ctrl: %4b]. PREAMBLE[7] bit: %0d | %0d Hz",
@@ -387,7 +395,7 @@ module tx_spdif (
                         clk_count <= 6'd6;
                         state_m <= TX_PREAMBLE;
                     end else begin
-`ifdef D_SPDIF
+`ifdef D_SPDIF_BC
                         prev_time_bit <= $time;
                         $display ($time, " SPDIF:\tTX_SUB_FRAME_BEGIN: Error -- no data --. | %0d Hz",
                                                     1000000000000 / ($time - prev_time_bit));
@@ -396,7 +404,7 @@ module tx_spdif (
                 end
 
                 TX_PREAMBLE: begin
-`ifdef D_SPDIF
+`ifdef D_SPDIF_BC
                     prev_time_bit <= $time;
                     $display ($time, " SPDIF:\tPREAMBLE[%0d] bit: %h. | %0d Hz", clk_count, preamble[clk_count],
                                                 1000000000000 / ($time - prev_time_bit));
@@ -415,7 +423,7 @@ module tx_spdif (
                 TX_SAMPLE: begin
                     if (clk_count[0]) begin
                         spdif_o <= ~spdif_o;
-`ifdef D_SPDIF
+`ifdef D_SPDIF_BC
                         prev_time_bit <= $time;
                         $display ($time, " SPDIF:\tSAMPLE[%0d] bit: %h. | %0d Hz", bit_index, tx_sample[bit_index],
                                                     1000000000000 / ($time - prev_time_bit));
@@ -441,7 +449,7 @@ module tx_spdif (
                 TX_CONTROL: begin
                     if (clk_count[0]) begin
                         spdif_o <= ~spdif_o;
-`ifdef D_SPDIF
+`ifdef D_SPDIF_BC
                         prev_time_bit <= $time;
                         // Print the index in the control buffer.
                         $display ($time, " SPDIF:\tCONTROL[%0d] bit: %h. | %0d Hz", bit_index,

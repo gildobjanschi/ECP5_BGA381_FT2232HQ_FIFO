@@ -36,7 +36,12 @@ helpFunction()
 # FIFO:         Asynchronous FIFO messages.
 # CTRL:         Controller messages.
 # SPDIF:        SPDIF messages.
-OPTIONS="-D SIMULATION -D BIG_ENDIAN_SAMPLES -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
+# SPDIF_BC:     SPDIF bit clock messages.
+# I2S:          I2S messages.
+# I2S_BC:       I2S bit clock messages.
+# BIG_ENDIAN_SAMPLES    Audio samples received in big endian order.
+#OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_SPDIF_BC -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_SPDIF -D D_I2S -D D_I2S_FRAME"
 BOARD=""
 OUTPUT_FILE=out.sim
 

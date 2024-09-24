@@ -147,9 +147,15 @@ module tx_i2s (
 
                             bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
+`ifdef BIG_ENDIAN_SAMPLES
                             $display ($time, " I2S:\t16-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[15:8] : sample_l[15:8], rd_output_FIFO_data},
                                         1000000000000 / ($time - prev_time));
+`else
+                            $display ($time, " I2S:\t16-bit sample: %h | %0d Hz",
+                                        {rd_output_FIFO_data, sample_sel ? sample_r[7:0] : sample_l[7:0]},
+                                        1000000000000 / ($time - prev_time));
+`endif // BIG_ENDIAN_SAMPLES
 `endif
                         end
                     endcase
@@ -187,9 +193,15 @@ module tx_i2s (
 
                             bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
+`ifdef BIG_ENDIAN_SAMPLES
                             $display ($time, " I2S:\t24-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[23:8] : sample_l[23:8], rd_output_FIFO_data},
                                         1000000000000 / ($time - prev_time));
+`else
+                            $display ($time, " I2S:\t24-bit sample: %h | %0d Hz",
+                                        {rd_output_FIFO_data, sample_sel ? sample_r[15:0] : sample_l[15:0]},
+                                        1000000000000 / ($time - prev_time));
+`endif // BIG_ENDIAN_SAMPLES
 `endif
                         end
                     endcase
@@ -206,7 +218,6 @@ module tx_i2s (
                             if (sample_sel) sample_r[7:0] <= rd_output_FIFO_data;
                             else sample_l[7:0] <= rd_output_FIFO_data;
 `endif
-
                             sample_byte_index <= 2'd1;
                         end
 
@@ -218,7 +229,6 @@ module tx_i2s (
                             if (sample_sel) sample_r[15:8] <= rd_output_FIFO_data;
                             else sample_l[15:8] <= rd_output_FIFO_data;
 `endif
-
                             sample_byte_index <= 2'd2;
                         end
 
@@ -230,7 +240,6 @@ module tx_i2s (
                             if (sample_sel) sample_r[23:16] <= rd_output_FIFO_data;
                             else sample_l[23:16] <= rd_output_FIFO_data;
 `endif
-
                             sample_byte_index <= 2'd3;
                         end
 
@@ -242,15 +251,20 @@ module tx_i2s (
                             if (sample_sel) sample_r[31:24] <= rd_output_FIFO_data;
                             else sample_l[31:24] <= rd_output_FIFO_data;
 `endif
-
                             sample_byte_index <= 2'd0;
                             sample_sel <= ~sample_sel;
 
                             bit_clk_en <= 1'b1;
 `ifdef D_I2S_FRAME
+`ifdef BIG_ENDIAN_SAMPLES
                             $display ($time, " I2S:\t32-bit sample: %h | %0d Hz",
                                         {sample_sel ? sample_r[31:8] : sample_l[31:8], rd_output_FIFO_data},
                                         1000000000000 / ($time - prev_time));
+`else
+                            $display ($time, " I2S:\t32-bit sample: %h | %0d Hz",
+                                        {rd_output_FIFO_data, sample_sel ? sample_r[23:0] : sample_l[23:0]},
+                                        1000000000000 / ($time - prev_time));
+`endif // BIG_ENDIAN_SAMPLES
 `endif
                         end
                     endcase

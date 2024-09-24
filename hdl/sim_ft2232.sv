@@ -73,6 +73,7 @@ module sim_ft2232 (
     logic [7:0] out_packets;
     logic [7:0] out_data;
     logic [7:0] out_empty_cycles;
+    logic [31:0] out_index;
 
     logic [5:0] in_payload_bytes, total_in_payload_bytes;
     logic [1:0] in_last_cmd;
@@ -347,7 +348,58 @@ module sim_ft2232 (
     // Provide a default of 63 bytes.
     localparam DATA_PACKET_PAYLOAD = 6'd60;
 `endif
+    `define DATA_MEMORY 512000
+    // Memory space for sound data needs to be large enough to hold the sound.bin file.
+    logic [7:0] sound_data[0:`DATA_MEMORY - 1];
+    logic [31:0] sound_data_length;
+    initial begin
+        integer fd, bytes_read;
+        logic [7:0] value_1;
 
+        //fd = $fopen("i2s_48000_32bit.bin", "rb");
+        //fd = $fopen("spdif_96000_24bit.bin", "rb");
+        fd = $fopen("spdif_192000_16bit.bin", "rb");
+        if (fd) begin
+            sound_data_length = 0;
+            bytes_read = 1;
+
+            while (bytes_read > 0) begin
+                bytes_read = $fread(value_1, fd, sound_data_length, 1);
+                if (bytes_read == 1) begin
+                    sound_data[sound_data_length] = value_1;
+                    sound_data_length = sound_data_length + 1;
+                    if (sound_data_length >= `DATA_MEMORY) begin
+                        $display ($time, "\033[0;35m FT2232:\tMemory to small to hold sound.bin data. \033[0;0m");
+                        $finish(1);
+                    end
+                end else begin
+                    $display ($time, "\033[0;35m FT2232:\tLoaded sound.bin data: %d. \033[0;0m", sound_data_length);
+                end
+            end
+
+            $fclose(fd);
+        end else begin
+            $display ($time, "\033[0;35m FT2232:\tCannot open sound.bin. \033[0;0m");
+            $finish(1);
+        end
+    end
+
+    //==================================================================================================================
+    // The task that outputs the next byte
+    //==================================================================================================================
+    task output_data_task;
+        if (out_index < sound_data_length) begin
+`ifdef D_FT2232
+            //$display ($time, "\033[0;35m FT2232:\t%d bytes. \033[0;0m", out_index);
+`endif
+            fifo_data_o <= sound_data[out_index];
+            out_index <= out_index + 1;
+        end else begin
+            fifo_rxf_n_o <= 1'b1;
+            out_state_m <= STATE_OUT_IDLE;
+        end
+    endtask
+/*
     //==================================================================================================================
     // The task that outputs the next byte
     //==================================================================================================================
@@ -431,7 +483,7 @@ module sim_ft2232 (
         endcase
 
     endtask
-
+*/
     //==================================================================================================================
     // The task that reads the next byte
     //==================================================================================================================
@@ -579,6 +631,7 @@ module sim_ft2232 (
             in_full_cycles <= IN_FULL_CYCLES;
 
             out_data <= 8'd0;
+            out_index <= 0;
             in_data <= 8'd0;
 
             fifo_txe_n_o <= 1'b0;
