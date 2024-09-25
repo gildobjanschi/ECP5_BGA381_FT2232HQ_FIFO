@@ -107,8 +107,7 @@ int main(int argc, char *argv[])
     FT_Purge(ftHandle, FT_PURGE_RX);
 
     unsigned int EventStatus;
-    unsigned int rx_bytes;
-    unsigned int tx_bytes;
+    unsigned int rx_bytes, tx_bytes;
     unsigned int rx_bytes_received;
     unsigned char rx_buffer[RX_BUFFER_SIZE];
     unsigned char tx_buffer[TX_BUFFER_SIZE];
