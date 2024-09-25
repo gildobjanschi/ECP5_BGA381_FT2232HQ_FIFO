@@ -42,7 +42,7 @@ module control (
     input logic wr_out_fifo_full_i,
     input logic wr_out_fifo_afull_i,
     // LEDs
-    output logic led_app_ctrl_err_o);
+    output logic led_ctrl_err_o);
 
     logic clk;
     assign clk = clk_24576000_i;
@@ -92,7 +92,7 @@ module control (
         (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_TEST_START: begin
-                led_app_ctrl_err_o <= 1'b0;
+                led_ctrl_err_o <= 1'b0;
 
                 if (payload_length == 6'd1) begin
 `ifdef D_CTRL
@@ -377,7 +377,7 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
 `endif
-        led_app_ctrl_err_o <= 1'b1;
+        led_ctrl_err_o <= 1'b1;
 
         state_m <= STATE_WR_BUFFER;
         next_state_m <= STATE_IDLE;
@@ -397,7 +397,7 @@ module control (
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
 
-            led_app_ctrl_err_o <= 1'b0;
+            led_ctrl_err_o <= 1'b0;
         end else begin
             (* parallel_case, full_case *)
             case (state_m)

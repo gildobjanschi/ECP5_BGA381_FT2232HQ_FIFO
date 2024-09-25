@@ -41,12 +41,12 @@ module audio (
     // UART
     input logic uart_rxd,
     output logic uart_txd,
-    output logic led_uart_tx_overflow,
-    output logic led_uart_rx_overflow,
 `endif
     // Extension
     inout logic [45:0] extension,
     // LEDs
+    output logic led_0,
+    output logic led_1,
     output logic led_reset,
     output logic led_user);
 
@@ -54,7 +54,7 @@ module audio (
     logic ext_led_rd_ft2232_data_o, ext_led_ft2232_out_fifo_has_data_o, ext_led_ft2232_in_fifo_is_full_o,
             ext_led_wr_ft2232_data_o;
     logic ext_led_app_out_fifo_wr_o, ext_led_app_out_fifo_full_o, ext_led_app_out_fifo_has_data_o;
-    logic ext_led_app_ctrl_err_o;
+    logic ext_led_ctrl_err_o;
     logic spdif_o, i2s_sdata_o, i2s_bclk_o, i2s_lrck_o, i2s_mclk_o, dsd_o, mute_o;
     logic ext_led_sr_48000Hz_o, ext_led_sr_96000Hz_o, ext_led_sr_192000Hz_o, ext_led_sr_384000Hz_o;
     logic ext_led_sr_44100Hz_o, ext_led_sr_88200Hz_o, ext_led_sr_176400Hz_o, ext_led_sr_352800Hz_o;
@@ -101,8 +101,8 @@ module audio (
     TRELLIS_IO #(.DIR("OUTPUT")) extension_41(.B(extension[41]), .T(1'b0), .I(ext_led_app_out_fifo_has_data_o));
     assign ext_led_app_out_fifo_has_data_o = ~rd_out_fifo_empty;
 
-    // Control
-    TRELLIS_IO #(.DIR("OUTPUT")) extension_29(.B(extension[29]), .T(1'b0), .I(ext_led_app_ctrl_err_o));
+    // Control error LED
+    TRELLIS_IO #(.DIR("OUTPUT")) extension_29(.B(extension[29]), .T(1'b0), .I(ext_led_ctrl_err_o));
 
     // Audio outputs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_4(.B(extension[4]), .T(1'b0), .I(spdif_o));
@@ -144,11 +144,14 @@ module audio (
 
 `endif
 
-`ifdef TEST_MODE
-    assign led_user = 1'b1;
-`else
-    assign led_user = 1'b0;
+    // If the extension board is not present see Control module errors on led_user
+    assign led_user = ext_led_ctrl_err_o;
+`ifndef ENABLE_UART
+    // If UART is not using LED 0 and 1 use LED 0 for control errors (if extension board is not present).
+    assign led_0 = ext_led_rd_ft2232_data_o;
+    assign led_1 = ext_led_wr_ft2232_data_o;
 `endif
+
     //==================================================================================================================
     // Definitions
     //==================================================================================================================
@@ -181,7 +184,7 @@ module audio (
         .clk_i          (fifo_clk),
         .stb_i          (tx_stb_o),
         .data_i         (tx_data_o),
-        .led_tx_err_o   (led_uart_tx_overflow),
+        .led_tx_err_o   (led_1),
         .uart_txd_o     (uart_txd));
 
     //==================================================================================================================
@@ -194,7 +197,7 @@ module audio (
         .clk_i          (fifo_clk),
         .stb_i          (rx_stb_o),
         .data_o         (rx_data_i),
-        .led_rx_err_o   (led_uart_rx_overflow),
+        .led_rx_err_o   (led_0),
         .uart_rxd_i     (uart_rxd));
 
 `endif // ENABLE_UART
@@ -301,7 +304,7 @@ module audio (
         .wr_out_fifo_full_i     (wr_out_fifo_full),
         .wr_out_fifo_afull_i    (wr_out_fifo_afull),
         .wr_out_fifo_data_o     (wr_out_fifo_data),
-        .led_app_ctrl_err_o     (ext_led_app_ctrl_err_o)
+        .led_ctrl_err_o         (ext_led_ctrl_err_o)
 `ifndef TEST_MODE
         ,
         // Audio ouputs

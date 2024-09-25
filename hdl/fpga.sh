@@ -49,8 +49,8 @@ fi
 #
 if [ "$BOARD" = "BOARD_REV_A" ] ; then
     echo "Running on Rev A board."
-    # Add board specific options
-    OPTIONS="$OPTIONS -D EXT_A_ENABLED"
+    # Enable EXT_A_ENABLED when you have the board
+    #OPTIONS="$OPTIONS -D EXT_A_ENABLED"
     LPF_FILE="audio_tx_rev_A.lpf"
     SPEED="6"
 else if [ "$BOARD" = "BOARD_REV_B" ] ; then

@@ -39,7 +39,7 @@ module control (
     output logic [7:0] wr_out_fifo_data_o,
     input logic wr_out_fifo_full_i,
     input logic wr_out_fifo_afull_i,
-    output logic led_app_ctrl_err_o,
+    output logic led_ctrl_err_o,
     output logic spdif_o,
     output logic i2s_sdata_o,
     output logic i2s_bclk_o,
@@ -526,7 +526,7 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== ERROR [code: %d] ====. \033[0;0m", error);
 `endif
-        led_app_ctrl_err_o <= 1'b1;
+        led_ctrl_err_o <= 1'b1;
 
         wr_data_index <= 6'd0;
         wr_data[0] <= {`CMD_STOPPED, 6'h1};
@@ -607,7 +607,7 @@ module control (
 
             state_m <= STATE_RD;
             fifo_state_m <= STATE_FIFO_CMD;
-            led_app_ctrl_err_o <= 1'b0;
+            led_ctrl_err_o <= 1'b0;
         end else begin
             wr_output_en <= 1'b0;
 

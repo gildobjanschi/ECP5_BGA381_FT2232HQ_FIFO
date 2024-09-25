@@ -47,7 +47,7 @@ module sim_audio;
 `ifdef ENABLE_UART
     logic uart_rxd, uart_txd;
 `endif
-    logic led_uart_tx_overflow, led_uart_rx_overflow, led_reset, led_user;
+    logic led_0, led_1, led_reset, led_user;
     logic [45:0] extension;
 
     //==================================================================================================================
@@ -73,12 +73,12 @@ module sim_audio;
         //  UART
         .uart_rxd               (uart_rxd),
         .uart_txd               (uart_txd),
-        .led_uart_tx_overflow   (led_uart_tx_overflow),
-        .led_uart_rx_overflow   (led_uart_rx_overflow),
 `endif // ENABLE_UART
         // Extension
         .extension              (extension),
         // LEDs
+        .led_0                  (led_0),
+        .led_1                  (led_1),
         .led_reset              (led_reset),
         .led_user               (led_user));
 
