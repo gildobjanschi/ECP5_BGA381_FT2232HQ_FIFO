@@ -144,7 +144,9 @@ module audio (
 
 `endif
 
-    // If the extension board is not present see Control module errors on led_user
+    //==================================================================================================================
+    // Assign main board LEDs
+    //==================================================================================================================
     assign led_user = ext_led_ctrl_err_o;
 `ifndef ENABLE_UART
     // If UART is not using LED 0 and 1 use LED 0 for control errors (if extension board is not present).
