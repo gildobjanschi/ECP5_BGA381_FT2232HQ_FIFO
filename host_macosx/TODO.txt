@@ -1,4 +1,17 @@
+Bring up plan:
+1. Use FT_PROG to program the board in 245 FIFO mode
+2. Build the HDL:
+./fpga.sh -t -p 1 -c 1
 
+2. Execute basic test:
+    ./ft2232_test -t 0 -p 1 -c 1
+    ./ft2232_test -t 1 -p 1 -c 1
+    ./ft2232_test -t 2
+3. Increase the complexity with larger payloads (-p 63)
+4. Send many packets for the above tests (-c 255 and higher).
+
+5. Run the audio playback
+6. Validate with a measuring tool or with a DAC & amp
 
 
     unsigned int tx_bytes_to_send_t = 0;
