@@ -149,7 +149,7 @@ module audio (
     //==================================================================================================================
     assign led_user = ext_led_ctrl_err_o;
 `ifndef ENABLE_UART
-    // If UART is not using LED 0 and 1 use LED 0 for control errors (if extension board is not present).
+    // If UART is not using LED 0 and 1 use LED 0 for FIFO rd/wr status.
     assign led_0 = ext_led_rd_ft2232_data_o;
     assign led_1 = ext_led_wr_ft2232_data_o;
 `endif
