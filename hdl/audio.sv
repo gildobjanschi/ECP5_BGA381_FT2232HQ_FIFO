@@ -116,7 +116,6 @@ module audio (
     assign mute_o = 1'b0;
 
     TRELLIS_IO #(.DIR("OUTPUT")) extension_11(.B(extension[11]), .T(1'b0), .I(dsd_o));
-    assign dsd_o = 1'b0;
 
     // Sample rate LEDs
     TRELLIS_IO #(.DIR("OUTPUT")) extension_32(.B(extension[32]), .T(1'b0), .I(ext_led_sr_48000Hz_o));
@@ -315,6 +314,7 @@ module audio (
         .i2s_bclk_o               (i2s_bclk_o),
         .i2s_lrck_o               (i2s_lrck_o),
         .i2s_mclk_o               (i2s_mclk_o),
+        .dsd_o                    (dsd_o),
         // Sample rate LEDs
         .led_sr_48000Hz_o         (ext_led_sr_48000Hz_o),
         .led_sr_96000Hz_o         (ext_led_sr_96000Hz_o),

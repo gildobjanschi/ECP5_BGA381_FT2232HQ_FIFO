@@ -45,6 +45,7 @@ module control (
     output logic i2s_bclk_o,
     output logic i2s_lrck_o,
     output logic i2s_mclk_o,
+    output logic dsd_o,
     // Sample rate LEDs
     output logic led_sr_48000Hz_o,
     output logic led_sr_96000Hz_o,
@@ -378,7 +379,8 @@ module control (
         .sdata_o                (i2s_sdata_o),
         .bclk_o                 (i2s_bclk_o),
         .lrck_o                 (i2s_lrck_o),
-        .mclk_o                 (i2s_mclk_o));
+        .mclk_o                 (i2s_mclk_o),
+        .dsd_o                  (dsd_o));
 
     logic output_streaming_meta_spdif, output_streaming_meta_i2s;
     DFF_META streaming_spdif_m (1'b0, output_streaming_spdif, clk, output_streaming_meta_spdif);

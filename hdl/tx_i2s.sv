@@ -38,7 +38,8 @@ module tx_i2s (
     output logic sdata_o,
     output logic bclk_o,
     output logic lrck_o,
-    output logic mclk_o);
+    output logic mclk_o,
+    output logic dsd_o);
 
     assign bclk_o = bit_clk_en ? bit_clk_i : 1'b1;
     assign mclk_o = bit_clk_en ? mclk_i : 1'b0;
@@ -94,6 +95,7 @@ module tx_i2s (
         sample_sel <= 1'b0;
         sample_byte_index <= 2'd0;
         stream_stopping_clocks <= 3'd0;
+        dsd_o <= 1'b0;
     endtask
 
     //==================================================================================================================
@@ -157,6 +159,7 @@ module tx_i2s (
                                         1000000000000 / ($time - prev_time));
 `endif // BIG_ENDIAN_SAMPLES
 `endif
+                            dsd_o <= 1'b0;
                         end
                     endcase
                 end
@@ -203,6 +206,7 @@ module tx_i2s (
                                         1000000000000 / ($time - prev_time));
 `endif // BIG_ENDIAN_SAMPLES
 `endif
+                            dsd_o <= bit_depth_i == `BIT_DEPTH_DOP;
                         end
                     endcase
                 end
@@ -266,6 +270,7 @@ module tx_i2s (
                                         1000000000000 / ($time - prev_time));
 `endif // BIG_ENDIAN_SAMPLES
 `endif
+                            dsd_o <= 1'b0;
                         end
                     endcase
                 end

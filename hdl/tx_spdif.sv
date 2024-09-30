@@ -197,7 +197,7 @@ module tx_spdif (
                     endcase
                 end
 
-                `BIT_DEPTH_24: begin
+                `BIT_DEPTH_24, `BIT_DEPTH_DOP: begin
                     case (sample_byte_index)
                         2'd0: begin
                             if (r_channel_sample) begin
@@ -279,8 +279,8 @@ module tx_spdif (
                     endcase
                 end
 
-                `BIT_DEPTH_32, `BIT_DEPTH_DOP: begin
-                    // Invalid cases
+                `BIT_DEPTH_32: begin
+                    // Invalid case
                 end
             endcase
         end else if (~rd_output_FIFO_empty) begin
