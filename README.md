@@ -5,7 +5,7 @@ This project aims to implement a High Speed USB device using the Lattice Semicon
 The Verilog software is located in the [/hdl](https://github.com/gildobjanschi/ECP5_BGA381_FT2232HQ_FIFO/tree/main/hdl) directory. The host application that interfaces to the D2XX FTDI driver can be found in the [/host_macosx](https://github.com/gildobjanschi/ECP5_BGA381_FT2232HQ_FIFO/tree/main/host_macosx) directory.
 
 ## Project Status
-The board should be back from manufacturing at PCBWay on Oct. 24th 2024.
+The board is back from manufacturing at PCBWay and it is functional. Read all the details of the bringup steps and testing in the [Wiki](https://github.com/gildobjanschi/ECP5_BGA381_FT2232HQ_FIFO/wiki).
 
 [Schematic PDF](https://github.com/gildobjanschi/ECP5_BGA381_FT2232HQ_FIFO/blob/main/kicad/ECP5.pdf)
 
