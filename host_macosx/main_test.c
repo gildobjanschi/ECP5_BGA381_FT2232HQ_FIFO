@@ -77,6 +77,12 @@ int main(int argc, char *argv[])
     printf("Test number: %d, send payload length: %d, packet count: %d\r\n",
                             test_number, send_payload_length, send_packet_count);
 
+    ftStatus = FT_SetVIDPID(0x1403, 0x6010);
+    if(ftStatus != FT_OK) {
+        printf("FT_SetVIDPID failed! %d\r\n", ftStatus);
+        return 1;
+    }
+
     ftStatus = FT_Open(0, &ftHandle);
     if(ftStatus != FT_OK) {
         printf("FT_Open failed! %d\r\n", ftStatus);
@@ -179,23 +185,19 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
                 rx_payload_length = rx_buffer[i] & 0x3f;
                 switch (last_rx_cmd) {
                     case CMD_RX_TEST_DATA: {
-                        printf("CMD_RX_TEST_DATA with payload: %d\r\n", rx_payload_length);
+                        printf("CMD_RX_TEST_DATA with payload: %d bytes\r\n", rx_payload_length);
                         rx_state_m = STATE_RX_STREAM_PAYLOAD;
                         break;
                     }
 
                     case CMD_RX_TEST_STOPPED: {
-                        printf("CMD_RX_TEST_STOPPED with payload: %d\r\n", rx_payload_length);
-                        if (rx_payload_length != 1) {
-                            return FALSE;
-                        } else {
-                            rx_state_m = STATE_RX_STOPPED_PAYLOAD;
-                        }
+                        printf("CMD_RX_TEST_STOPPED with payload: %d bytes\r\n", rx_payload_length);
+                        rx_state_m = STATE_RX_STOPPED_PAYLOAD;
                         break;
                     }
 
                     default: {
-                        printf("Bad command: %d with payload: %d\r\n", last_rx_cmd, rx_payload_length);
+                        printf("Bad command: %d with payload: %d bytes\r\n", last_rx_cmd, rx_payload_length);
                         return FALSE;
                     }
                 }
@@ -220,15 +222,20 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
             }
 
             case STATE_RX_STOPPED_PAYLOAD: {
-                printf("STATE_RX_STOPPED_PAYLOAD. Error code: %d\r\n", rx_buffer[i]);
-                if (rx_buffer[i] == 0) {
-                    printf("===== Test OK =====\r\n");
-                } else {
-                    printf("===== Test failed (error code %d) =====\r\n", rx_buffer[i]);
+                printf("STATE_RX_STOPPED_PAYLOAD [%d]: %x\r\n", payload_received, rx_buffer[i]);
+                if (payload_received == 0) {
+                    if (rx_buffer[i] == 0) {
+                        printf("===== Test OK =====\r\n");
+                    } else {
+                        printf("===== Test failed (error code %d) =====\r\n", rx_buffer[i]);
+                    }
                 }
 
-                rx_state_m = STATE_RX_DONE;
-                *pStopped = TRUE;
+                payload_received += 1;
+                if (payload_received == rx_payload_length) {
+                    rx_state_m = STATE_RX_DONE;
+                    *pStopped = TRUE;
+                }
                 break;
             }
 
@@ -288,8 +295,24 @@ BOOL tx_data (int test_number, unsigned char send_payload_length, unsigned int s
                 break;
             }
         }
+    } else if (test_number == 2) {
+        switch (tx_state_m) {
+            case STATE_TX_START_CMD: {
+                tx_buffer[0] = CMD_TX_TEST_START | 1;
+                tx_buffer[1] = test_number;
+
+                *tx_bytes_to_send = 2;
+
+                tx_state_m = STATE_TX_DONE;
+                break;
+            }
+
+            default: {
+                // For test 2 there is no data to send.
+                *tx_bytes_to_send = 0;
+            }
+        }
     } else {
-        // For test 2 there is no data to send.
         *tx_bytes_to_send = 0;
     }
 

@@ -106,8 +106,10 @@ module control (
                                     payload_length);
 `endif
                     wr_data_index <= 6'd0;
-                    wr_data[0] <= {`CMD_TEST_STOPPED, 6'h1};
+                    wr_data[0] <= {`CMD_TEST_STOPPED, 6'h2};
                     wr_data[1] <= `TEST_ERROR_INVALID_START_PAYLOAD;
+                    // Send back what you received.
+                    wr_data[2] <= {fifo_cmd, payload_length};
 
                     test_fail_task;
 

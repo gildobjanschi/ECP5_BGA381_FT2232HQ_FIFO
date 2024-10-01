@@ -21,7 +21,7 @@ helpFunction()
 BOARD=""
 LPF_FILE=""
 SPEED=""
-TRELLISD_DB="/Users/virgildobjanschi/tools-oss-cad-suite-0.1.0/share/trellis/database"
+TRELLISD_DB="/home/gil/tools-oss-cad-suite-0.1.0/share/trellis/database"
 
 while getopts 'abtp:c:uhD:' opt; do
     case "$opt" in
