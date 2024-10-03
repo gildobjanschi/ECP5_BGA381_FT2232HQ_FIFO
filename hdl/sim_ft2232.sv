@@ -619,6 +619,8 @@ module sim_ft2232 (
         endcase
     endtask
 `endif
+
+    logic first_val;
     //==================================================================================================================
     // The FT2232 simulation
     //==================================================================================================================
@@ -629,6 +631,7 @@ module sim_ft2232 (
 
             out_empty_cycles <= OUT_EMPTY_CYCLES;
             in_full_cycles <= IN_FULL_CYCLES;
+            first_val <= 1'b1;
 
             out_data <= 8'd0;
             out_index <= 0;
@@ -644,7 +647,12 @@ module sim_ft2232 (
             if (~fifo_rxf_n_o) begin
                 if (~fifo_oe_n_i) begin
                     if (~fifo_rd_n_i) begin
-                        output_data_task (~fifo_rd_n_i);
+                        output_data_task;
+                    end else begin
+                        if (first_val) begin
+                            output_data_task;
+                            first_val <= 1'b0;
+                        end
                     end
                 end
             end else if (out_state_m != STATE_OUT_IDLE) begin

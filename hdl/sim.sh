@@ -41,7 +41,7 @@ helpFunction()
 # I2S_BC:       I2S bit clock messages.
 # BIG_ENDIAN_SAMPLES    Audio samples received in big endian order.
 #OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_FT_FIFO -D D_CTRL -D D_SPDIF -D D_SPDIF_BC -D D_I2S -D D_I2S_FRAME -D D_I2S_BC"
-OPTIONS="-D SIMULATION -D D_FT2232 -D D_CORE -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME"
+OPTIONS="-D SIMULATION -D D_FT2232 -D D_FT_FIFO -D D_CORE -D D_CTRL -D D_SPDIF -D D_I2S -D D_I2S_FRAME"
 BOARD=""
 OUTPUT_FILE=out.sim
 
@@ -87,7 +87,7 @@ if test -z "$TEST_MODE"; then
 else
     # Test mode
     iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
-            sim_trellis.sv uart_tx.sv uart_rx.sv utils.sv async_fifo.sv test_control.sv ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
+            sim_trellis.sv uart_tx.sv uart_rx.sv utils.sv async_fifo.sv test_ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
 fi
 if [ $? -eq 0 ]; then
     vvp $OUTPUT_FILE
