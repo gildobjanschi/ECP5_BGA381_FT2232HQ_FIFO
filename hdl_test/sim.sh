@@ -4,8 +4,6 @@
 # Use -D SIMULATION to enable simulation.
 # Use -D D_CORE, D_CORE_FINE for core and trap debug messages
 # Use -D GENERATE_VCD to generate a waveform file for GtkWave
-#
-# Note that all the -D flags above only apply if SIMULATION is enabled. For sythesis none of this flags are used.
 ########################################################################################################################
 #!/usr/bin/bash)
 
@@ -52,9 +50,6 @@ if test -z "$BOARD"; then
     BOARD="BOARD_REV_A"
 fi
 
-echo $OPTIONS
-
-# Test mode
 iverilog -g2005-sv -D $BOARD $OPTIONS -o $OUTPUT_FILE \
         sim_trellis.sv utils.sv test_ft2232_fifo.sv audio.sv sim_ft2232.sv sim_audio.sv
 

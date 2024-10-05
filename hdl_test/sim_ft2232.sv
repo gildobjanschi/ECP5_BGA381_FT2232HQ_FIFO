@@ -101,7 +101,7 @@ module sim_ft2232 (
 `endif
             if (in_data == `DATA_BYTES_TO_SEND - 1) begin
 `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\t==== Test successfull. Received %d bytes. \033[0;0m",
+                $display ($time, "\033[0;35m FT2232:\t==== Test successful. Received %d bytes. \033[0;0m",
                                 `DATA_BYTES_TO_SEND);
 `endif
             end

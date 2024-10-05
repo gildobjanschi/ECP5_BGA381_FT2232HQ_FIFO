@@ -21,44 +21,41 @@
 #include "ftd2xx.h"
 
 //======================================================================================================================
-BOOL rx_data (unsigned int send_bytes, unsigned char* rx_buffer, unsigned int rx_bytes);
-BOOL tx_data (unsigned int send_bytes, unsigned int packet_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
+BOOL rx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned char* rx_buffer, unsigned int rx_bytes);
+BOOL tx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned char* tx_buffer,
+                    unsigned int* tx_bytes_to_send);
 
 //======================================================================================================================
-#define RX_BUFFER_SIZE 256
+#define RX_BUFFER_SIZE 512
 unsigned int bytes_received = 0;
 //======================================================================================================================
-#define TX_BUFFER_SIZE 256
+#define TX_BUFFER_SIZE 512
 unsigned char out_data = 0;
 unsigned char in_data = 0;
 BOOL run_test = TRUE;
-unsigned int bytes_sent = 0;
+unsigned int packets_sent = 0;
 //======================================================================================================================
 int main(int argc, char *argv[]) {
     int opt;
-    unsigned int send_bytes = 1;
+    unsigned int packet_count = 1;
     unsigned int packet_bytes = 1;
     if (argc <= 1) {
-        printf("Usage: %s [-c count of bytes -p bytes per packet]\r\n", argv[0]);
+        printf("Usage: %s [-p <bytes per packet> -c <count of packets>]\r\n", argv[0]);
         return 1;
     } else {
         while ((opt = getopt(argc, argv, "c:p:")) != -1) {
             switch (opt) {
-                case 'c': send_bytes = strtol (argv[2], NULL, 10); break;
+                case 'c': packet_count = strtol (argv[2], NULL, 10); break;
                 case 'p': packet_bytes = strtol (argv[4], NULL, 10); break;
                 default: {
-                    printf("Usage: %s [-c count of bytes -p bytes per packet]\r\n", argv[0]);
+                    printf("Usage: %s [-p <bytes per packet> -c <count of packets>]\r\n", argv[0]);
                     return 1;
                 }
             }
         }
     }
 
-    printf("Send bytes: %d, packet bytes: %d\r\n", send_bytes, packet_bytes);
-    if (send_bytes < packet_bytes) {
-        printf("Send bytes < packet bytes\r\n");
-        return 1;
-    }
+    printf("Packet count: %d, packet bytes: %d\r\n", packet_count, packet_bytes);
     if (packet_bytes > TX_BUFFER_SIZE) {
         printf("Packet size > TX_BUFFER_SIZE (%d)\r\n", TX_BUFFER_SIZE);
         return 1;
@@ -129,21 +126,21 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
 
-            if (FALSE == rx_data (send_bytes, rx_buffer, rx_bytes)) {
+            if (FALSE == rx_data (packet_count, packet_bytes, rx_buffer, rx_bytes)) {
                 FT_Close(ftHandle);
                 return 1;
             }
         }
 
         if (tx_bytes_to_send == 0) {
-            tx_data (send_bytes, packet_bytes, tx_buffer, &tx_bytes_to_send);
+            tx_data (packet_count, packet_bytes, tx_buffer, &tx_bytes_to_send);
         }
 
         // Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
         // Synchronous FIFO mode.
         if (tx_bytes_to_send > 0 && 512 - tx_bytes >= tx_bytes_to_send) {
             ftStatus = FT_Write(ftHandle, tx_buffer, tx_bytes_to_send, &tx_bytes_written);
-            //printf("WR: %d\r\n", tx_bytes_written);
+            printf("WR: %d\r\n", tx_bytes_written);
             if (ftStatus != FT_OK || tx_bytes_written != tx_bytes_to_send) {
                 printf("FT_Write failed! ftStatus = %d; Bytes to send: %d, Bytes sent: %d\r\n",
                                     ftStatus, tx_bytes_to_send, tx_bytes_written);
@@ -162,7 +159,7 @@ int main(int argc, char *argv[]) {
 }
 
 //======================================================================================================================
-BOOL rx_data (unsigned int send_bytes, unsigned char* rx_buffer, unsigned int rx_bytes) {
+BOOL rx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned char* rx_buffer, unsigned int rx_bytes) {
     for (unsigned int i = 0; i < rx_bytes; i++) {
         if (rx_buffer[i] == in_data) {
             //printf("Recv: %d\r\n", rx_buffer[i]);
@@ -173,17 +170,18 @@ BOOL rx_data (unsigned int send_bytes, unsigned char* rx_buffer, unsigned int rx
         in_data += 1;
     }
     bytes_received += rx_bytes;
-    //printf("Recv: %d of %d\r\n", bytes_received, send_bytes);
+    printf("RD: %d of %d\r\n", bytes_received, packet_count * packet_bytes);
 
-    if (bytes_received == send_bytes) {
-        printf("==== Test successfull ====\r\n");
+    if (bytes_received == packet_count * packet_bytes) {
+        printf("==== Test successful ====\r\n");
         return FALSE;
     }
     return TRUE;
 }
 
 //======================================================================================================================
-BOOL tx_data (unsigned int send_bytes, unsigned int packet_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send) {
+BOOL tx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned char* tx_buffer,
+                    unsigned int* tx_bytes_to_send) {
     if (run_test) {
         for (unsigned int i = 0; i < packet_bytes; i++) {
             tx_buffer[i] = out_data;
@@ -193,12 +191,12 @@ BOOL tx_data (unsigned int send_bytes, unsigned int packet_bytes, unsigned char*
         }
 
         *tx_bytes_to_send = packet_bytes;
-        bytes_sent += packet_bytes;
+        packets_sent += 1;
 
-        if (bytes_sent >= send_bytes) {
+        if (packets_sent == packet_count) {
             // Done sending data
             run_test = FALSE;
-            printf("Done sending %d bytes\r\n", send_bytes);
+            printf("Done sending %d packets\r\n", packet_count);
         }
     } else {
         *tx_bytes_to_send = 0;
