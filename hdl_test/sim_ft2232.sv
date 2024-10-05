@@ -63,7 +63,7 @@ module sim_ft2232 (
     TRELLIS_IO #(.DIR("BIDIR")) fifo_d_io[7:0] (.B(fifo_data_io), .T(fifo_oe_n_i), .O(fifo_data_i), .I(fifo_data_o));
 
     logic [7:0] out_data, in_data;
-    logic send_data;
+    logic send_data, start_sending_data;
 
 `ifndef DATA_BYTES_TO_SEND
 `define DATA_BYTES_TO_SEND 1
@@ -73,24 +73,22 @@ module sim_ft2232 (
     // The task that outputs the next byte
     //==================================================================================================================
     task output_data_task;
-        if (send_data) begin
-    `ifdef D_FT2232
-            $display ($time, "\033[0;35m FT2232:\t---> Sending: %d. \033[0;0m", out_data);
-    `endif
-            fifo_data_o <= out_data;
-            out_data = out_data + 8'd1;
+`ifdef D_FT2232
+        $display ($time, "\033[0;35m FT2232:\t---> Sending: %d. \033[0;0m", out_data);
+`endif
+        fifo_data_o <= out_data;
+        out_data = out_data + 8'd1;
 
-            if (out_data == `DATA_BYTES_TO_SEND) begin
-                // Stop sending data
-                send_data <= 1'b0;
-    `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\tDone sending. \033[0;0m");
-    `endif
-            end
-        end else begin
+        if (out_data == `DATA_BYTES_TO_SEND) begin
             // Stop sending data
-            fifo_rxf_n_o <= 1'b1;
+            send_data <= 1'b0;
+`ifdef D_FT2232
+            $display ($time, "\033[0;35m FT2232:\tDone sending. \033[0;0m");
+`endif
         end
+
+        // There is data in the FIFO
+        fifo_rxf_n_o <= 1'b0;
     endtask
 
     //==================================================================================================================
@@ -101,6 +99,12 @@ module sim_ft2232 (
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t<--- Received: %d. \033[0;0m", fifo_data_i);
 `endif
+            if (in_data == `DATA_BYTES_TO_SEND - 1) begin
+`ifdef D_FT2232
+                $display ($time, "\033[0;35m FT2232:\t==== Test successfull. Received %d bytes. \033[0;0m",
+                                `DATA_BYTES_TO_SEND);
+`endif
+            end
         end else begin
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t<--- Received: %d; expected :%d. \033[0;0m", fifo_data_i, in_data);
@@ -122,6 +126,7 @@ module sim_ft2232 (
             out_data <= 8'd0;
             in_data <= 8'd0;
             send_data <= 1'b1;
+            start_sending_data <= 1'b1;
 
             fifo_txe_n_o <= 1'b0;
             fifo_rxf_n_o <= 1'b1;
@@ -130,15 +135,20 @@ module sim_ft2232 (
             $display ($time, "\033[0;35m FT2232:\t-- Reset. \033[0;0m");
 `endif
         end else begin
-            if (~fifo_rxf_n_o) begin
-                if (~fifo_oe_n_i) begin
-                    if (~fifo_rd_n_i) begin
+            if (start_sending_data) begin
+                output_data_task;
+                start_sending_data <= 1'b0;
+            end
+
+            if (~fifo_oe_n_i) begin
+                if (~fifo_rd_n_i) begin
+                    if (send_data) begin
                         output_data_task;
+                    end else begin
+                        // Stop sending data
+                        fifo_rxf_n_o <= 1'b1;
                     end
                 end
-            end else begin
-                fifo_data_o <= 0;
-                fifo_rxf_n_o <= 1'b0;
             end
 
             if (~fifo_txe_n_o) begin
