@@ -80,8 +80,7 @@ module audio (
         .fifo_data_io       (fifo_data),
         // LEDs
         .led_ft2232_rd_data_o   (led_0),
-        .led_ft2232_wr_data_o   (led_1)
-        );
+        .led_ft2232_wr_data_o   (led_1));
 
     logic btn_reset_meta;
     DFF_META fpga_reset_meta_m (1'b0, btn_reset, clk, btn_reset_meta);
@@ -143,11 +142,7 @@ module audio (
 
             STATE_RESET_WAIT_FOR_BTN_RELEASE: begin
                 // If the Reset button is still pressed remain in this state machine.
-`ifdef EXT_A_ENABLED
-                if (~btn_reset_meta || ext_btn_reset_meta) begin
-`else
                 if (~btn_reset_meta) begin
-`endif
                     reset_state_m <= STATE_RESET_IN_PROGRESS;
                     reset_clks <= RESET_CLKS;
                 end else begin

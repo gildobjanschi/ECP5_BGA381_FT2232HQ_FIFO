@@ -21141,7 +21141,7 @@
       "attributes": {
         "hdlname": "\\audio",
         "top": "00000000000000000000000000000001",
-        "src": "audio.sv:24.1-181.10"
+        "src": "audio.sv:24.1-176.10"
       },
       "ports": {
         "btn_reset": {
@@ -21194,15 +21194,15 @@
         },
         "led_0": {
           "direction": "output",
-          "bits": [ 20 ]
+          "bits": [ 7 ]
         },
         "led_1": {
           "direction": "output",
-          "bits": [ 21 ]
+          "bits": [ 6 ]
         },
         "led_reset": {
           "direction": "output",
-          "bits": [ 22 ]
+          "bits": [ 20 ]
         },
         "led_user": {
           "direction": "output",
@@ -21210,7 +21210,7 @@
         }
       },
       "cells": {
-        "fifo_rxf_n_LUT4_B": {
+        "fifo_rxf_n_LUT4_A": {
           "hide_name": 0,
           "type": "LUT4",
           "parameters": {
@@ -21228,14 +21228,14 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 23 ],
-            "B": [ 7 ],
-            "C": [ 24 ],
-            "D": [ 25 ],
-            "Z": [ 26 ]
+            "A": [ 7 ],
+            "B": [ 21 ],
+            "C": [ 22 ],
+            "D": [ 23 ],
+            "Z": [ 24 ]
           }
         },
-        "fifo_rxf_n_LUT4_B_1": {
+        "fifo_rxf_n_LUT4_A_1": {
           "hide_name": 0,
           "type": "LUT4",
           "parameters": {
@@ -21253,11 +21253,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 23 ],
-            "B": [ 7 ],
-            "C": [ 25 ],
-            "D": [ 24 ],
-            "Z": [ 27 ]
+            "A": [ 7 ],
+            "B": [ 21 ],
+            "C": [ 23 ],
+            "D": [ 22 ],
+            "Z": [ 25 ]
           }
         },
         "fifo_rxf_n_LUT4_C": {
@@ -21279,10 +21279,10 @@
           },
           "connections": {
             "A": [ "0" ],
-            "B": [ 23 ],
+            "B": [ 21 ],
             "C": [ 7 ],
-            "D": [ 24 ],
-            "Z": [ 28 ]
+            "D": [ 22 ],
+            "Z": [ 26 ]
           }
         },
         "fifo_txe_n_LUT4_B": {
@@ -21305,9 +21305,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ 6 ],
-            "C": [ 23 ],
-            "D": [ 25 ],
-            "Z": [ 29 ]
+            "C": [ 21 ],
+            "D": [ 27 ],
+            "Z": [ 28 ]
           }
         },
         "fifo_txe_n_LUT4_B_1": {
@@ -21328,11 +21328,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 30 ],
+            "A": [ 29 ],
             "B": [ 6 ],
-            "C": [ 23 ],
-            "D": [ 24 ],
-            "Z": [ 31 ]
+            "C": [ 22 ],
+            "D": [ 21 ],
+            "Z": [ 30 ]
           }
         },
         "fifo_txe_n_LUT4_C": {
@@ -21356,8 +21356,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ 6 ],
-            "D": [ 23 ],
-            "Z": [ 32 ]
+            "D": [ 21 ],
+            "Z": [ 31 ]
           }
         },
         "fpga_reset_meta_m.Q_TRELLIS_FF_Q": {
@@ -21372,7 +21372,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:87.14-87.70|utils.sv:25.5-33.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
+            "src": "audio.sv:86.14-86.70|utils.sv:25.5-33.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
           },
           "port_directions": {
             "CLK": "input",
@@ -21382,9 +21382,9 @@
           },
           "connections": {
             "CLK": [ 3 ],
-            "DI": [ 33 ],
+            "DI": [ 32 ],
             "LSR": [ "0" ],
-            "Q": [ 34 ]
+            "Q": [ 33 ]
           }
         },
         "fpga_reset_meta_m.Q_pipe_TRELLIS_FF_Q": {
@@ -21399,7 +21399,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:87.14-87.70|utils.sv:25.5-33.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
+            "src": "audio.sv:86.14-86.70|utils.sv:25.5-33.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
           },
           "port_directions": {
             "CLK": "input",
@@ -21411,7 +21411,7 @@
             "CLK": [ 3 ],
             "DI": [ 2 ],
             "LSR": [ "0" ],
-            "Q": [ 33 ]
+            "Q": [ 32 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q": {
@@ -21426,7 +21426,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21436,11 +21436,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 37 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 36 ],
             "LSR": [ "0" ],
-            "Q": [ 38 ]
+            "Q": [ 37 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_1": {
@@ -21455,7 +21455,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21465,11 +21465,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 39 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 38 ],
             "LSR": [ "0" ],
-            "Q": [ 40 ]
+            "Q": [ 39 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_2": {
@@ -21484,7 +21484,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21494,11 +21494,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 41 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 40 ],
             "LSR": [ "0" ],
-            "Q": [ 42 ]
+            "Q": [ 41 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_3": {
@@ -21513,7 +21513,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21523,11 +21523,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 43 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 42 ],
             "LSR": [ "0" ],
-            "Q": [ 44 ]
+            "Q": [ 43 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_4": {
@@ -21542,7 +21542,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21552,11 +21552,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 45 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 44 ],
             "LSR": [ "0" ],
-            "Q": [ 46 ]
+            "Q": [ 45 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_5": {
@@ -21571,7 +21571,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21581,11 +21581,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 47 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 46 ],
             "LSR": [ "0" ],
-            "Q": [ 48 ]
+            "Q": [ 47 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_6": {
@@ -21600,7 +21600,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21610,11 +21610,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 49 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 48 ],
             "LSR": [ "0" ],
-            "Q": [ 50 ]
+            "Q": [ 49 ]
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_7": {
@@ -21629,7 +21629,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21639,11 +21639,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 35 ],
-            "CLK": [ 36 ],
-            "DI": [ 51 ],
+            "CE": [ 34 ],
+            "CLK": [ 35 ],
+            "DI": [ 50 ],
             "LSR": [ "0" ],
-            "Q": [ 52 ]
+            "Q": [ 51 ]
           }
         },
         "ft2232_fifo_m.fifo_clk_i_LUT4_Z": {
@@ -21666,9 +21666,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 30 ],
+            "C": [ 29 ],
             "D": [ 5 ],
-            "Z": [ 36 ]
+            "Z": [ 35 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[0]": {
@@ -21680,7 +21680,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[0]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21690,9 +21690,9 @@
           },
           "connections": {
             "B": [ 12 ],
-            "I": [ 53 ],
-            "O": [ 51 ],
-            "T": [ 54 ]
+            "I": [ 52 ],
+            "O": [ 50 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[1]": {
@@ -21704,7 +21704,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[1]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21714,9 +21714,9 @@
           },
           "connections": {
             "B": [ 13 ],
-            "I": [ 55 ],
-            "O": [ 49 ],
-            "T": [ 54 ]
+            "I": [ 54 ],
+            "O": [ 48 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[2]": {
@@ -21728,7 +21728,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[2]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21738,9 +21738,9 @@
           },
           "connections": {
             "B": [ 14 ],
-            "I": [ 56 ],
-            "O": [ 47 ],
-            "T": [ 54 ]
+            "I": [ 55 ],
+            "O": [ 46 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[3]": {
@@ -21752,7 +21752,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[3]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21762,9 +21762,9 @@
           },
           "connections": {
             "B": [ 15 ],
-            "I": [ 57 ],
-            "O": [ 45 ],
-            "T": [ 54 ]
+            "I": [ 56 ],
+            "O": [ 44 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[4]": {
@@ -21776,7 +21776,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[4]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21786,9 +21786,9 @@
           },
           "connections": {
             "B": [ 16 ],
-            "I": [ 58 ],
-            "O": [ 43 ],
-            "T": [ 54 ]
+            "I": [ 57 ],
+            "O": [ 42 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[5]": {
@@ -21800,7 +21800,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[5]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21810,9 +21810,9 @@
           },
           "connections": {
             "B": [ 17 ],
-            "I": [ 59 ],
-            "O": [ 41 ],
-            "T": [ 54 ]
+            "I": [ 58 ],
+            "O": [ 40 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[6]": {
@@ -21824,7 +21824,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[6]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21834,9 +21834,9 @@
           },
           "connections": {
             "B": [ 18 ],
-            "I": [ 60 ],
-            "O": [ 39 ],
-            "T": [ 54 ]
+            "I": [ 59 ],
+            "O": [ 38 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_d_io[7]": {
@@ -21848,7 +21848,7 @@
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_d_io[7]",
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.33-54.118"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.33-53.118"
           },
           "port_directions": {
             "B": "inout",
@@ -21858,9 +21858,9 @@
           },
           "connections": {
             "B": [ 19 ],
-            "I": [ 61 ],
-            "O": [ 37 ],
-            "T": [ 54 ]
+            "I": [ 60 ],
+            "O": [ 36 ],
+            "T": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q": {
@@ -21875,7 +21875,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21885,11 +21885,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 38 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 37 ],
             "LSR": [ "0" ],
-            "Q": [ 61 ]
+            "Q": [ 60 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_1": {
@@ -21904,7 +21904,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21914,11 +21914,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 40 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 39 ],
             "LSR": [ "0" ],
-            "Q": [ 60 ]
+            "Q": [ 59 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_2": {
@@ -21933,7 +21933,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21943,11 +21943,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 42 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 41 ],
             "LSR": [ "0" ],
-            "Q": [ 59 ]
+            "Q": [ 58 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_3": {
@@ -21962,7 +21962,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -21972,11 +21972,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 44 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 43 ],
             "LSR": [ "0" ],
-            "Q": [ 58 ]
+            "Q": [ 57 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_4": {
@@ -21991,7 +21991,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22001,11 +22001,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 46 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 45 ],
             "LSR": [ "0" ],
-            "Q": [ 57 ]
+            "Q": [ 56 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_5": {
@@ -22020,7 +22020,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22030,11 +22030,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 48 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 47 ],
             "LSR": [ "0" ],
-            "Q": [ 56 ]
+            "Q": [ 55 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_6": {
@@ -22049,7 +22049,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22059,11 +22059,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 50 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 49 ],
             "LSR": [ "0" ],
-            "Q": [ 55 ]
+            "Q": [ 54 ]
           }
         },
         "ft2232_fifo_m.fifo_data_o_TRELLIS_FF_Q_7": {
@@ -22078,7 +22078,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22088,11 +22088,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 31 ],
-            "CLK": [ 36 ],
-            "DI": [ 52 ],
+            "CE": [ 30 ],
+            "CLK": [ 35 ],
+            "DI": [ 51 ],
             "LSR": [ "0" ],
-            "Q": [ 53 ]
+            "Q": [ 52 ]
           }
         },
         "ft2232_fifo_m.fifo_oe_n_o_LUT4_D": {
@@ -22117,7 +22117,7 @@
             "B": [ "0" ],
             "C": [ "0" ],
             "D": [ 9 ],
-            "Z": [ 54 ]
+            "Z": [ 53 ]
           }
         },
         "ft2232_fifo_m.fifo_oe_n_o_TRELLIS_FF_Q": {
@@ -22133,7 +22133,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
           },
           "port_directions": {
             "CE": "input",
@@ -22143,10 +22143,10 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 27 ],
-            "CLK": [ 36 ],
-            "DI": [ 25 ],
-            "LSR": [ 30 ],
+            "CE": [ 25 ],
+            "CLK": [ 35 ],
+            "DI": [ 23 ],
+            "LSR": [ 29 ],
             "Q": [ 9 ]
           }
         },
@@ -22163,7 +22163,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
           },
           "port_directions": {
             "CE": "input",
@@ -22173,10 +22173,10 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 62 ],
-            "CLK": [ 36 ],
-            "DI": [ 25 ],
-            "LSR": [ 30 ],
+            "CE": [ 61 ],
+            "CLK": [ 35 ],
+            "DI": [ 23 ],
+            "LSR": [ 29 ],
             "Q": [ 11 ]
           }
         },
@@ -22200,9 +22200,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 25 ],
-            "D": [ 63 ],
-            "Z": [ 62 ]
+            "C": [ 23 ],
+            "D": [ 27 ],
+            "Z": [ 61 ]
           }
         },
         "ft2232_fifo_m.fifo_wr_n_o_TRELLIS_FF_Q": {
@@ -22218,7 +22218,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:74.161-74.220"
           },
           "port_directions": {
             "CE": "input",
@@ -22228,10 +22228,10 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 24 ],
-            "CLK": [ 36 ],
-            "DI": [ 32 ],
-            "LSR": [ 30 ],
+            "CE": [ 22 ],
+            "CLK": [ 35 ],
+            "DI": [ 31 ],
+            "LSR": [ 29 ],
             "Q": [ 10 ]
           }
         },
@@ -22248,7 +22248,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:73.163-73.222"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:73.163-73.222"
           },
           "port_directions": {
             "CE": "input",
@@ -22258,11 +22258,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 64 ],
-            "CLK": [ 36 ],
-            "DI": [ 29 ],
-            "LSR": [ 30 ],
-            "Q": [ 23 ]
+            "CE": [ 62 ],
+            "CLK": [ 35 ],
+            "DI": [ 28 ],
+            "LSR": [ 29 ],
+            "Q": [ 21 ]
           }
         },
         "ft2232_fifo_m.have_byte_to_write_TRELLIS_FF_Q_CE_LUT4_Z": {
@@ -22285,9 +22285,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 24 ],
-            "D": [ 25 ],
-            "Z": [ 64 ]
+            "C": [ 22 ],
+            "D": [ 27 ],
+            "Z": [ 62 ]
           }
         },
         "ft2232_fifo_m.state_m_TRELLIS_FF_Q": {
@@ -22312,10 +22312,10 @@
             "Q": "output"
           },
           "connections": {
-            "CLK": [ 36 ],
-            "DI": [ 28 ],
-            "LSR": [ 30 ],
-            "Q": [ 63 ]
+            "CLK": [ 35 ],
+            "DI": [ 26 ],
+            "LSR": [ 29 ],
+            "Q": [ 27 ]
           }
         },
         "ft2232_fifo_m.state_m_TRELLIS_FF_Q_1": {
@@ -22340,10 +22340,10 @@
             "Q": "output"
           },
           "connections": {
-            "CLK": [ 36 ],
-            "DI": [ 63 ],
-            "LSR": [ 30 ],
-            "Q": [ 25 ]
+            "CLK": [ 35 ],
+            "DI": [ 27 ],
+            "LSR": [ 29 ],
+            "Q": [ 23 ]
           }
         },
         "ft2232_fifo_m.state_m_TRELLIS_FF_Q_2": {
@@ -22368,10 +22368,10 @@
             "Q": "output"
           },
           "connections": {
-            "CLK": [ 36 ],
-            "DI": [ 26 ],
-            "LSR": [ 30 ],
-            "Q": [ 24 ]
+            "CLK": [ 35 ],
+            "DI": [ 24 ],
+            "LSR": [ 29 ],
+            "Q": [ 22 ]
           }
         },
         "ft2232_reset_n_LUT4_Z": {
@@ -22395,58 +22395,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 30 ],
+            "D": [ 29 ],
             "Z": [ 8 ]
-          }
-        },
-        "led_0_LUT4_Z": {
-          "hide_name": 0,
-          "type": "LUT4",
-          "parameters": {
-            "INIT": "0000000011111111"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:114.33-115.56"
-          },
-          "port_directions": {
-            "A": "input",
-            "B": "input",
-            "C": "input",
-            "D": "input",
-            "Z": "output"
-          },
-          "connections": {
-            "A": [ "0" ],
-            "B": [ "0" ],
-            "C": [ "0" ],
-            "D": [ 7 ],
-            "Z": [ 20 ]
-          }
-        },
-        "led_1_LUT4_Z": {
-          "hide_name": 0,
-          "type": "LUT4",
-          "parameters": {
-            "INIT": "0000000011111111"
-          },
-          "attributes": {
-            "module_not_derived": "00000000000000000000000000000001",
-            "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:114.33-115.56"
-          },
-          "port_directions": {
-            "A": "input",
-            "B": "input",
-            "C": "input",
-            "D": "input",
-            "Z": "output"
-          },
-          "connections": {
-            "A": [ "0" ],
-            "B": [ "0" ],
-            "C": [ "0" ],
-            "D": [ 6 ],
-            "Z": [ 21 ]
           }
         },
         "led_reset_TRELLIS_FF_Q": {
@@ -22461,7 +22411,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22471,11 +22421,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 65 ],
+            "CE": [ 63 ],
             "CLK": [ 3 ],
-            "DI": [ 66 ],
+            "DI": [ 64 ],
             "LSR": [ "0" ],
-            "Q": [ 22 ]
+            "Q": [ 20 ]
           }
         },
         "reset_LUT4_C": {
@@ -22498,9 +22448,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 30 ],
-            "D": [ 25 ],
-            "Z": [ 35 ]
+            "C": [ 29 ],
+            "D": [ 27 ],
+            "Z": [ 34 ]
           }
         },
         "reset_TRELLIS_FF_Q": {
@@ -22515,7 +22465,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:56.101-56.163"
           },
           "port_directions": {
             "CE": "input",
@@ -22525,11 +22475,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 65 ],
+            "CE": [ 63 ],
             "CLK": [ 3 ],
-            "DI": [ 66 ],
+            "DI": [ 64 ],
             "LSR": [ "0" ],
-            "Q": [ 30 ]
+            "Q": [ 29 ]
           }
         },
         "reset_TRELLIS_FF_Q_CE_LUT4_Z": {
@@ -22551,10 +22501,10 @@
           },
           "connections": {
             "A": [ "0" ],
-            "B": [ 67 ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 65 ]
+            "B": [ 65 ],
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 63 ]
           }
         },
         "reset_TRELLIS_FF_Q_DI_LUT4_Z": {
@@ -22577,9 +22527,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 66 ]
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 64 ]
           }
         },
         "reset_clks_LUT4_B": {
@@ -22601,10 +22551,10 @@
           },
           "connections": {
             "A": [ "0" ],
-            "B": [ 70 ],
-            "C": [ 71 ],
-            "D": [ 72 ],
-            "Z": [ 73 ]
+            "B": [ 68 ],
+            "C": [ 69 ],
+            "D": [ 70 ],
+            "Z": [ 71 ]
           }
         },
         "reset_clks_LUT4_C": {
@@ -22627,9 +22577,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 70 ],
-            "D": [ 71 ],
-            "Z": [ 74 ]
+            "C": [ 68 ],
+            "D": [ 69 ],
+            "Z": [ 72 ]
           }
         },
         "reset_clks_LUT4_D": {
@@ -22653,8 +22603,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 71 ],
-            "Z": [ 75 ]
+            "D": [ 69 ],
+            "Z": [ 73 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q": {
@@ -22670,7 +22620,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
           },
           "port_directions": {
             "CE": "input",
@@ -22680,11 +22630,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 76 ],
+            "CE": [ 74 ],
             "CLK": [ 3 ],
-            "DI": [ 73 ],
-            "LSR": [ 77 ],
-            "Q": [ 72 ]
+            "DI": [ 71 ],
+            "LSR": [ 75 ],
+            "Q": [ 70 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_1": {
@@ -22700,7 +22650,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
           },
           "port_directions": {
             "CE": "input",
@@ -22710,11 +22660,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 76 ],
+            "CE": [ 74 ],
             "CLK": [ 3 ],
-            "DI": [ 74 ],
-            "LSR": [ 78 ],
-            "Q": [ 70 ]
+            "DI": [ 72 ],
+            "LSR": [ 76 ],
+            "Q": [ 68 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_1_LSR_LUT4_Z": {
@@ -22735,11 +22685,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 67 ],
-            "B": [ 34 ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 78 ]
+            "A": [ 65 ],
+            "B": [ 33 ],
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 76 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_2": {
@@ -22755,7 +22705,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:84.168-84.227"
           },
           "port_directions": {
             "CE": "input",
@@ -22765,11 +22715,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 76 ],
+            "CE": [ 74 ],
             "CLK": [ 3 ],
-            "DI": [ 75 ],
-            "LSR": [ 79 ],
-            "Q": [ 71 ]
+            "DI": [ 73 ],
+            "LSR": [ 77 ],
+            "Q": [ 69 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_2_LSR_LUT4_Z": {
@@ -22790,11 +22740,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 67 ],
-            "B": [ 34 ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 79 ]
+            "A": [ 65 ],
+            "B": [ 33 ],
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 77 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_CE_LUT4_Z": {
@@ -22815,11 +22765,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 34 ],
-            "B": [ 67 ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 76 ]
+            "A": [ 33 ],
+            "B": [ 65 ],
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 74 ]
           }
         },
         "reset_clks_TRELLIS_FF_Q_LSR_LUT4_Z": {
@@ -22840,11 +22790,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 67 ],
-            "B": [ 34 ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 77 ]
+            "A": [ 65 ],
+            "B": [ 33 ],
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 75 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q": {
@@ -22860,7 +22810,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:83.170-83.229"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:83.170-83.229"
           },
           "port_directions": {
             "CE": "input",
@@ -22870,11 +22820,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 80 ],
+            "CE": [ 78 ],
             "CLK": [ 3 ],
-            "DI": [ 81 ],
-            "LSR": [ 82 ],
-            "Q": [ 68 ]
+            "DI": [ 79 ],
+            "LSR": [ 80 ],
+            "Q": [ 66 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_1": {
@@ -22890,7 +22840,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:83.170-83.229"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:83.170-83.229"
           },
           "port_directions": {
             "CE": "input",
@@ -22900,11 +22850,11 @@
             "Q": "output"
           },
           "connections": {
-            "CE": [ 80 ],
+            "CE": [ 78 ],
             "CLK": [ 3 ],
-            "DI": [ 83 ],
-            "LSR": [ 84 ],
-            "Q": [ 69 ]
+            "DI": [ 81 ],
+            "LSR": [ 82 ],
+            "Q": [ 67 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_1_LSR_LUT4_Z": {
@@ -22927,9 +22877,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 67 ],
-            "D": [ 34 ],
-            "Z": [ 84 ]
+            "C": [ 65 ],
+            "D": [ 33 ],
+            "Z": [ 82 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z": {
@@ -22948,10 +22898,10 @@
             "Z": "output"
           },
           "connections": {
-            "D0": [ 85 ],
-            "D1": [ 86 ],
-            "SD": [ 67 ],
-            "Z": [ 80 ]
+            "D0": [ 83 ],
+            "D1": [ 84 ],
+            "SD": [ 65 ],
+            "Z": [ 78 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z": {
@@ -22970,10 +22920,10 @@
             "Z": "output"
           },
           "connections": {
-            "D0": [ 87 ],
-            "D1": [ 88 ],
-            "SD": [ 69 ],
-            "Z": [ 85 ]
+            "D0": [ 85 ],
+            "D1": [ 86 ],
+            "SD": [ 67 ],
+            "Z": [ 83 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z": {
@@ -22992,10 +22942,10 @@
             "Z": "output"
           },
           "connections": {
-            "ALUT": [ 89 ],
-            "BLUT": [ 90 ],
-            "C0": [ 68 ],
-            "Z": [ 87 ]
+            "ALUT": [ 87 ],
+            "BLUT": [ 88 ],
+            "C0": [ 66 ],
+            "Z": [ 85 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z": {
@@ -23017,10 +22967,10 @@
           },
           "connections": {
             "A": [ "0" ],
-            "B": [ 70 ],
-            "C": [ 72 ],
-            "D": [ 71 ],
-            "Z": [ 89 ]
+            "B": [ 68 ],
+            "C": [ 70 ],
+            "D": [ 69 ],
+            "Z": [ 87 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_BLUT_LUT4_Z": {
@@ -23045,7 +22995,7 @@
             "B": [ "0" ],
             "C": [ "0" ],
             "D": [ "0" ],
-            "Z": [ 90 ]
+            "Z": [ 88 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z": {
@@ -23064,10 +23014,10 @@
             "Z": "output"
           },
           "connections": {
-            "ALUT": [ 91 ],
-            "BLUT": [ 92 ],
-            "C0": [ 68 ],
-            "Z": [ 88 ]
+            "ALUT": [ 89 ],
+            "BLUT": [ 90 ],
+            "C0": [ 66 ],
+            "Z": [ 86 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z": {
@@ -23092,7 +23042,7 @@
             "B": [ "0" ],
             "C": [ "0" ],
             "D": [ "0" ],
-            "Z": [ 91 ]
+            "Z": [ 89 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_BLUT_LUT4_Z": {
@@ -23116,8 +23066,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 34 ],
-            "Z": [ 92 ]
+            "D": [ 33 ],
+            "Z": [ 90 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z": {
@@ -23136,10 +23086,10 @@
             "Z": "output"
           },
           "connections": {
-            "D0": [ 93 ],
-            "D1": [ 94 ],
-            "SD": [ 69 ],
-            "Z": [ 86 ]
+            "D0": [ 91 ],
+            "D1": [ 92 ],
+            "SD": [ 67 ],
+            "Z": [ 84 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z": {
@@ -23158,10 +23108,10 @@
             "Z": "output"
           },
           "connections": {
-            "ALUT": [ 95 ],
-            "BLUT": [ 96 ],
-            "C0": [ 68 ],
-            "Z": [ 93 ]
+            "ALUT": [ 93 ],
+            "BLUT": [ 94 ],
+            "C0": [ 66 ],
+            "Z": [ 91 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT_LUT4_Z": {
@@ -23185,8 +23135,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 34 ],
-            "Z": [ 95 ]
+            "D": [ 33 ],
+            "Z": [ 93 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_BLUT_LUT4_Z": {
@@ -23210,8 +23160,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 34 ],
-            "Z": [ 96 ]
+            "D": [ 33 ],
+            "Z": [ 94 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z": {
@@ -23230,10 +23180,10 @@
             "Z": "output"
           },
           "connections": {
-            "ALUT": [ 97 ],
-            "BLUT": [ 98 ],
-            "C0": [ 68 ],
-            "Z": [ 94 ]
+            "ALUT": [ 95 ],
+            "BLUT": [ 96 ],
+            "C0": [ 66 ],
+            "Z": [ 92 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_ALUT_LUT4_Z": {
@@ -23257,8 +23207,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 34 ],
-            "Z": [ 97 ]
+            "D": [ 33 ],
+            "Z": [ 95 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_BLUT_LUT4_Z": {
@@ -23282,8 +23232,8 @@
             "A": [ "0" ],
             "B": [ "0" ],
             "C": [ "0" ],
-            "D": [ 34 ],
-            "Z": [ 98 ]
+            "D": [ 33 ],
+            "Z": [ 96 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_DI_LUT4_Z": {
@@ -23306,9 +23256,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 81 ]
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 79 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_DI_LUT4_Z_1": {
@@ -23331,9 +23281,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 68 ],
-            "D": [ 69 ],
-            "Z": [ 83 ]
+            "C": [ 66 ],
+            "D": [ 67 ],
+            "Z": [ 81 ]
           }
         },
         "reset_state_m_TRELLIS_FF_Q_LSR_LUT4_Z": {
@@ -23356,9 +23306,9 @@
           "connections": {
             "A": [ "0" ],
             "B": [ "0" ],
-            "C": [ 67 ],
-            "D": [ 34 ],
-            "Z": [ 82 ]
+            "C": [ 65 ],
+            "D": [ 33 ],
+            "Z": [ 80 ]
           }
         },
         "state_m_TRELLIS_FF_Q": {
@@ -23373,7 +23323,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "audio.sv:97.5-112.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
+            "src": "audio.sv:96.5-111.8|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:16.100-16.154"
           },
           "port_directions": {
             "CLK": "input",
@@ -23383,9 +23333,9 @@
           },
           "connections": {
             "CLK": [ 3 ],
-            "DI": [ 99 ],
+            "DI": [ 97 ],
             "LSR": [ "0" ],
-            "Q": [ 67 ]
+            "Q": [ 65 ]
           }
         },
         "state_m_TRELLIS_FF_Q_DI_LUT4_Z": {
@@ -23406,11 +23356,11 @@
             "Z": "output"
           },
           "connections": {
-            "A": [ 69 ],
-            "B": [ 68 ],
-            "C": [ 34 ],
-            "D": [ 67 ],
-            "Z": [ 99 ]
+            "A": [ 67 ],
+            "B": [ 66 ],
+            "C": [ 33 ],
+            "D": [ 65 ],
+            "Z": [ 97 ]
           }
         }
       },
@@ -23424,9 +23374,9 @@
         },
         "btn_reset_meta": {
           "hide_name": 0,
-          "bits": [ 34 ],
+          "bits": [ 33 ],
           "attributes": {
-            "src": "audio.sv:86.11-86.25"
+            "src": "audio.sv:85.11-85.25"
           }
         },
         "clk": {
@@ -23459,7 +23409,7 @@
         },
         "fifo_clk_i": {
           "hide_name": 0,
-          "bits": [ 36 ],
+          "bits": [ 35 ],
           "attributes": {
             "src": "audio.sv:58.11-58.21"
           }
@@ -23508,7 +23458,7 @@
         },
         "fifo_txe_n_LUT4_B_1_Z": {
           "hide_name": 0,
-          "bits": [ 31 ],
+          "bits": [ 30 ],
           "attributes": {
           }
         },
@@ -23524,23 +23474,23 @@
           "bits": [ 2 ],
           "attributes": {
             "hdlname": "fpga_reset_meta_m D",
-            "src": "audio.sv:87.14-87.70|utils.sv:23.49-23.50"
+            "src": "audio.sv:86.14-86.70|utils.sv:23.49-23.50"
           }
         },
         "fpga_reset_meta_m.Q": {
           "hide_name": 0,
-          "bits": [ 34 ],
+          "bits": [ 33 ],
           "attributes": {
             "hdlname": "fpga_reset_meta_m Q",
-            "src": "audio.sv:87.14-87.70|utils.sv:23.82-23.83"
+            "src": "audio.sv:86.14-86.70|utils.sv:23.82-23.83"
           }
         },
         "fpga_reset_meta_m.Q_pipe": {
           "hide_name": 0,
-          "bits": [ 33 ],
+          "bits": [ 32 ],
           "attributes": {
             "hdlname": "fpga_reset_meta_m Q_pipe",
-            "src": "audio.sv:87.14-87.70|utils.sv:24.11-24.17"
+            "src": "audio.sv:86.14-86.70|utils.sv:24.11-24.17"
           }
         },
         "fpga_reset_meta_m.clk": {
@@ -23548,7 +23498,7 @@
           "bits": [ 3 ],
           "attributes": {
             "hdlname": "fpga_reset_meta_m clk",
-            "src": "audio.sv:87.14-87.70|utils.sv:23.64-23.67"
+            "src": "audio.sv:86.14-86.70|utils.sv:23.64-23.67"
           }
         },
         "fpga_reset_meta_m.reset": {
@@ -23556,37 +23506,37 @@
           "bits": [ "0" ],
           "attributes": {
             "hdlname": "fpga_reset_meta_m reset",
-            "src": "audio.sv:87.14-87.70|utils.sv:23.30-23.35"
+            "src": "audio.sv:86.14-86.70|utils.sv:23.30-23.35"
           }
         },
         "ft2232_fifo_m.byte_to_write": {
           "hide_name": 0,
-          "bits": [ 52, 50, 48, 46, 44, 42, 40, 38 ],
+          "bits": [ 51, 49, 47, 45, 43, 41, 39, 37 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m byte_to_write",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:48.17-48.30"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:48.17-48.30"
           }
         },
         "ft2232_fifo_m.byte_to_write_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 35 ],
+          "bits": [ 34 ],
           "attributes": {
           }
         },
         "ft2232_fifo_m.fifo_clk_i": {
           "hide_name": 0,
-          "bits": [ 36 ],
+          "bits": [ 35 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_clk_i",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:27.17-27.27"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:27.17-27.27"
           }
         },
         "ft2232_fifo_m.fifo_data_i": {
           "hide_name": 0,
-          "bits": [ 51, 49, 47, 45, 43, 41, 39, 37 ],
+          "bits": [ 50, 48, 46, 44, 42, 40, 38, 36 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_data_i",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:51.17-51.28"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:51.17-51.28"
           }
         },
         "ft2232_fifo_m.fifo_data_io": {
@@ -23594,16 +23544,16 @@
           "bits": [ 12, 13, 14, 15, 16, 17, 18, 19 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_data_io",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:35.22-35.34",
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:35.22-35.34",
             "unused_bits": "0 1 2 3 4 5 6 7"
           }
         },
         "ft2232_fifo_m.fifo_data_o": {
           "hide_name": 0,
-          "bits": [ 53, 55, 56, 57, 58, 59, 60, 61 ],
+          "bits": [ 52, 54, 55, 56, 57, 58, 59, 60 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_data_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:52.17-52.28"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:51.30-51.41"
           }
         },
         "ft2232_fifo_m.fifo_oe_n_o": {
@@ -23611,19 +23561,19 @@
           "bits": [ 9 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_oe_n_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:31.18-31.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:31.18-31.29"
           }
         },
         "ft2232_fifo_m.fifo_oe_n_o_LUT4_D_Z": {
           "hide_name": 0,
-          "bits": [ 54 ],
+          "bits": [ 53 ],
           "attributes": {
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:54.70-54.82"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:53.70-53.82"
           }
         },
         "ft2232_fifo_m.fifo_oe_n_o_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 27 ],
+          "bits": [ 25 ],
           "attributes": {
           }
         },
@@ -23632,12 +23582,12 @@
           "bits": [ 11 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_rd_n_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:34.18-34.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:34.18-34.29"
           }
         },
         "ft2232_fifo_m.fifo_rd_n_o_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 62 ],
+          "bits": [ 61 ],
           "attributes": {
           }
         },
@@ -23646,7 +23596,7 @@
           "bits": [ 7 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_rxf_n_i",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:29.17-29.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:29.17-29.29"
           }
         },
         "ft2232_fifo_m.fifo_siwu_o": {
@@ -23654,7 +23604,7 @@
           "bits": [ "1" ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_siwu_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:32.18-32.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:32.18-32.29"
           }
         },
         "ft2232_fifo_m.fifo_txe_n_i": {
@@ -23662,7 +23612,7 @@
           "bits": [ 6 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_txe_n_i",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:28.17-28.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:28.17-28.29"
           }
         },
         "ft2232_fifo_m.fifo_wr_n_o": {
@@ -23670,12 +23620,12 @@
           "bits": [ 10 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m fifo_wr_n_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:33.18-33.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:33.18-33.29"
           }
         },
         "ft2232_fifo_m.fifo_wr_n_o_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 32 ],
+          "bits": [ 31 ],
           "attributes": {
           }
         },
@@ -23684,70 +23634,70 @@
           "bits": [ 8 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m ft2232_reset_n_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:30.18-30.34"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:30.18-30.34"
           }
         },
         "ft2232_fifo_m.have_byte_to_write": {
           "hide_name": 0,
-          "bits": [ 23 ],
+          "bits": [ 21 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m have_byte_to_write",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:47.11-47.29"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:47.11-47.29"
           }
         },
         "ft2232_fifo_m.have_byte_to_write_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 64 ],
+          "bits": [ 62 ],
           "attributes": {
           }
         },
         "ft2232_fifo_m.have_byte_to_write_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 29 ],
+          "bits": [ 28 ],
           "attributes": {
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:65.5-131.8"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:64.5-123.8"
           }
         },
         "ft2232_fifo_m.led_ft2232_rd_data_o": {
           "hide_name": 0,
-          "bits": [ 20 ],
+          "bits": [ 7 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m led_ft2232_rd_data_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:37.18-37.38"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:37.18-37.38"
           }
         },
         "ft2232_fifo_m.led_ft2232_wr_data_o": {
           "hide_name": 0,
-          "bits": [ 21 ],
+          "bits": [ 6 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m led_ft2232_wr_data_o",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:38.18-38.38"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:38.18-38.38"
           }
         },
         "ft2232_fifo_m.reset_i": {
           "hide_name": 0,
-          "bits": [ 30 ],
+          "bits": [ 29 ],
           "attributes": {
             "hdlname": "ft2232_fifo_m reset_i",
-            "src": "audio.sv:69.17-84.10|test_ft2232_fifo.sv:25.17-25.24"
+            "src": "audio.sv:69.17-83.41|test_ft2232_fifo.sv:25.17-25.24"
           }
         },
         "ft2232_fifo_m.state_m": {
           "hide_name": 0,
-          "bits": [ 24, 25, 63 ],
+          "bits": [ 22, 23, 27 ],
           "attributes": {
             "onehot": "00000000000000000000000000000001"
           }
         },
         "ft2232_fifo_m.state_m_TRELLIS_FF_Q_2_DI": {
           "hide_name": 0,
-          "bits": [ 26 ],
+          "bits": [ 24 ],
           "attributes": {
           }
         },
         "ft2232_fifo_m.state_m_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 28 ],
+          "bits": [ 26 ],
           "attributes": {
           }
         },
@@ -23760,21 +23710,21 @@
         },
         "led_0": {
           "hide_name": 0,
-          "bits": [ 20 ],
+          "bits": [ 7 ],
           "attributes": {
             "src": "audio.sv:41.18-41.23"
           }
         },
         "led_1": {
           "hide_name": 0,
-          "bits": [ 21 ],
+          "bits": [ 6 ],
           "attributes": {
             "src": "audio.sv:42.18-42.23"
           }
         },
         "led_reset": {
           "hide_name": 0,
-          "bits": [ 22 ],
+          "bits": [ 20 ],
           "attributes": {
             "src": "audio.sv:43.18-43.27"
           }
@@ -23788,206 +23738,206 @@
         },
         "reset": {
           "hide_name": 0,
-          "bits": [ 30 ],
+          "bits": [ 29 ],
           "attributes": {
             "src": "audio.sv:55.11-55.16"
           }
         },
         "reset_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 65 ],
+          "bits": [ 63 ],
           "attributes": {
           }
         },
         "reset_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 66 ],
+          "bits": [ 64 ],
           "attributes": {
           }
         },
         "reset_clks": {
           "hide_name": 0,
-          "bits": [ 71, 70, 72 ],
+          "bits": [ 69, 68, 70 ],
           "attributes": {
-            "src": "audio.sv:123.17-123.27"
+            "src": "audio.sv:122.17-122.27"
           }
         },
         "reset_clks_TRELLIS_FF_Q_1_LSR": {
-          "hide_name": 0,
-          "bits": [ 78 ],
-          "attributes": {
-          }
-        },
-        "reset_clks_TRELLIS_FF_Q_2_LSR": {
-          "hide_name": 0,
-          "bits": [ 79 ],
-          "attributes": {
-          }
-        },
-        "reset_clks_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
           "bits": [ 76 ],
           "attributes": {
           }
         },
-        "reset_clks_TRELLIS_FF_Q_DI": {
-          "hide_name": 0,
-          "bits": [ 75, 74, 73 ],
-          "attributes": {
-            "force_downto": "00000000000000000000000000000001",
-            "src": "audio.sv:161.31-161.48|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:270.26-270.27"
-          }
-        },
-        "reset_clks_TRELLIS_FF_Q_LSR": {
+        "reset_clks_TRELLIS_FF_Q_2_LSR": {
           "hide_name": 0,
           "bits": [ 77 ],
           "attributes": {
           }
         },
+        "reset_clks_TRELLIS_FF_Q_CE": {
+          "hide_name": 0,
+          "bits": [ 74 ],
+          "attributes": {
+          }
+        },
+        "reset_clks_TRELLIS_FF_Q_DI": {
+          "hide_name": 0,
+          "bits": [ 73, 72, 71 ],
+          "attributes": {
+            "force_downto": "00000000000000000000000000000001",
+            "src": "audio.sv:156.31-156.48|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:270.26-270.27"
+          }
+        },
+        "reset_clks_TRELLIS_FF_Q_LSR": {
+          "hide_name": 0,
+          "bits": [ 75 ],
+          "attributes": {
+          }
+        },
         "reset_state_m": {
           "hide_name": 0,
-          "bits": [ 69, 68 ],
+          "bits": [ 67, 66 ],
           "attributes": {
-            "src": "audio.sv:119.17-119.30"
+            "src": "audio.sv:118.17-118.30"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_1_LSR": {
           "hide_name": 0,
-          "bits": [ 84 ],
+          "bits": [ 82 ],
           "attributes": {
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE": {
           "hide_name": 0,
-          "bits": [ 80 ],
+          "bits": [ 78 ],
           "attributes": {
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0": {
           "hide_name": 0,
-          "bits": [ 85 ],
+          "bits": [ 83 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.66-157.68"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0": {
           "hide_name": 0,
-          "bits": [ 87 ],
+          "bits": [ 85 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.50-157.52"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_ALUT": {
           "hide_name": 0,
-          "bits": [ 89 ],
+          "bits": [ 87 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.22-157.24"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_BLUT": {
           "hide_name": 0,
-          "bits": [ 90 ],
+          "bits": [ 88 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.18-157.20"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1": {
           "hide_name": 0,
-          "bits": [ 88 ],
+          "bits": [ 86 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.54-157.56"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_ALUT": {
           "hide_name": 0,
-          "bits": [ 91 ],
+          "bits": [ 89 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.30-157.32"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_BLUT": {
           "hide_name": 0,
-          "bits": [ 92 ],
+          "bits": [ 90 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.26-157.28"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1": {
           "hide_name": 0,
-          "bits": [ 86 ],
+          "bits": [ 84 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.70-157.72"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0": {
           "hide_name": 0,
-          "bits": [ 93 ],
+          "bits": [ 91 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.58-157.60"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_ALUT": {
           "hide_name": 0,
-          "bits": [ 95 ],
+          "bits": [ 93 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.38-157.40"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_BLUT": {
           "hide_name": 0,
-          "bits": [ 96 ],
+          "bits": [ 94 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.34-157.36"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1": {
           "hide_name": 0,
-          "bits": [ 94 ],
+          "bits": [ 92 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.62-157.64"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_ALUT": {
           "hide_name": 0,
-          "bits": [ 97 ],
+          "bits": [ 95 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.46-157.48"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_CE_L6MUX21_Z_D1_L6MUX21_Z_D1_PFUMX_Z_BLUT": {
           "hide_name": 0,
-          "bits": [ 98 ],
+          "bits": [ 96 ],
           "attributes": {
             "src": "/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/ecp5/cells_map.v:157.42-157.44"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 83, 81 ],
+          "bits": [ 81, 79 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "audio.sv:0.0-0.0|audio.sv:130.9-179.16|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:575.21-575.22"
+            "src": "audio.sv:0.0-0.0|audio.sv:129.9-174.16|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:575.21-575.22"
           }
         },
         "reset_state_m_TRELLIS_FF_Q_LSR": {
           "hide_name": 0,
-          "bits": [ 82 ],
+          "bits": [ 80 ],
           "attributes": {
           }
         },
         "state_m": {
           "hide_name": 0,
-          "bits": [ 67 ],
+          "bits": [ 65 ],
           "attributes": {
-            "src": "audio.sv:92.11-92.18"
+            "src": "audio.sv:91.11-91.18"
           }
         },
         "state_m_TRELLIS_FF_Q_DI": {
           "hide_name": 0,
-          "bits": [ 99 ],
+          "bits": [ 97 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "audio.sv:0.0-0.0|audio.sv:99.9-111.16|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:575.21-575.22"
+            "src": "audio.sv:0.0-0.0|audio.sv:98.9-110.16|/home/gil/tools-oss-cad-suite-0.1.0/lib/../share/yosys/techmap.v:575.21-575.22"
           }
         }
       }

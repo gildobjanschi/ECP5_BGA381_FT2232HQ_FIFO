@@ -37,8 +37,8 @@ module ft2232_fifo (
     output logic led_ft2232_rd_data_o,
     output logic led_ft2232_wr_data_o);
 
-    assign led_ft2232_rd_data_o = ~fifo_rxf_n_i;
-    assign led_ft2232_wr_data_o = ~fifo_txe_n_i;
+    assign led_ft2232_rd_data_o = fifo_rxf_n_i;
+    assign led_ft2232_wr_data_o = fifo_txe_n_i;
 
     // Reset the FT2232HQ
     assign ft2232_reset_n_o = ~reset_i;
@@ -48,15 +48,14 @@ module ft2232_fifo (
     logic [7:0] byte_to_write;
 
     // Input/output 8-bit data bus
-    logic [7:0] fifo_data_i;
-    logic [7:0] fifo_data_o;
+    logic [7:0] fifo_data_i, fifo_data_o;
     // .T = 0 -> fifo_data_io is output; .T = 1 -> fifo_data_io is input.
     TRELLIS_IO #(.DIR("BIDIR")) fifo_d_io[7:0] (.B(fifo_data_io), .T(~fifo_oe_n_o), .O(fifo_data_i), .I(fifo_data_o));
 
     // Main state machine
-    localparam STATE_RD                 = 2'd0;
-    localparam STATE_RD_TURN_AROUND     = 2'd1;
-    localparam STATE_WR                 = 2'd2;
+    localparam STATE_WR         = 2'b00;
+    localparam STATE_RD         = 2'b01;
+    localparam STATE_RD_DONE    = 2'b10;
     logic [1:0] state_m;
 
     //==================================================================================================================
@@ -94,36 +93,30 @@ module ft2232_fifo (
                         // OE needs to be low one cycle before RD.
                         fifo_oe_n_o <= 1'b0;
 `ifdef D_FT_FIFO_FINE
-                        $display ($time, " FT_FIFO:\t[STATE_WR -> STATE_RD_TURN_AROUND] OE 1 -> 0. ");
+                        $display ($time, " FT_FIFO:\t[STATE_WR -> STATE_RD] OE 1 -> 0. ");
 `endif
                         // Wait one cycle after changing OE.
-                        state_m <= STATE_RD_TURN_AROUND;
+                        state_m <= STATE_RD;
                     end
                 end
 
-                STATE_RD_TURN_AROUND: begin
-                    // Assert the FT2232 FIFO read signal.
-                    fifo_rd_n_o <= 1'b0;
-`ifdef D_FT_FIFO_FINE
-                    $display ($time, " FT_FIFO:\t[STATE_RD_TURN_AROUND] RD 1 -> 0.");
-`endif
-                    state_m <= STATE_RD;
-                end
-
                 STATE_RD: begin
-                    // Enter this state machine with fifo_oe_n_o = 1'b0 and fifo_rd_n_o = 1'b0 if fifo_rxf_n_i = 1'b0
+                    fifo_rd_n_o <= 1'b0;
+
+                    byte_to_write <= fifo_data_i;
+                    have_byte_to_write <= 1'b1;
 `ifdef D_FT_FIFO
                     $display ($time, " FT_FIFO:\t[STATE_RD] Read: %d. ", fifo_data_i);
 `endif
-                    byte_to_write <= fifo_data_i;
-                    have_byte_to_write <= 1'b1;
+                    state_m <= STATE_RD_DONE;
+                end
+
+                STATE_RD_DONE: begin
                     // Switch to write
                     fifo_oe_n_o <= 1'b1;
                     fifo_rd_n_o <= 1'b1;
-                    state_m <= STATE_WR;
-                end
 
-                default: begin
+                    state_m <= STATE_WR;
                 end
             endcase
         end

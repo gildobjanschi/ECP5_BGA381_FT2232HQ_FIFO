@@ -16,8 +16,7 @@
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
- * This is a simulator for the FT2232 synchronous FIFO interface. It implements 3 tests in TEST_MODE else it simulates
- * audio samples send.
+ * This is a simulator for the FT2232 synchronous FIFO interface.
  *
  * Simulation rules:
  *
@@ -115,20 +114,17 @@ module sim_ft2232 (
         in_data <= in_data + 8'd1;
     endtask
 
-    logic first_val;
     //==================================================================================================================
     // The FT2232 simulation
     //==================================================================================================================
     always @(posedge fifo_clk_o, negedge ft2232_reset_n_i) begin
         if (~ft2232_reset_n_i) begin
-            first_val <= 1'b1;
-
             out_data <= 8'd0;
             in_data <= 8'd0;
             send_data <= 1'b1;
 
             fifo_txe_n_o <= 1'b0;
-            fifo_rxf_n_o <= 1'b0;
+            fifo_rxf_n_o <= 1'b1;
 
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t-- Reset. \033[0;0m");
@@ -138,13 +134,11 @@ module sim_ft2232 (
                 if (~fifo_oe_n_i) begin
                     if (~fifo_rd_n_i) begin
                         output_data_task;
-                    end else begin
-                        if (first_val) begin
-                            output_data_task;
-                            first_val <= 1'b0;
-                        end
                     end
                 end
+            end else begin
+                fifo_data_o <= 0;
+                fifo_rxf_n_o <= 1'b0;
             end
 
             if (~fifo_txe_n_o) begin

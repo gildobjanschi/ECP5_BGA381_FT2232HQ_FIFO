@@ -6,22 +6,26 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 -u -h [-D <flag>]"
-    echo "    -u: Enable UART debugging."
+    echo "Usage: $0 -h"
     echo "    -h: Help."
-    echo "    -D: debug flags (e.g. -D D_CORE ...)"
     exit 1
 }
 
 BOARD=""
 LPF_FILE=""
 SPEED=""
-BIN_PATH="/home/gil/tools-oss-cad-suite-0.1.0/bin"
 TRELLISD_DB="/home/gil/tools-oss-cad-suite-0.1.0/share/trellis/database"
 
-while getopts 'uh' opt; do
+# Add BIN_PATH to the path if not already part of the path.
+BIN_PATH="/home/gil/tools-oss-cad-suite-0.1.0/bin"
+
+if [ -d "$BIN_PATH" ] && [[ ! $PATH =~ (^|:)$BIN_PATH(:|$) ]]; then
+    PATH+=:$BIN_PATH
+fi
+
+
+while getopts 'h' opt; do
     case "$opt" in
-        u ) OPTIONS="$OPTIONS -D ENABLE_UART" ;;
         h ) helpFunction ;;
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
     esac
@@ -63,7 +67,7 @@ fi
 
     yosys -p "synth_ecp5 -noabc9 -json out.json" -D $BOARD $OPTIONS utils.sv test_ft2232_fifo.sv audio.sv
 
-    if [ $? -eq 0 ]; then
+if [ $? -eq 0 ]; then
     nextpnr-ecp5 --package CABGA381 --25k --speed $SPEED --freq 62.50 --json out.json --lpf $LPF_FILE --textcfg out.cfg
     if [ $? -eq 0 ]; then
         ecppack --db $TRELLISD_DB out.cfg out.bit

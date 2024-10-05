@@ -1,5 +1,19 @@
-/*
- */
+/***********************************************************************************************************************
+ * Copyright (c) 2024 Virgil Dobjanschi dobjanschivirgil@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **********************************************************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -7,49 +21,53 @@
 #include "ftd2xx.h"
 
 //======================================================================================================================
-BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes);
-BOOL tx_data (unsigned char send_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
+BOOL rx_data (unsigned int send_bytes, unsigned char* rx_buffer, unsigned int rx_bytes);
+BOOL tx_data (unsigned int send_bytes, unsigned int packet_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
 
 //======================================================================================================================
-#define RX_BUFFER_SIZE 64
-
+#define RX_BUFFER_SIZE 256
+unsigned int bytes_received = 0;
 //======================================================================================================================
-#define TX_BUFFER_SIZE 64
+#define TX_BUFFER_SIZE 256
 unsigned char out_data = 0;
 unsigned char in_data = 0;
 BOOL run_test = TRUE;
+unsigned int bytes_sent = 0;
 //======================================================================================================================
-int main(int argc, char *argv[])
-{
-    FT_HANDLE ftHandle = NULL;
-    FT_STATUS ftStatus;
-    unsigned char Mask = 0xff;
-    unsigned char Mode;
-
+int main(int argc, char *argv[]) {
     int opt;
-    unsigned char send_bytes = 1;
+    unsigned int send_bytes = 1;
+    unsigned int packet_bytes = 1;
     if (argc <= 1) {
-        printf("Usage: %s [-p send bytes (1..255)]\r\n", argv[0]);
+        printf("Usage: %s [-c count of bytes -p bytes per packet]\r\n", argv[0]);
         return 1;
     } else {
-        while ((opt = getopt(argc, argv, "p:")) != -1) {
+        while ((opt = getopt(argc, argv, "c:p:")) != -1) {
             switch (opt) {
-                case 'p': send_bytes = strtol (argv[2], NULL, 10); break;
+                case 'c': send_bytes = strtol (argv[2], NULL, 10); break;
+                case 'p': packet_bytes = strtol (argv[4], NULL, 10); break;
                 default: {
-                    printf("Usage: %s [-p send bytes]\r\n", argv[0]);
+                    printf("Usage: %s [-c count of bytes -p bytes per packet]\r\n", argv[0]);
                     return 1;
                 }
             }
         }
     }
 
-    //printf("Send bytes: %d\r\n", send_bytes);
-
-    ftStatus = FT_SetVIDPID(0x1403, 0x6010);
-    if(ftStatus != FT_OK) {
-        printf("FT_SetVIDPID failed! %d\r\n", ftStatus);
+    printf("Send bytes: %d, packet bytes: %d\r\n", send_bytes, packet_bytes);
+    if (send_bytes < packet_bytes) {
+        printf("Send bytes < packet bytes\r\n");
         return 1;
     }
+    if (packet_bytes > TX_BUFFER_SIZE) {
+        printf("Packet size > TX_BUFFER_SIZE (%d)\r\n", TX_BUFFER_SIZE);
+        return 1;
+    }
+
+    FT_HANDLE ftHandle = NULL;
+    FT_STATUS ftStatus;
+    unsigned char Mask = 0xff;
+    unsigned char Mode;
 
     ftStatus = FT_Open(0, &ftHandle);
     if(ftStatus != FT_OK) {
@@ -79,13 +97,14 @@ int main(int argc, char *argv[])
     FT_SetLatencyTimer(ftHandle, 2);
     FT_SetUSBParameters(ftHandle,0x10000, 0x10000);
     FT_SetFlowControl(ftHandle, FT_FLOW_RTS_CTS, 0x0, 0x0);
-    FT_Purge(ftHandle, FT_PURGE_RX);
+    FT_Purge(ftHandle, FT_PURGE_RX | FT_PURGE_TX);
 
     unsigned int EventStatus;
     unsigned int rx_bytes, tx_bytes;
     unsigned int rx_bytes_received;
     unsigned char rx_buffer[RX_BUFFER_SIZE];
     unsigned char tx_buffer[TX_BUFFER_SIZE];
+
     unsigned int tx_bytes_to_send = 0, tx_bytes_written;
     BOOL rx_stopped = FALSE;
     while (!rx_stopped) {
@@ -102,7 +121,7 @@ int main(int argc, char *argv[])
             }
 
             ftStatus = FT_Read(ftHandle, rx_buffer, rx_bytes, &rx_bytes_received);
-            printf("RD: %d\r\n", rx_bytes_received);
+            //printf("RD: %d\r\n", rx_bytes_received);
             if (ftStatus != FT_OK || rx_bytes_received != rx_bytes) {
                 printf("FT_Read failed! ftStatus = %d; Bytes requested: %d, Bytes received: %d\r\n",
                                     ftStatus, rx_bytes, rx_bytes_received);
@@ -110,19 +129,18 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            if (FALSE == rx_data (rx_buffer, rx_bytes)) {
+            if (FALSE == rx_data (send_bytes, rx_buffer, rx_bytes)) {
                 FT_Close(ftHandle);
                 return 1;
             }
         }
 
         if (tx_bytes_to_send == 0) {
-            tx_data (send_bytes, tx_buffer, &tx_bytes_to_send);
+            tx_data (send_bytes, packet_bytes, tx_buffer, &tx_bytes_to_send);
         }
 
-        /* Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
-         * Synchronous FIFO mode.
-         */
+        // Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
+        // Synchronous FIFO mode.
         if (tx_bytes_to_send > 0 && 512 - tx_bytes >= tx_bytes_to_send) {
             ftStatus = FT_Write(ftHandle, tx_buffer, tx_bytes_to_send, &tx_bytes_written);
             //printf("WR: %d\r\n", tx_bytes_written);
@@ -144,36 +162,48 @@ int main(int argc, char *argv[])
 }
 
 //======================================================================================================================
-BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes) {
+BOOL rx_data (unsigned int send_bytes, unsigned char* rx_buffer, unsigned int rx_bytes) {
     for (unsigned int i = 0; i < rx_bytes; i++) {
         if (rx_buffer[i] == in_data) {
-            printf("Recv: %d\r\n", rx_buffer[i]);
+            //printf("Recv: %d\r\n", rx_buffer[i]);
         } else {
             printf("Recv: %d, exp: %d\r\n", rx_buffer[i], in_data);
-            //return FALSE;
+            return FALSE;
         }
         in_data += 1;
     }
+    bytes_received += rx_bytes;
+    //printf("Recv: %d of %d\r\n", bytes_received, send_bytes);
 
+    if (bytes_received == send_bytes) {
+        printf("==== Test successfull ====\r\n");
+        return FALSE;
+    }
     return TRUE;
 }
 
 //======================================================================================================================
-BOOL tx_data (unsigned char send_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send) {
+BOOL tx_data (unsigned int send_bytes, unsigned int packet_bytes, unsigned char* tx_buffer, unsigned int* tx_bytes_to_send) {
     if (run_test) {
-        tx_buffer[0] = out_data;
-        *tx_bytes_to_send = 1;
-        printf("Send: %d\r\n", out_data);
+        for (unsigned int i = 0; i < packet_bytes; i++) {
+            tx_buffer[i] = out_data;
 
-        out_data += 1;
-        if (out_data == send_bytes) {
+            //printf("Send: %d\r\n", out_data);
+            out_data += 1;
+        }
+
+        *tx_bytes_to_send = packet_bytes;
+        bytes_sent += packet_bytes;
+
+        if (bytes_sent >= send_bytes) {
             // Done sending data
             run_test = FALSE;
-            printf("Done sending\r\n");
+            printf("Done sending %d bytes\r\n", send_bytes);
         }
     } else {
         *tx_bytes_to_send = 0;
     }
+
     return TRUE;
 }
 
