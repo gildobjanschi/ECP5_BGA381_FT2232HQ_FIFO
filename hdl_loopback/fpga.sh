@@ -14,10 +14,11 @@ helpFunction()
 BOARD=""
 LPF_FILE=""
 SPEED=""
-TRELLISD_DB="/home/gil/tools-oss-cad-suite-0.1.0/share/trellis/database"
+TOOLS_PATH="/home/gil/tools-oss-cad-suite-0.1.0"
 
+TRELLISD_DB="${TOOLS_PATH}/share/trellis/database"
 # Add BIN_PATH to the path if not already part of the path.
-BIN_PATH="/home/gil/tools-oss-cad-suite-0.1.0/bin"
+BIN_PATH="${TOOLS_PATH}/bin"
 
 if [ -d "$BIN_PATH" ] && [[ ! $PATH =~ (^|:)$BIN_PATH(:|$) ]]; then
     PATH+=:$BIN_PATH
