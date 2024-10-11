@@ -19,7 +19,7 @@
  * This module implements the loopback verification. Any byte received, including host commands,
  * are sent back with a CMD_FPGA_LOOPBACK command.
  *
- * This was useful during debugging to ensure that the control module receives the expected data from the host.
+ * This code was useful during debugging to ensure that the control module receives the expected data from the host.
  **********************************************************************************************************************/
 `timescale 1ps/1ps
 `default_nettype none
