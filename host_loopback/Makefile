@@ -17,8 +17,8 @@ APP = ft2232
 
 all: $(APP)
 
-$(APP): main_loopback.c
-	$(CC) main_loopback.c -o $(APP) $(CFLAGS)
+$(APP): main.c
+	$(CC) main.c -o $(APP) $(CFLAGS)
 
 clean:
 	-rm -f *.o ; rm -f $(APP);

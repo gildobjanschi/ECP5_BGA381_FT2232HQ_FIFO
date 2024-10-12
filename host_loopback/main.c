@@ -27,15 +27,17 @@ BOOL rx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned cha
 BOOL tx_data (unsigned int packet_count, unsigned int packet_bytes, unsigned char* tx_buffer,
                     unsigned int* tx_bytes_to_send, unsigned char verbose);
 
+#define USB_BUFFER_SIZE 0x10000
 //======================================================================================================================
-#define RX_BUFFER_SIZE 512
+#define RX_BUFFER_SIZE USB_BUFFER_SIZE
 unsigned int bytes_received = 0;
 //======================================================================================================================
-#define TX_BUFFER_SIZE 512
+#define TX_BUFFER_SIZE USB_BUFFER_SIZE
 unsigned char out_data = 0;
 unsigned char in_data = 0;
 BOOL run_test = TRUE;
 unsigned int packets_sent = 0;
+
 
 //======================================================================================================================
 int main(int argc, char *argv[]) {
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     FT_SetLatencyTimer(ftHandle, 2);
-    FT_SetUSBParameters(ftHandle,0x10000, 0x10000);
+    FT_SetUSBParameters(ftHandle, USB_BUFFER_SIZE, USB_BUFFER_SIZE);
     FT_SetFlowControl(ftHandle, FT_FLOW_RTS_CTS, 0x0, 0x0);
     FT_Purge(ftHandle, FT_PURGE_RX | FT_PURGE_TX);
 
@@ -148,14 +150,11 @@ int main(int argc, char *argv[]) {
                 break;
             }
         }
-
         if (tx_bytes_to_send == 0) {
             tx_data (packet_count, packet_bytes, tx_buffer, &tx_bytes_to_send, verbose);
         }
 
-        // Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
-        // Synchronous FIFO mode.
-        if (tx_bytes_to_send > 0 && 512 - tx_bytes >= tx_bytes_to_send) {
+        if (tx_bytes_to_send > 0 && USB_BUFFER_SIZE - tx_bytes >= tx_bytes_to_send) {
             ftStatus = FT_Write(ftHandle, tx_buffer, tx_bytes_to_send, &tx_bytes_written);
 
             if (ftStatus != FT_OK || tx_bytes_written != tx_bytes_to_send) {
@@ -170,7 +169,12 @@ int main(int argc, char *argv[]) {
             }
 
             tx_total_bytes_sent += tx_bytes_written;
-
+/*
+            // If we don't want to wait for the loopback data this code is useful in breaking out of the while loop.
+            if (tx_total_bytes_sent == packet_bytes * packet_count) {
+                break;
+            }
+*/
             // This buffer was sent
             tx_bytes_to_send = 0;
         }
@@ -180,8 +184,11 @@ int main(int argc, char *argv[]) {
     struct timeval tv_stop;
     gettimeofday(&tv_stop, NULL);
     long long stop_ms = tv_stop.tv_sec*1000LL + tv_stop.tv_usec/1000;
-    printf("%d bytes sent, %d bytes received in %ld ms\r\n", tx_total_bytes_sent, rx_total_bytes_received,
-            (long)(stop_ms - start_ms));
+    long duration = (long)(stop_ms - start_ms);
+
+    printf("%d bytes sent, %d bytes received in %ld ms. Tx: %ld KBps, Rx: %ld KBps\r\n",
+                tx_total_bytes_sent, rx_total_bytes_received, duration, tx_total_bytes_sent / duration,
+                rx_total_bytes_received / duration);
 
     FT_Close(ftHandle);
 
