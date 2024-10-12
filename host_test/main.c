@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include "ftd2xx.h"
 
@@ -34,6 +35,7 @@ unsigned int payload_received = 0;
 unsigned char next_rx_value = 0;
 unsigned int rx_payload_length = 0;
 unsigned char last_rx_cmd;
+unsigned int rx_total_bytes_received = 0;
 
 // Commands from the FPGA to the host.
 #define CMD_FPGA_DATA           0x40
@@ -69,6 +71,8 @@ unsigned int slow_tx_bytes_to_send = 0;
 unsigned int slow_index = 0;
 unsigned char slow_tx_buffer[TX_BUFFER_SIZE];
 BOOL send_slow = FALSE;
+unsigned int tx_total_bytes_sent = 0;
+
 //======================================================================================================================
 int main(int argc, char *argv[])
 {
@@ -136,6 +140,11 @@ int main(int argc, char *argv[])
     unsigned char rx_buffer[RX_BUFFER_SIZE];
     unsigned char tx_buffer[TX_BUFFER_SIZE];
     unsigned int tx_bytes_to_send = 0, tx_bytes_written;
+    // Get the start time
+    struct timeval tv_start;
+    gettimeofday(&tv_start, NULL);
+    long long start_ms = tv_start.tv_sec*1000LL + tv_start.tv_usec/1000;
+
     BOOL rx_stopped = FALSE;
     while (TRUE) {
         ftStatus = FT_GetStatus (ftHandle, &rx_bytes, &tx_bytes, &EventStatus);
@@ -158,6 +167,7 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
+            rx_total_bytes_received += rx_bytes_received;
             if (FALSE == rx_data (rx_buffer, rx_bytes, &rx_stopped)) {
                 FT_Close(ftHandle);
                 return 1;
@@ -187,9 +197,12 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
+            tx_total_bytes_sent += tx_bytes_written;
+/*
             for (unsigned int i = 0; i < tx_bytes_to_send; i++) {
                 printf ("Sending: %d\r\n", tx_buffer[i]);
             }
+*/
             if (send_slow) {
                 usleep(1000000);
             }
@@ -198,6 +211,13 @@ int main(int argc, char *argv[])
             tx_bytes_to_send = 0;
         }
     }
+
+    // Get the stop time
+    struct timeval tv_stop;
+    gettimeofday(&tv_stop, NULL);
+    long long stop_ms = tv_stop.tv_sec*1000LL + tv_stop.tv_usec/1000;
+    printf("%d bytes sent, %d bytes received in %ld ms\r\n", tx_total_bytes_sent, rx_total_bytes_received,
+            (long)(stop_ms - start_ms));
 
     FT_Close(ftHandle);
 
