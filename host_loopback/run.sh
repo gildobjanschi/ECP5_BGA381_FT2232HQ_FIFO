@@ -13,7 +13,11 @@ while getopts 'p:c:v' opt; do
 done
 
 # Remove drivers that conflict with D2XX drivers
-sudo rmmod ftdi_sio
-sudo rmmod usbserial
+if lsmod | grep -wq "ftdi_sio"; then
+    sudo rmmod ftdi_sio
+fi
+if lsmod | grep -wq "usbserial"; then
+    sudo rmmod usbserial
+fi
 
 sudo ./ft2232 -c $PACKET_COUNT -p $PACKET_BYTES $VERBOSE

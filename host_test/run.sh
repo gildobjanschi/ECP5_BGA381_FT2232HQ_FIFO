@@ -16,6 +16,10 @@ while getopts 't:p:c:sv' opt; do
     esac
 done
 
-sudo rmmod ftdi_sio
-sudo rmmod usbserial
+if lsmod | grep -wq "ftdi_sio"; then
+    sudo rmmod ftdi_sio
+fi
+if lsmod | grep -wq "usbserial"; then
+    sudo rmmod usbserial
+fi
 sudo ./ft2232 -t $TEST_NUM -p $PACKET_BYTES -c $PACKET_COUNT $SEND_SLOW $VERBOSE
