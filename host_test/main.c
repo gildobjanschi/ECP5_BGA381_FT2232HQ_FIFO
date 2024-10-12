@@ -222,8 +222,10 @@ int main(int argc, char *argv[]) {
     struct timeval tv_stop;
     gettimeofday(&tv_stop, NULL);
     long long stop_ms = tv_stop.tv_sec*1000LL + tv_stop.tv_usec/1000;
-    printf("%d bytes sent, %d bytes received in %ld ms\r\n", tx_total_bytes_sent, rx_total_bytes_received,
-            (long)(stop_ms - start_ms));
+    long duration = (long)(stop_ms - start_ms);
+    printf("%d bytes sent, %d bytes received in %ld ms. Tx: %ld Kbps, Rx: %ld Kbps\r\n",
+                tx_total_bytes_sent, rx_total_bytes_received, duration, (tx_total_bytes_sent * 8) / duration,
+                (rx_total_bytes_received * 8) / duration);
 
     FT_Close(ftHandle);
 
