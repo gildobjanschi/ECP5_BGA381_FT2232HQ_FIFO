@@ -22,7 +22,7 @@
 #include "ftd2xx.h"
 
 //======================================================================================================================
-BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped);
+BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char verbose, BOOL* pStopped);
 BOOL tx_data (int test_number, unsigned char payload_length, unsigned char packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
 BOOL tx_data_slow (int test_number, unsigned char payload_length, unsigned char packet_count,
@@ -35,7 +35,6 @@ unsigned int payload_received = 0;
 unsigned char next_rx_value = 0;
 unsigned int rx_payload_length = 0;
 unsigned char last_rx_cmd;
-unsigned int rx_total_bytes_received = 0;
 
 // Commands from the FPGA to the host.
 #define CMD_FPGA_DATA           0x40
@@ -71,11 +70,9 @@ unsigned int slow_tx_bytes_to_send = 0;
 unsigned int slow_index = 0;
 unsigned char slow_tx_buffer[TX_BUFFER_SIZE];
 BOOL send_slow = FALSE;
-unsigned int tx_total_bytes_sent = 0;
 
 //======================================================================================================================
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     FT_HANDLE ftHandle = NULL;
     FT_STATUS ftStatus;
     unsigned char Mask = 0xff;
@@ -85,16 +82,18 @@ int main(int argc, char *argv[])
     int test_number;
     unsigned char payload_length = 1;
     unsigned char packet_count = 1;
+    unsigned char verbose = 0;
     if (argc <= 1) {
-        printf("Usage: %s -t test number [-p payload length] [-c packet count] [-s send slow]\r\n", argv[0]);
+        printf("Usage: %s -t test number [-p payload length] [-c packet count] [-s send slow] [-v]\r\n", argv[0]);
         return 1;
     } else {
-        while ((opt = getopt(argc, argv, "t:p:c:s")) != -1) {
+        while ((opt = getopt(argc, argv, "t:p:c:sv")) != -1) {
             switch (opt) {
                 case 't': test_number = strtol (argv[2], NULL, 10); break;
                 case 'p': payload_length = strtol (argv[4], NULL, 10); break;
                 case 'c': packet_count = strtol (argv[6], NULL, 10); break;
                 case 's': send_slow = TRUE; break;
+                case 'v': verbose = 1; break;
                 default: {
                     printf("Usage: %s -t test number [-p payload length] [-c packet count] [-s send slow]\r\n", argv[0]);
                     return 1;
@@ -103,7 +102,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Test number: %d, payload length: %d, packet count: %d\r\n", test_number, payload_length, packet_count);
+    if (verbose) {
+        printf("Test number: %d, payload length: %d, packet count: %d\r\n", test_number, payload_length, packet_count);
+    }
 
     ftStatus = FT_Open(0, &ftHandle);
     if(ftStatus != FT_OK) {
@@ -140,6 +141,10 @@ int main(int argc, char *argv[])
     unsigned char rx_buffer[RX_BUFFER_SIZE];
     unsigned char tx_buffer[TX_BUFFER_SIZE];
     unsigned int tx_bytes_to_send = 0, tx_bytes_written;
+    unsigned int rx_total_bytes_received = 0;
+    unsigned int tx_total_bytes_sent = 0;
+
+    printf("Start sending.\r\n");
     // Get the start time
     struct timeval tv_start;
     gettimeofday(&tv_start, NULL);
@@ -168,7 +173,7 @@ int main(int argc, char *argv[])
             }
 
             rx_total_bytes_received += rx_bytes_received;
-            if (FALSE == rx_data (rx_buffer, rx_bytes, &rx_stopped)) {
+            if (FALSE == rx_data (rx_buffer, rx_bytes, verbose, &rx_stopped)) {
                 FT_Close(ftHandle);
                 return 1;
             }
@@ -198,11 +203,12 @@ int main(int argc, char *argv[])
             }
 
             tx_total_bytes_sent += tx_bytes_written;
-/*
-            for (unsigned int i = 0; i < tx_bytes_to_send; i++) {
-                printf ("Sending: %d\r\n", tx_buffer[i]);
+            if (verbose) {
+                for (unsigned int i = 0; i < tx_bytes_to_send; i++) {
+                    printf ("Sending: %d\r\n", tx_buffer[i]);
+                }
             }
-*/
+
             if (send_slow) {
                 usleep(1000000);
             }
@@ -225,7 +231,7 @@ int main(int argc, char *argv[])
 }
 
 //======================================================================================================================
-BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
+BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char verbose, BOOL* pStopped) {
     *pStopped = FALSE;
 
     for (unsigned int i = 0; i < rx_bytes; i++) {
@@ -237,19 +243,25 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
                 rx_payload_length = rx_buffer[i] & 0x3f;
                 switch (last_rx_cmd) {
                     case CMD_FPGA_DATA: {
-                        printf("CMD_FPGA_DATA with payload: %d bytes\r\n", rx_payload_length);
+                        if (verbose) {
+                            printf("CMD_FPGA_DATA with payload: %d bytes\r\n", rx_payload_length);
+                        }
                         rx_state_m = STATE_RX_STREAM_PAYLOAD;
                         break;
                     }
 
                     case CMD_FPGA_LOOPBACK: {
-                        printf("CMD_FPGA_LOOPBACK with payload: %d bytes\r\n", rx_payload_length);
+                        if (verbose) {
+                            printf("CMD_FPGA_LOOPBACK with payload: %d bytes\r\n", rx_payload_length);
+                        }
                         rx_state_m = STATE_RX_LOOPBACK_PAYLOAD;
                         break;
                     }
 
                     case CMD_FPGA_STOPPED: {
-                        printf("CMD_FPGA_STOPPED with payload: %d bytes\r\n", rx_payload_length);
+                        if (verbose) {
+                            printf("CMD_FPGA_STOPPED with payload: %d bytes\r\n", rx_payload_length);
+                        }
                         rx_state_m = STATE_RX_STOPPED_PAYLOAD;
                         break;
                     }
@@ -264,7 +276,9 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
             }
 
             case STATE_RX_STREAM_PAYLOAD: {
-                printf("STATE_RX_STREAM_PAYLOAD: %d\r\n", rx_buffer[i]);
+                if (verbose) {
+                    printf("STATE_RX_STREAM_PAYLOAD: %d\r\n", rx_buffer[i]);
+                }
 
                 if (rx_buffer[i] != next_rx_value) {
                     printf("Got: %d, Expected: %d\r\n", rx_buffer[i], next_rx_value);
@@ -281,7 +295,9 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, BOOL* pStopped) {
             }
 
             case STATE_RX_LOOPBACK_PAYLOAD: {
-                printf("STATE_RX_LOOPBACK_PAYLOAD: %d\r\n", rx_buffer[i]);
+                if (verbose) {
+                    printf("STATE_RX_LOOPBACK_PAYLOAD: %d\r\n", rx_buffer[i]);
+                }
 
                 payload_received += 1;
                 if (payload_received == rx_payload_length) {
