@@ -8,7 +8,7 @@ while getopts 'p:c:v' opt; do
         p ) PACKET_BYTES="${OPTARG}" ;;
         c ) PACKET_COUNT="${OPTARG}" ;;
         v ) VERBOSE="-v" ;;
-        ? ) echo "Usage: $0 -p <bytes per packet> -c <number of packets> -v" ; exit 1 ;;
+        ? ) echo "Usage: $0 -p <bytes per packet> -c <number of packets> [-v]" ; exit 1 ;;
     esac
 done
 
