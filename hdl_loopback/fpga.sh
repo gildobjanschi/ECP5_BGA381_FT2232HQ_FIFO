@@ -66,7 +66,7 @@ if test -f "out.json"; then
     rm out.json
 fi
 
-    yosys -p "synth_ecp5 -noabc9 -json out.json" -D $BOARD $OPTIONS utils.sv test_ft2232_fifo.sv audio.sv
+    yosys -p "synth_ecp5 -noabc9 -json out.json" -D $BOARD $OPTIONS utils.sv ft2232_fifo.sv audio.sv
 
 if [ $? -eq 0 ]; then
     nextpnr-ecp5 --package CABGA381 --25k --speed $SPEED --freq 62.50 --json out.json --lpf $LPF_FILE --textcfg out.cfg

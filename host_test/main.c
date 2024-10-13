@@ -28,8 +28,9 @@ BOOL tx_data (int test_number, unsigned char payload_length, unsigned char packe
 BOOL tx_data_slow (int test_number, unsigned char payload_length, unsigned char packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
 
+#define USB_BUFFER_SIZE 0x10000
 //======================================================================================================================
-#define RX_BUFFER_SIZE 512
+#define RX_BUFFER_SIZE USB_BUFFER_SIZE
 
 unsigned int payload_received = 0;
 unsigned char next_rx_value = 0;
@@ -49,7 +50,7 @@ unsigned char last_rx_cmd;
 #define STATE_RX_STOPPED           5
 unsigned char rx_state_m = STATE_RX_CMD;
 //======================================================================================================================
-#define TX_BUFFER_SIZE 512
+#define TX_BUFFER_SIZE USB_BUFFER_SIZE
 
 unsigned char next_tx_value = 0;
 unsigned char packets_sent = 0;
@@ -102,10 +103,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (verbose) {
-        printf("Test number: %d, payload length: %d, packet count: %d\r\n", test_number, payload_length, packet_count);
-    }
-
     ftStatus = FT_Open(0, &ftHandle);
     if(ftStatus != FT_OK) {
         printf("FT_Open failed! %d\r\n", ftStatus);
@@ -144,7 +141,7 @@ int main(int argc, char *argv[]) {
     unsigned int rx_total_bytes_received = 0;
     unsigned int tx_total_bytes_sent = 0;
 
-    printf("Start sending.\r\n");
+    printf("Start test: %d, payload length: %d, packet count: %d\r\n", test_number, payload_length, packet_count);
     // Get the start time
     struct timeval tv_start;
     gettimeofday(&tv_start, NULL);
@@ -191,9 +188,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // Although the RX and TX buffers are 4KB, they only use 2x 512 bytes for each buffer under FT245
-        // synchronous FIFO mode.
-        if (tx_bytes_to_send > 0 && 512 - tx_bytes >= tx_bytes_to_send) {
+        if (tx_bytes_to_send > 0 && USB_BUFFER_SIZE - tx_bytes >= tx_bytes_to_send) {
             ftStatus = FT_Write(ftHandle, tx_buffer, tx_bytes_to_send, &tx_bytes_written);
             if (ftStatus != FT_OK || tx_bytes_written != tx_bytes_to_send) {
                 printf("FT_Write failed! ftStatus = %d; Bytes to send: %d, Bytes sent: %d\r\n",
@@ -223,9 +218,9 @@ int main(int argc, char *argv[]) {
     gettimeofday(&tv_stop, NULL);
     long long stop_ms = tv_stop.tv_sec*1000LL + tv_stop.tv_usec/1000;
     long duration = (long)(stop_ms - start_ms);
-    printf("%d bytes sent, %d bytes received in %ld ms. Tx: %ld Kbps, Rx: %ld Kbps\r\n",
-                tx_total_bytes_sent, rx_total_bytes_received, duration, (tx_total_bytes_sent * 8) / duration,
-                (rx_total_bytes_received * 8) / duration);
+    printf("%d bytes sent, %d bytes received in %ld ms. Tx: %ld KBps, Rx: %ld KBps\r\n",
+                tx_total_bytes_sent, rx_total_bytes_received, duration, tx_total_bytes_sent/ duration,
+                rx_total_bytes_received / duration);
 
     FT_Close(ftHandle);
 
