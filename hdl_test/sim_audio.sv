@@ -109,7 +109,7 @@ module sim_audio;
         $dumpvars(0, fifo_oe_n);
 `endif
 
-        #5000000000
+        #15000000000
 
         $display($time, " SIM: ---------------------- Simulation end [Timeout] ------------------------");
 

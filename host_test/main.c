@@ -23,42 +23,43 @@
 
 //======================================================================================================================
 BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char verbose, BOOL* pStopped);
-BOOL tx_data (int test_number, unsigned char payload_length, unsigned char packet_count,
+BOOL tx_data (unsigned char test_number, unsigned short payload_length, unsigned short packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
-BOOL tx_data_slow (int test_number, unsigned char payload_length, unsigned char packet_count,
+BOOL tx_data_slow (unsigned char test_number, unsigned short payload_length, unsigned short packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send);
 
 #define USB_BUFFER_SIZE 0x10000
 //======================================================================================================================
 #define RX_BUFFER_SIZE USB_BUFFER_SIZE
 
-unsigned int payload_received = 0;
+unsigned short payload_received = 0;
 unsigned char next_rx_value = 0;
-unsigned int rx_payload_length = 0;
+unsigned short rx_payload_length = 0;
 unsigned char last_rx_cmd;
 
 // Commands from the FPGA to the host.
-#define CMD_FPGA_DATA           0x40
-#define CMD_FPGA_LOOPBACK       0x80
-#define CMD_FPGA_STOPPED        0xc0
+#define CMD_FPGA_DATA           0x20
+#define CMD_FPGA_LOOPBACK       0x40
+#define CMD_FPGA_STOPPED        0x60
 
 // Receive state machines
-#define STATE_RX_CMD               1
-#define STATE_RX_STREAM_PAYLOAD    2
-#define STATE_RX_LOOPBACK_PAYLOAD  3
-#define STATE_RX_STOPPED_PAYLOAD   4
-#define STATE_RX_STOPPED           5
+#define STATE_RX_CMD                    1
+#define STATE_RX_STREAM_PAYLOAD         2
+#define STATE_RX_STREAM_PAYLOAD_LENGTH  3
+#define STATE_RX_LOOPBACK_PAYLOAD       4
+#define STATE_RX_STOPPED_PAYLOAD        5
+#define STATE_RX_STOPPED                6
 unsigned char rx_state_m = STATE_RX_CMD;
 //======================================================================================================================
 #define TX_BUFFER_SIZE USB_BUFFER_SIZE
 
 unsigned char next_tx_value = 0;
-unsigned char packets_sent = 0;
+unsigned short packets_sent = 0;
 
-// Commands from the host to the FPGA; bits[7:6] represent the command and bits[5:0] represent the length of the packet.
+// Commands from the host to the FPGA; bits[7:5] represent the command and bits[5:0] represent the length of the packet.
 #define CMD_HOST_START          0x00
-#define CMD_HOST_DATA           0x40
-#define CMD_HOST_STOP           0x80
+#define CMD_HOST_DATA           0x20
+#define CMD_HOST_STOP           0x40
 
 // Send state machines
 #define STATE_TX_START_CMD         1
@@ -80,9 +81,9 @@ int main(int argc, char *argv[]) {
     unsigned char Mode;
 
     int opt;
-    int test_number;
-    unsigned char payload_length = 1;
-    unsigned char packet_count = 1;
+    unsigned char test_number;
+    unsigned short payload_length = 1;
+    unsigned short packet_count = 1;
     unsigned char verbose = 0;
     if (argc <= 1) {
         printf("Usage: %s -t test number [-p payload length] [-c packet count] [-s send slow] [-v]\r\n", argv[0]);
@@ -230,20 +231,27 @@ int main(int argc, char *argv[]) {
 //======================================================================================================================
 BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char verbose, BOOL* pStopped) {
     *pStopped = FALSE;
-
+    unsigned char rx_byte_sel;
+    unsigned short msbyte;
     for (unsigned int i = 0; i < rx_bytes; i++) {
         switch (rx_state_m) {
             case STATE_RX_CMD: {
                 payload_received = 0;
 
-                last_rx_cmd = rx_buffer[i] & 0xc0;
-                rx_payload_length = rx_buffer[i] & 0x3f;
+                last_rx_cmd = rx_buffer[i] & 0xe0;
+                rx_payload_length = rx_buffer[i] & 0x1f;
                 switch (last_rx_cmd) {
                     case CMD_FPGA_DATA: {
-                        if (verbose) {
-                            printf("CMD_FPGA_DATA with payload: %d bytes\r\n", rx_payload_length);
+                        if ((rx_buffer[i] & 0x10) == 0x10) {
+                            // 2 bytes length follows
+                            rx_byte_sel = 0;
+                            rx_state_m = STATE_RX_STREAM_PAYLOAD_LENGTH;
+                        } else {
+                            if (verbose) {
+                                printf("CMD_FPGA_DATA with payload: %d bytes\r\n", rx_payload_length);
+                            }
+                            rx_state_m = STATE_RX_STREAM_PAYLOAD;
                         }
-                        rx_state_m = STATE_RX_STREAM_PAYLOAD;
                         break;
                     }
 
@@ -267,6 +275,21 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char ver
                         printf("Bad command: %d with payload: %d bytes\r\n", last_rx_cmd, rx_payload_length);
                         return FALSE;
                     }
+                }
+
+                break;
+            }
+
+            case STATE_RX_STREAM_PAYLOAD_LENGTH: {
+                if (rx_byte_sel == 0) {
+                    msbyte = rx_buffer[i];
+                    rx_byte_sel = 1;
+                } else {
+                    rx_payload_length = ((unsigned short)msbyte) << 8 | rx_buffer[i];
+                    if (verbose) {
+                        printf("STATE_RX_STREAM_PAYLOAD_LENGTH: %d bytes\r\n", rx_payload_length);
+                    }
+                    rx_state_m = STATE_RX_STREAM_PAYLOAD;
                 }
 
                 break;
@@ -334,7 +357,7 @@ BOOL rx_data (unsigned char* rx_buffer, unsigned int rx_bytes, unsigned char ver
 }
 
 //======================================================================================================================
-BOOL tx_data_slow (int test_number, unsigned char payload_length, unsigned char packet_count,
+BOOL tx_data_slow (unsigned char test_number, unsigned short payload_length, unsigned short packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send) {
     if (slow_index < slow_tx_bytes_to_send) {
         tx_buffer[0] = slow_tx_buffer[slow_index];
@@ -357,16 +380,18 @@ BOOL tx_data_slow (int test_number, unsigned char payload_length, unsigned char 
 }
 
 //======================================================================================================================
-BOOL tx_data (int test_number, unsigned char payload_length, unsigned char packet_count,
+BOOL tx_data (unsigned char test_number, unsigned short payload_length, unsigned short packet_count,
                         unsigned char* tx_buffer, unsigned int* tx_bytes_to_send) {
     switch (tx_state_m) {
         case STATE_TX_START_CMD: {
-            tx_buffer[0] = CMD_HOST_START | 3;
+            tx_buffer[0] = CMD_HOST_START | 5;
             tx_buffer[1] = test_number;
-            tx_buffer[2] = payload_length;
-            tx_buffer[3] = packet_count;
+            tx_buffer[2] = payload_length >> 8;
+            tx_buffer[3] = (unsigned char) payload_length;
+            tx_buffer[4] = packet_count >> 8;
+            tx_buffer[5] = (unsigned char) packet_count;
 
-            *tx_bytes_to_send = 4;
+            *tx_bytes_to_send = 6;
 
             if (test_number == 0 || test_number == 1) {
                 if (packet_count > 0) {
@@ -383,13 +408,15 @@ BOOL tx_data (int test_number, unsigned char payload_length, unsigned char packe
         }
 
         case STATE_TX_STREAM_CMD: {
-            tx_buffer[0] = (unsigned char) CMD_HOST_DATA | payload_length;
-            for (int i = 1; i < payload_length + 1; i++) {
+            tx_buffer[0] = (unsigned char) CMD_HOST_DATA | 0x10;
+            tx_buffer[1] = payload_length >> 8;
+            tx_buffer[2] = (unsigned char) payload_length;
+            for (int i = 3; i < payload_length + 3; i++) {
                 tx_buffer[i] = next_tx_value;
                 next_tx_value += 1;
             }
 
-            *tx_bytes_to_send = payload_length + 1;
+            *tx_bytes_to_send = payload_length + 3;
 
             packets_sent = packets_sent + 1;
             if (packets_sent == packet_count) {

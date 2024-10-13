@@ -74,10 +74,8 @@ module ft2232_fifo (
     logic [7:0] saved_rd_data;
     logic have_saved_rd_data;
 
-    logic [7:0] saved_wr_data_0, saved_wr_data_1;
-    logic [1:0] saved_wr_data_bits;
+    logic [7:0] saved_wr_data;
     logic have_saved_wr_data;
-    assign have_saved_wr_data = saved_wr_data_bits[0] || saved_wr_data_bits[1];
 
     //==================================================================================================================
     // The FIFO state machine
@@ -98,7 +96,7 @@ module ft2232_fifo (
             rd_out_fifo_en_o <= 1'b0;
 
             have_saved_rd_data <= 1'b0;
-            saved_wr_data_bits <= 2'b00;
+            have_saved_wr_data <= 1'b0;
         end else begin
             case (state_m)
                 STATE_RD_IDLE: begin
@@ -232,24 +230,17 @@ module ft2232_fifo (
 
                 STATE_WR_FLUSH_SAVED_DATA: begin
                     if (~fifo_txe_n_i) begin
-                        if (saved_wr_data_bits[0]) begin
-                            saved_wr_data_bits[0] <= 1'b0;
+                        if (have_saved_wr_data) begin
+                            have_saved_wr_data <= 1'b0;
                             fifo_wr_n_o <= 1'b0;
                             // Write data to the FT2232 FIFO.
-                            fifo_data_o <= saved_wr_data_0;
+                            fifo_data_o <= saved_wr_data;
 `ifdef D_FT_FIFO
                             $display ($time, " FT_FIFO:\t<---- [STATE_WR_FLUSH_SAVED_DATA] Wr FT2232 (saved 0): %d.",
-                                            saved_wr_data_0);
+                                            saved_wr_data);
 `endif
-                        end else if (saved_wr_data_bits[1]) begin
-                            saved_wr_data_bits[1] <= 1'b0;
-                            fifo_wr_n_o <= 1'b0;
-                            // Write data to the FT2232 FIFO.
-                            fifo_data_o <= saved_wr_data_1;
-`ifdef D_FT_FIFO
-                            $display ($time, " FT_FIFO:\t<---- [STATE_WR_FLUSH_SAVED_DATA] Wr FT2232 (saved 1): %d.",
-                                            saved_wr_data_1);
-`endif
+                        end else begin
+                            fifo_wr_n_o <= 1'b1;
                         end
                     end else begin
                         fifo_wr_n_o <= 1'b1;
@@ -261,26 +252,12 @@ module ft2232_fifo (
                 STATE_WR_DATA: begin
                     if (fifo_txe_n_i) begin
                         // The last value could not be written (the FT2232 FIFO became full).
-                        saved_wr_data_bits[0] <= 1'b1;
-                        if (~rd_out_fifo_empty_i) begin
+                        have_saved_wr_data <= 1'b1;
+                        saved_wr_data <= rd_out_fifo_data_i;
 `ifdef D_FT_FIFO
-                            $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232 [0]: %d, [1] %d.",
-                                        saved_wr_data_0, rd_out_fifo_data_i);
+                        $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232 [0]: %d.", rd_out_fifo_data_i);
 `endif
-                            // Save the data that was read out of the OUT FIFO but cannot be written now
-                            // to the FT2232 FIFO.
-                            saved_wr_data_1 <= rd_out_fifo_data_i;
-                            saved_wr_data_bits[1] <= 1'b1;
-                        end else begin
-`ifdef D_FT_FIFO
-                            $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232 [0]: %d.", saved_wr_data_0);
-`endif
-                        end
-
                         fifo_wr_n_o <= 1'b1;
-                        rd_out_fifo_en_o <= 1'b0;
-
-                        state_m <= STATE_WR_IDLE;
                     end else if (~rd_out_fifo_empty_i) begin
 `ifdef D_FT_FIFO
                         $display ($time, " FT_FIFO:\t<--- [STATE_WR_DATA] Wr FT2232: %d.", rd_out_fifo_data_i);
@@ -288,16 +265,12 @@ module ft2232_fifo (
                         fifo_wr_n_o <= 1'b0;
                         // Write data to the FT2232 FIFO.
                         fifo_data_o <= rd_out_fifo_data_i;
-                        // Save this value in case the FT2232 FIFO will not accept the data now in which case
-                        // the saved_wr_data_bits[0] will be set so that the write can be retried when the FT2232
-                        // has room to accept the byte.
-                        saved_wr_data_0 <= rd_out_fifo_data_i;
                     end else begin
                         fifo_wr_n_o <= 1'b1;
-                        rd_out_fifo_en_o <= 1'b0;
-
-                        state_m <= STATE_WR_IDLE;
                     end
+
+                    rd_out_fifo_en_o <= 1'b0;
+                    state_m <= STATE_WR_IDLE;
                 end
 
                 default: begin

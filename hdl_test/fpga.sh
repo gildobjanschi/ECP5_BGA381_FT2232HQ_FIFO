@@ -8,7 +8,7 @@ helpFunction()
     echo ""
     echo "Usage: $0 [-f <FIFO address bits>] -l -h"
     echo "    -f: Async FIFO address bits. Default is 5 (32 bytes FIFO)."
-    echo "    -l Loopback mode."
+    echo "    -l Loopback mode (do not use this when testing; it is intended for debugging)."
     echo "    -h: Help."
     exit 1
 }
@@ -60,7 +60,7 @@ fi
 yosys -p "synth_ecp5 -noabc9 -json out.json" $OPTIONS utils.sv async_fifo.sv $CONTROL ft2232_fifo.sv audio.sv
 
 if [ $? -eq 0 ]; then
-    nextpnr-ecp5 --package CABGA381 --25k --speed $SPEED --freq 62.50 --json out.json --lpf $LPF_FILE --textcfg out.cfg
+    nextpnr-ecp5 --package CABGA381 --25k --speed $SPEED --freq 100.00 --json out.json --lpf $LPF_FILE --textcfg out.cfg
     if [ $? -eq 0 ]; then
         ecppack --db $TRELLISD_DB out.cfg out.bit
         if [ $? -eq 0 ]; then

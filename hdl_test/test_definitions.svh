@@ -16,14 +16,14 @@
  **********************************************************************************************************************/
 
 // Commands from the host to the FPGA.
-`define CMD_HOST_START          2'b00
-`define CMD_HOST_DATA           2'b01
-`define CMD_HOST_STOP           2'b10
+`define CMD_HOST_START          3'b000
+`define CMD_HOST_DATA           3'b001
+`define CMD_HOST_STOP           3'b010
 
 // Commands from the FPGA to the host.
-`define CMD_FPGA_DATA           2'b01
-`define CMD_FPGA_LOOPBACK       2'b10
-`define CMD_FPGA_STOPPED        2'b11
+`define CMD_FPGA_DATA           3'b001
+`define CMD_FPGA_LOOPBACK       3'b010
+`define CMD_FPGA_STOPPED        3'b011
 
 // Test number definitions.
 `define TEST_RECEIVE            8'd0

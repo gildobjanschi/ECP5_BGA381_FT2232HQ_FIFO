@@ -55,15 +55,15 @@ module control (
     localparam STATE_WR_BUFFER  = 1'b0;
     logic state_m, next_state_m;
 
-    logic [5:0] wr_data_index;
+    logic [4:0] wr_data_index;
     logic [7:0] wr_data[0:1];
     //==================================================================================================================
     // The FIFO reader
     //==================================================================================================================
     task read_data_task (input logic [7:0] fifo_data);
         // Write back the byte received
-        wr_data_index <= 6'd0;
-        wr_data[0] <= {`CMD_FPGA_LOOPBACK, 6'd1};
+        wr_data_index <= 5'd0;
+        wr_data[0] <= {`CMD_FPGA_LOOPBACK, 5'd1};
         wr_data[1] <= fifo_data;
 
         state_m <= STATE_WR_BUFFER;
@@ -74,7 +74,7 @@ module control (
     // The FIFO writter
     //==================================================================================================================
     task write_buffer_task;
-        if (wr_data_index == 6'd2) begin
+        if (wr_data_index == 5'd2) begin
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
         end else begin

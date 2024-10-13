@@ -1,11 +1,5 @@
 ########################################################################################################################
 # Configure SIMULATION mode for iverilog with the following command line parameters:
-#
-# Use -D SIMULATION to enable simulation.
-# Use -D D_CORE, D_CORE_FINE for core and trap debug messages
-# Use -D GENERATE_VCD to generate a waveform file for GtkWave
-#
-# Note that all the -D flags above only apply if SIMULATION is enabled. For sythesis none of this flags are used.
 ########################################################################################################################
 #!/usr/bin/bash)
 
@@ -14,8 +8,8 @@ helpFunction()
     echo ""
     echo "Usage: $0 -t <test number> -p <payload length> -c <count of packets> [-f <FIFO address bits>] [-s <clock period>] [-D <flag>] -l -h"
     echo "    -t: Test number (0..2). Test 0: Send from FT2232 to FPGA. Test 1: Send from FT2232 to FPGA and loopback from FPGA. Test 2: Send from FPGA to FT2232."
-    echo "    -p: Test payload length (0..63). Default is 63."
-    echo "    -c: Test number of packets (1..255). Default is 1."
+    echo "    -p: Test payload length (1..16383). Default is 1."
+    echo "    -c: Test number of packets (1..16383). Default is 1."
     echo "    -f: Async FIFO address bits. Default is 5 (32 bytes FIFO)."
     echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690 (24.576MHz)."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
@@ -47,8 +41,8 @@ fi
 while getopts 't:p:c:f:s:D:lh' opt; do
     case "$opt" in
         t ) OPTIONS="$OPTIONS -D TEST_NUMBER=${OPTARG}" ;;
-        p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=6'd${OPTARG}" ;;
-        c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=8'd${OPTARG}" ;;
+        p ) OPTIONS="$OPTIONS -D DATA_PACKET_PAYLOAD=${OPTARG}" ;;
+        c ) OPTIONS="$OPTIONS -D DATA_PACKETS_COUNT=${OPTARG}" ;;
         f ) OPTIONS="$OPTIONS -D FIFO_ADDR_BITS=${OPTARG}" ;;
         s ) OPTIONS="$OPTIONS -D CLK_PERIOD=${OPTARG}" ;;
         D ) OPTIONS="$OPTIONS -D ${OPTARG}" ;;

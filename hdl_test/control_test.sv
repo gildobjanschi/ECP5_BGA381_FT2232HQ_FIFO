@@ -58,35 +58,39 @@ module control (
     logic [1:0] state_m, next_state_m;
 
     // Protocol state machine
-    localparam STATE_FIFO_CMD       = 1'b0;
-    localparam STATE_FIFO_PAYLOAD   = 1'b1;
-    logic fifo_state_m;
+    localparam STATE_FIFO_CMD               = 2'b00;
+    localparam STATE_FIFO_PAYLOAD_LENGTH_1  = 2'b01;
+    localparam STATE_FIFO_PAYLOAD_LENGTH_2  = 2'b10;
+    localparam STATE_FIFO_PAYLOAD           = 2'b11;
+    logic [1:0] fifo_state_m;
 
     // Write state machines
-    localparam STATE_WR_CMD         = 1'd0;
-    localparam STATE_WR_PAYLOAD     = 1'd1;
-    logic wr_state_m;
+    localparam STATE_WR_CMD                 = 2'd0;
+    localparam STATE_WR_PAYLOAD_LENGTH_1    = 2'd1;
+    localparam STATE_WR_PAYLOAD_LENGTH_2    = 2'd2;
+    localparam STATE_WR_PAYLOAD             = 2'd3;
+    logic [1:0] wr_state_m;
 
-    logic [1:0] last_fifo_cmd;
-    logic [5:0] rd_payload_bytes;
-    logic [5:0] wr_data_index;
+    logic [2:0] last_fifo_cmd;
+    logic [4:0] wr_data_index;
     logic [7:0] wr_data[0:3];
 
-    logic [7:0] test_number, host_packet_count, wr_packets, rd_packets;
+    logic [7:0] test_number;
+    logic [15:0] host_packet_count, host_packet_length;
+    logic [15:0] wr_payload_bytes, rd_payload_bytes, rd_packets, wr_packets;
     logic [7:0] expected_test_data;
-    logic [5:0] wr_payload_bytes, host_packet_length;
 
     //==================================================================================================================
     // The command handler
     //==================================================================================================================
-    task handle_cmd_task (input logic [1:0] fifo_cmd, input logic [5:0] payload_length);
+    task handle_cmd_task (input logic [2:0] fifo_cmd, input logic [4:0] payload_length);
         (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_HOST_START: begin
                 led_ctrl_err_o <= 1'b0;
-                rd_packets <= 8'd0;
+                rd_packets <= 16'd0;
 
-                if (payload_length == 6'd3) begin
+                if (payload_length == 5'd5) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_START. \033[0;0m");
 `endif
@@ -94,41 +98,40 @@ module control (
                     expected_test_data <= 8'd0;
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_START payload bytes: %d (expected 3). \033[0;0m",
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_START payload bytes: %d (expected 5). \033[0;0m",
                                         payload_length);
 `endif
-                    wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h2};
+                    wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd2};
                     wr_data[1] <= `TEST_ERROR_INVALID_START_PAYLOAD;
-                    // Send back what you received.
-                    wr_data[2] <= {2'b00, payload_length};
+                    // Send back the payload received.
+                    wr_data[2] <= {3'b00, payload_length};
 
                     test_fail_task;
                 end
             end
 
             `CMD_HOST_DATA: begin
-                if (payload_length == host_packet_length) begin
+                if (payload_length == 5'b10000) begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_DATA payload bytes: %d. \033[0;0m",
-                                        payload_length);
+                    $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_DATA. \033[0;0m");
 `endif
-                    rd_packets <= rd_packets + 8'd1;
+                    rd_packets <= rd_packets + 16'd1;
                 end else begin
 `ifdef D_CTRL
-                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_DATA payload bytes: %d (expected %d). \033[0;0m",
-                                    payload_length, host_packet_length);
+                    $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_DATA payload bytes: %d (expected 5'b10000). \033[0;0m",
+                                    payload_length);
 `endif
-                    wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h2};
+                    wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd2};
                     wr_data[1] <= `TEST_ERROR_INVALID_DATA_PAYLOAD;
-                    // Send back what you received.
-                    wr_data[2] <= {2'b00, payload_length};
+                    // Send back what was received.
+                    wr_data[2] <= {3'b00, payload_length};
 
                     test_fail_task;
                 end
             end
 
             `CMD_HOST_STOP: begin
-                if (payload_length == 6'd0) begin
+                if (payload_length == 5'd0) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_STOP. \033[0;0m");
 `endif
@@ -139,10 +142,11 @@ module control (
                         $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_STOP payload bytes: %d (expected 0). \033[0;0m",
                                     payload_length);
 `endif
-                        wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h2};
+                        wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd3};
                         wr_data[1] <= `TEST_ERROR_STOP_PACKETS_RECEIVED;
-                        // Send back how many packets you received.
-                        wr_data[2] <= rd_packets;
+                        // Send back how many packets were received.
+                        wr_data[2] <= rd_packets[15:8];
+                        wr_data[3] <= rd_packets[7:0];
 
                         test_fail_task;
                     end
@@ -151,10 +155,10 @@ module control (
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_STOP payload bytes: %d (expected 0). \033[0;0m",
                                     payload_length);
 `endif
-                    wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h2};
+                    wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd2};
                     wr_data[1] <= `TEST_ERROR_INVALID_STOP_PAYLOAD;
                     // Send back what you received.
-                    wr_data[2] <= {2'b00, payload_length};
+                    wr_data[2] <= {3'b00, payload_length};
 
                     test_fail_task;
                 end
@@ -165,7 +169,7 @@ module control (
                 $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_CMD] Rd IN: invalid command: %d. \033[0;0m",
                                     fifo_cmd);
 `endif
-                wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h1};
+                wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd1};
                 wr_data[1] <= `TEST_ERROR_INVALID_CMD;
 
                 test_fail_task;
@@ -176,12 +180,12 @@ module control (
     //==================================================================================================================
     // The payload handler
     //==================================================================================================================
-    task handle_payload_task (input logic [1:0] fifo_cmd, input logic [7:0] fifo_data);
+    task handle_payload_task (input logic [2:0] fifo_cmd, input logic [7:0] fifo_data);
         (* parallel_case, full_case *)
         case (fifo_cmd)
             `CMD_HOST_START: begin
                 case (rd_payload_bytes)
-                    6'd3: begin
+                    16'd5: begin
 `ifdef D_CTRL
                         $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_HOST_START] [Test number] Rd IN: %d. \033[0;0m",
                                             fifo_data);
@@ -192,7 +196,7 @@ module control (
                             end
 
                             default: begin
-                                wr_data[0] <= {`CMD_FPGA_STOPPED, 6'd2};
+                                wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd2};
                                 wr_data[1] <= `TEST_ERROR_INVALID_TEST_NUM;
                                 wr_data[2] <= fifo_data;
 
@@ -201,26 +205,32 @@ module control (
                         endcase
                     end
 
-                    6'd2: begin
-`ifdef D_CTRL
-                        $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_HOST_START] [Payload bytes] Rd IN: %d. \033[0;0m",
-                                            fifo_data);
-`endif
-                        if (test_number == `TEST_SEND) begin
-                            wr_payload_bytes <= fifo_data[5:0];
-                        end
-                        host_packet_length <= fifo_data[5:0];
+                    16'd4: begin
+                        host_packet_length[15:8] <= fifo_data;
                     end
 
-                    6'd1: begin
+                    16'd3: begin
+                        host_packet_length[7:0] <= fifo_data;
+`ifdef D_CTRL
+                        $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_HOST_START] [Packet length] Rd IN: %d. \033[0;0m",
+                                            {host_packet_length[15:8], fifo_data});
+`endif
+                    end
+
+                    16'd2: begin
+                        host_packet_count[15:8] <= fifo_data;
+                    end
+
+                    16'd1: begin
+                        host_packet_count[7:0] <= fifo_data;
 `ifdef D_CTRL
                         $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_PAYLOAD for CMD_HOST_START] [Packet count] Rd IN: %d. \033[0;0m",
-                                            fifo_data);
+                                            {host_packet_count[15:8], fifo_data});
 `endif
-                        host_packet_count <= fifo_data;
 
                         if (test_number == `TEST_SEND) begin
-                            wr_packets <= fifo_data;
+                            wr_payload_bytes <= host_packet_length;
+                            wr_packets <= { host_packet_count[15:8], fifo_data};
                             rd_in_fifo_en_o <= 1'b0;
 
                             wr_state_m <= STATE_WR_CMD;
@@ -239,8 +249,8 @@ module control (
                     // For the loop back test write back the byte that was just received.
                     if (test_number == `TEST_RECEIVE_SEND) begin
                         // Write back the byte received
-                        wr_data_index <= 6'd0;
-                        wr_data[0] <= {`CMD_FPGA_DATA, 6'd1};
+                        wr_data_index <= 5'd0;
+                        wr_data[0] <= {`CMD_FPGA_DATA, 5'd1};
                         wr_data[1] <= fifo_data;
 
                         rd_in_fifo_en_o <= 1'b0;
@@ -255,7 +265,7 @@ module control (
                     $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_PAYLOAD for CMD_HOST_DATA] Rd IN: bad payload: %d (expected %d). \033[0;0m",
                                 fifo_data, expected_test_data);
 `endif
-                    wr_data[0] <= {`CMD_FPGA_STOPPED, 6'd3};
+                    wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd3};
                     wr_data[1] <= `TEST_ERROR_INVALID_TEST_DATA;
                     // Actually data received
                     wr_data[2] <= fifo_data;
@@ -275,7 +285,7 @@ module control (
                 $display ($time, "\033[0;36m CTRL:\t[ERROR] ---> [STATE_FIFO_PAYLOAD] Rd IN: invalid command: %d. \033[0;0m",
                                 fifo_cmd);
 `endif
-                wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h1};
+                wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd1};
                 wr_data[1] <= `TEST_ERROR_INVALID_LAST_CMD;
 
                 test_fail_task;
@@ -293,11 +303,23 @@ module control (
                 STATE_WR_CMD: begin
                     // The beginning of a packet
                     wr_out_fifo_en_o <= 1'b1;
-                    wr_out_fifo_data_o <= {`CMD_HOST_DATA, host_packet_length};
+                    wr_out_fifo_data_o <= {`CMD_FPGA_DATA, 5'b10000};
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t<--- [STATE_WR_CMD] Wr OUT: %d. \033[0;0m",
-                                {`CMD_HOST_DATA, host_packet_length});
+                                {`CMD_FPGA_DATA, host_packet_length});
 `endif
+                    wr_state_m <= STATE_WR_PAYLOAD_LENGTH_1;
+                end
+
+                STATE_WR_PAYLOAD_LENGTH_1: begin
+                    wr_out_fifo_en_o <= 1'b1;
+                    wr_out_fifo_data_o <= host_packet_length[15:8];
+                    wr_state_m <= STATE_WR_PAYLOAD_LENGTH_2;
+                end
+
+                STATE_WR_PAYLOAD_LENGTH_2: begin
+                    wr_out_fifo_en_o <= 1'b1;
+                    wr_out_fifo_data_o <= host_packet_length[7:0];
                     wr_state_m <= STATE_WR_PAYLOAD;
                 end
 
@@ -312,10 +334,10 @@ module control (
 
                     expected_test_data <= expected_test_data + 8'd1;
 
-                    wr_payload_bytes <= wr_payload_bytes - 8'd1;
-                    if (wr_payload_bytes == 8'd1) begin
-                        wr_packets <= wr_packets - 8'd1;
-                        if (wr_packets == 8'd1) begin
+                    wr_payload_bytes <= wr_payload_bytes - 16'd1;
+                    if (wr_payload_bytes == 16'd1) begin
+                        wr_packets <= wr_packets - 16'd1;
+                        if (wr_packets == 16'd1) begin
                             test_ok_task;
                         end else begin
 `ifdef D_CTRL_FINE
@@ -333,38 +355,10 @@ module control (
   endtask
 
     //==================================================================================================================
-    // The FIFO reader
-    //==================================================================================================================
-    task read_data_task (input logic [7:0] fifo_data);
-        (* parallel_case, full_case *)
-        case (fifo_state_m)
-            STATE_FIFO_CMD: begin
-                handle_cmd_task (fifo_data[7:6], fifo_data[5:0]);
-
-                if (fifo_data[5:0] > 6'd0) begin
-                    rd_payload_bytes <= fifo_data[5:0];
-                    last_fifo_cmd <= fifo_data[7:6];
-                    fifo_state_m <= STATE_FIFO_PAYLOAD;
-                end
-            end
-
-            STATE_FIFO_PAYLOAD: begin
-                handle_payload_task (last_fifo_cmd, fifo_data);
-
-                rd_payload_bytes <= rd_payload_bytes - 6'd1;
-
-                if (rd_payload_bytes == 2'd1) begin
-                    fifo_state_m <= STATE_FIFO_CMD;
-                end
-            end
-        endcase
-    endtask
-
-    //==================================================================================================================
     // The FIFO writter
     //==================================================================================================================
     task write_buffer_task;
-        if (wr_data[0][5:0] + 6'd1 == wr_data_index) begin
+        if (wr_data[0][4:0] + 5'd1 == wr_data_index) begin
             wr_out_fifo_en_o <= 1'b0;
             state_m <= next_state_m;
         end else begin
@@ -376,7 +370,7 @@ module control (
                 wr_out_fifo_en_o <= 1'b1;
                 wr_out_fifo_data_o <= wr_data[wr_data_index];
 
-                wr_data_index <= wr_data_index + 6'd1;
+                wr_data_index <= wr_data_index + 5'd1;
             end else begin
                 wr_out_fifo_en_o <= 1'b0;
             end
@@ -393,8 +387,8 @@ module control (
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== TEST OK ====. \033[0;0m");
 `endif
-        wr_data_index <= 6'd0;
-        wr_data[0] <= {`CMD_FPGA_STOPPED, 6'h1};
+        wr_data_index <= 5'd0;
+        wr_data[0] <= {`CMD_FPGA_STOPPED, 5'd1};
         wr_data[1] <= `TEST_ERROR_NONE;
 
         state_m <= STATE_WR_BUFFER;
@@ -407,7 +401,7 @@ module control (
     task test_fail_task;
         // Stop reading from the FIFO; there is an error.
         rd_in_fifo_en_o <= 1'b0;
-        wr_data_index <= 6'd0;
+        wr_data_index <= 5'd0;
 
 `ifdef D_CTRL
         $display ($time, "\033[0;36m CTRL:\t==== TEST FAILED [code: %d] ====. \033[0;0m", wr_data[1]);
@@ -417,6 +411,50 @@ module control (
         state_m <= STATE_WR_BUFFER;
         next_state_m <= STATE_IDLE;
     endtask
+
+    //==================================================================================================================
+    // The FIFO reader
+    //==================================================================================================================
+    task read_data_task (input logic [7:0] fifo_data);
+        (* parallel_case, full_case *)
+        case (fifo_state_m)
+            STATE_FIFO_CMD: begin
+                handle_cmd_task (fifo_data[7:5], fifo_data[4:0]);
+
+                last_fifo_cmd <= fifo_data[7:5];
+                if (fifo_data[4]) begin
+                    fifo_state_m <= STATE_FIFO_PAYLOAD_LENGTH_1;
+                end else if (fifo_data[3:0] > 4'd0) begin
+                    rd_payload_bytes <= {12'b0, fifo_data[3:0]};
+                    fifo_state_m <= STATE_FIFO_PAYLOAD;
+                end
+            end
+
+            STATE_FIFO_PAYLOAD_LENGTH_1: begin
+                rd_payload_bytes[15:8] <= fifo_data;
+                fifo_state_m <= STATE_FIFO_PAYLOAD_LENGTH_2;
+            end
+
+            STATE_FIFO_PAYLOAD_LENGTH_2: begin
+                rd_payload_bytes[7:0] <= fifo_data;
+                fifo_state_m <= STATE_FIFO_PAYLOAD;
+`ifdef D_CTRL
+                $display ($time, "\033[0;36m CTRL:\t---> [STATE] Packet length [%d]: \033[0;0m",
+                                {rd_payload_bytes[15:8], fifo_data});
+`endif
+            end
+
+            STATE_FIFO_PAYLOAD: begin
+                handle_payload_task (last_fifo_cmd, fifo_data);
+
+                rd_payload_bytes <= rd_payload_bytes - 16'd1;
+                if (rd_payload_bytes == 16'd1) begin
+                    fifo_state_m <= STATE_FIFO_CMD;
+                end
+            end
+        endcase
+    endtask
+
 
     //==================================================================================================================
     // FIFO read/write
