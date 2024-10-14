@@ -25,6 +25,8 @@
 `define CMD_FPGA_LOOPBACK       3'b010
 `define CMD_FPGA_STOPPED        3'b011
 
+// CMD byte least significant bits if two bytes payload length follows after command byte.
+`define PAYLOAD_LENGTH_FOLLOWS  5'b10000
 // Test number definitions.
 `define TEST_RECEIVE            8'd0
 `define TEST_RECEIVE_SEND       8'd1

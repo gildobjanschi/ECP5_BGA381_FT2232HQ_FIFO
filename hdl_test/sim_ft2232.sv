@@ -66,8 +66,7 @@ module sim_ft2232 (
 
     logic send_data, start_sending_data;
 
-    logic [15:0] out_payload_bytes;
-    logic [15:0] out_packets;
+    logic [15:0] out_payload_bytes, out_packets;
     logic [7:0] out_data;
     logic out_byte_in_word;
 
@@ -128,7 +127,7 @@ module sim_ft2232 (
             STATE_OUT_START_PAYLOAD_1: begin
                 fifo_data_o <= `TEST_NUMBER;
 `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] [Test number] %d. \033[0;0m",
+                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD_1] [Test number] %d. \033[0;0m",
                                     `TEST_NUMBER);
 `endif
                 out_byte_in_word <= 1'b0;
@@ -138,7 +137,7 @@ module sim_ft2232 (
             STATE_OUT_START_PAYLOAD_2: begin
                 fifo_data_o <= out_byte_in_word ? DATA_PACKET_PAYLOAD[7:0] : DATA_PACKET_PAYLOAD[15:8];
 `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] [Packet length] %d. \033[0;0m",
+                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD_2] [Packet length] %d. \033[0;0m",
                                     out_byte_in_word ? DATA_PACKET_PAYLOAD[7:0] : DATA_PACKET_PAYLOAD[15:8]);
 `endif
                 if (out_byte_in_word) begin
@@ -152,7 +151,7 @@ module sim_ft2232 (
             STATE_OUT_START_PAYLOAD_3: begin
                 fifo_data_o <= out_byte_in_word ? DATA_PACKETS_COUNT[7:0] : DATA_PACKETS_COUNT[15:8];
 `ifdef D_FT2232
-                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD] [Packet count] %d. \033[0;0m",
+                $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_START_PAYLOAD_3] [Packet count] %d. \033[0;0m",
                                     out_byte_in_word ? DATA_PACKETS_COUNT[7:0] : DATA_PACKETS_COUNT[15:8]);
 `endif
                 if (out_byte_in_word) begin
@@ -168,10 +167,10 @@ module sim_ft2232 (
             end
 
             STATE_OUT_DATA_CMD: begin
-                fifo_data_o <= {`CMD_HOST_DATA, 5'b10000};
+                fifo_data_o <= {`CMD_HOST_DATA, PAYLOAD_LENGTH_FOLLOWS};
 `ifdef D_FT2232
                 $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_DATA_CMD] %d. \033[0;0m",
-                                    {`CMD_HOST_DATA, 5'b10000});
+                                    {`CMD_HOST_DATA, PAYLOAD_LENGTH_FOLLOWS});
 `endif
                 out_payload_bytes <= DATA_PACKET_PAYLOAD;
 
@@ -309,11 +308,11 @@ module sim_ft2232 (
             end
 
             STATE_IN_PAYLOAD: begin
-                case (in_last_cmd)
+ `ifdef D_FT2232
+               case (in_last_cmd)
                     `CMD_FPGA_STOPPED: begin
                         case (total_in_payload_bytes - in_payload_bytes)
                             16'd0: begin
-`ifdef D_FT2232
                                 $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_FPGA_STOPPED] Error code: %d. \033[0;0m",
                                                     fifo_data_i);
                                 if (fifo_data_i == `TEST_ERROR_NONE) begin
@@ -322,36 +321,26 @@ module sim_ft2232 (
                                     $display ($time, "\033[0;35m FT2232:\t==== TEST FAILED [code: %d] ====. \033[0;0m",
                                                     fifo_data_i);
                                 end
-`endif
                             end
 
                             16'd1: begin
-`ifdef D_FT2232
                                 $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_FPGA_STOPPED] Value received: %d. \033[0;0m",
                                                     fifo_data_i);
-`endif
                             end
 
                             16'd2: begin
-`ifdef D_FT2232
                                 $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_FPGA_STOPPED] Value expected: %d. \033[0;0m",
                                                     fifo_data_i);
-`endif
                             end
 
                             default: begin
-`ifdef D_FT2232
                                 $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_FPGA_STOPPED] Invalid index: %d. \033[0;0m",
                                                     total_in_payload_bytes - in_payload_bytes);
-`endif
                             end
                         endcase
-
+`endif
                         in_payload_bytes <= in_payload_bytes - 16'd1;
                         if (in_payload_bytes == 16'd1) begin
-`ifdef D_FT2232_FINE
-                            $display ($time, "\033[0;35m FT2232:\t[STATE_IN_PAYLOAD] -> STATE_IN_CMD. \033[0;0m");
-`endif
                             in_state_m <= STATE_IN_CMD;
                         end
                     end
@@ -386,7 +375,7 @@ module sim_ft2232 (
                         $display ($time, "\033[0;35m FT2232:\t<--- [STATE_IN_PAYLOAD for CMD_FPGA_LOOPBACK]: %d. \033[0;0m",
                                                 fifo_data_i);
 `endif
-                        // TODO: Find a way to check the loopback data.
+                        // Looped back data is not checked.
                         in_payload_bytes <= in_payload_bytes - 16'd1;
                         if (in_payload_bytes == 16'd1) begin
 `ifdef D_FT2232_FINE
@@ -423,8 +412,6 @@ module sim_ft2232 (
             out_state_m <= STATE_OUT_START_CMD;
             in_state_m <= STATE_IN_CMD;
 
-            send_data <= 1'b1;
-
             out_data <= 8'd0;
             in_data <= 8'd0;
 
@@ -432,6 +419,7 @@ module sim_ft2232 (
             fifo_rxf_n_o <= 1'b1;
 
             start_sending_data <= 1'b1;
+            send_data <= 1'b1;
 `ifdef D_FT2232
             $display ($time, "\033[0;35m FT2232:\t-- Reset. \033[0;0m");
 `endif
