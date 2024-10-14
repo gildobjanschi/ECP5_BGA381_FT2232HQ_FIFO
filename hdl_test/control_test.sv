@@ -111,7 +111,7 @@ module control (
             end
 
             `CMD_HOST_DATA: begin
-                if (payload_length == PAYLOAD_LENGTH_FOLLOWS) begin
+                if (payload_length == `PAYLOAD_LENGTH_FOLLOWS) begin
 `ifdef D_CTRL
                     $display ($time, "\033[0;36m CTRL:\t---> [STATE_FIFO_CMD] Rd IN: CMD_HOST_DATA (payload length follows). \033[0;0m");
 `endif

@@ -167,10 +167,10 @@ module sim_ft2232 (
             end
 
             STATE_OUT_DATA_CMD: begin
-                fifo_data_o <= {`CMD_HOST_DATA, PAYLOAD_LENGTH_FOLLOWS};
+                fifo_data_o <= {`CMD_HOST_DATA, `PAYLOAD_LENGTH_FOLLOWS};
 `ifdef D_FT2232
                 $display ($time, "\033[0;35m FT2232:\t---> [STATE_OUT_DATA_CMD] %d. \033[0;0m",
-                                    {`CMD_HOST_DATA, PAYLOAD_LENGTH_FOLLOWS});
+                                    {`CMD_HOST_DATA, `PAYLOAD_LENGTH_FOLLOWS});
 `endif
                 out_payload_bytes <= DATA_PACKET_PAYLOAD;
 
