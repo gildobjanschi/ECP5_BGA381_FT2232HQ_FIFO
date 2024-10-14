@@ -13,7 +13,7 @@ helpFunction()
     echo "    -f: Async FIFO address bits. Default is 5 (32 bytes FIFO)."
     echo "    -s: The clock period of the application (in ps). Eg. 10000 for 100MHz. Default is 40690 (24.576MHz)."
     echo "    -D: debug flags (e.g. -D D_CORE ...)"
-    echo "    -l Loopback mode."
+    echo "    -l Loopback mode (not to be used in tests; intended for debugging)."
     echo "    -h: Help."
     exit 1
 }

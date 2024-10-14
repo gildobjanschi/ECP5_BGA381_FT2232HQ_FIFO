@@ -255,7 +255,7 @@ module ft2232_fifo (
                         have_saved_wr_data <= 1'b1;
                         saved_wr_data <= rd_out_fifo_data_i;
 `ifdef D_FT_FIFO
-                        $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232 [0]: %d.", rd_out_fifo_data_i);
+                        $display ($time, " FT_FIFO:\t[STATE_WR_DATA] Delayed Wr FT2232: %d.", rd_out_fifo_data_i);
 `endif
                         fifo_wr_n_o <= 1'b1;
                     end else if (~rd_out_fifo_empty_i) begin
