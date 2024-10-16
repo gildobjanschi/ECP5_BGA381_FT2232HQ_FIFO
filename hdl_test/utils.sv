@@ -32,3 +32,27 @@ module DFF_META (input logic reset, input logic D, input logic clk, output logic
         end
     end
 endmodule
+
+//======================================================================================================================
+// LED illumination amplification for fast signals that do not yield enough LED lighting.
+//======================================================================================================================
+module led_illum (input logic reset_i, input logic clk_i, input logic signal_i, output logic led_o);
+    logic [3:0] sample;
+    always @(posedge clk_i) begin
+        if (reset_i) begin
+            led_o <= 1'b0;
+            sample <= 4'h0;
+        end else begin
+            if (signal_i) begin
+                sample <= 4'b1000;
+                led_o <= 1'b1;
+            end else begin
+                if (sample == 4'h0) begin
+                    led_o <= 1'b0;
+                end else begin
+                    sample <= sample >> 1;
+                end
+            end
+        end
+    end
+endmodule

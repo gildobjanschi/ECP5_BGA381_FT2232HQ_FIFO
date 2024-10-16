@@ -6,8 +6,9 @@
 helpFunction()
 {
     echo ""
-    echo "Usage: $0 [-f <FIFO address bits>] -l -h"
-    echo "    -f: Async FIFO address bits. Default is 5 (32 bytes FIFO)."
+    echo "Usage: $0 [-a <FIFO address bits>] -e -l -h"
+    echo "    -a: Async FIFO address bits. Default is 5 (32 bytes FIFO)."
+    echo "    -e: Enable extension."
     echo "    -l Loopback mode (do not use this when testing; it is intended for debugging)."
     echo "    -h: Help."
     exit 1
@@ -27,9 +28,10 @@ if [ -d "$BIN_PATH" ] && [[ ! $PATH =~ (^|:)$BIN_PATH(:|$) ]]; then
     PATH+=:$BIN_PATH
 fi
 
-while getopts 'f:lh' opt; do
+while getopts 'f:elh' opt; do
     case "$opt" in
-        f ) OPTIONS="$OPTIONS -D FIFO_ADDR_BITS=${OPTARG}" ;;
+        a ) OPTIONS="$OPTIONS -D FIFO_ADDR_BITS=${OPTARG}" ;;
+        e ) OPTIONS="$OPTIONS -D EXT_A_ENABLED" ;;
         l ) CONTROL="control_loopback.sv" ;;
         h ) helpFunction ;;
         ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
