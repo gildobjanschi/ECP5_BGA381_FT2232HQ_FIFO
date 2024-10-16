@@ -467,6 +467,14 @@ module control (
             (* parallel_case, full_case *)
             case (state_m)
                 STATE_IDLE: begin
+                    // Need to reset the device to make it operational again.
+                    if (~rd_in_fifo_empty_i) begin
+                        // Read data and throw it away. If you don't do this FT_Write will block if
+                        // there is an FPGA error.
+                        rd_in_fifo_en_o <= 1'b1;
+                    end else begin
+                        rd_in_fifo_en_o <= 1'b0;
+                    end
                 end
 
                 STATE_RD: begin
