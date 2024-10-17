@@ -44,7 +44,7 @@ if test -f "out.json"; then
     rm out.json
 fi
 
-yosys -p "synth_ecp5 -noabc9 -json out.json" $OPTIONS utils.sv ecp5pll.sv async_fifo.sv divider.sv ft2232_fifo.sv control.sv tx_i2s.sv tx_spdif.sv audio.sv
+yosys -p "synth_ecp5 -noabc9 -json out.json" $OPTIONS utils.sv pll_22579200.v pll_24576000.v async_fifo.sv divider.sv ft2232_fifo.sv control.sv tx_i2s.sv tx_spdif.sv audio.sv
 
 SPEED="6"
 LPF_FILE="audio_tx_rev_A.lpf"

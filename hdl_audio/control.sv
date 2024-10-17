@@ -69,62 +69,42 @@ module control (
     output logic tp_control_2_o);
 
     // Assign test points as needed
-    assign tp_control_1_o = spdif_rd_output_FIFO_clk;
-    assign tp_control_2_o = i2s_rd_output_FIFO_clk;
+    assign tp_control_1_o = pll_clocks_22579200[1];
+    assign tp_control_2_o = pll_clocks_22579200[2];
 
     assign rd_in_fifo_clk_o = clk;
     assign wr_out_fifo_clk_o = clk;
 
 `ifdef SIMULATION
-    logic [3:0] pll_clocks_24576000 = 4'b0000;
+    logic [2:0] pll_clocks_24576000 = 4'b0000;
     // Max bit clock for 24 bit @24.576000 MHz
     localparam CLK_18432000_PS = 54253;
-    always #(CLK_18432000_PS/2) pll_clocks_24576000[0] = ~pll_clocks_24576000[0];
+    always #(CLK_18432000_PS/2) pll_clocks_24576000[1] = ~pll_clocks_24576000[1];
     // Max frequency which is a multiple of 2 @24.576000 MHz
     localparam CLK_98304000_PS = 10172;
-    always #(CLK_98304000_PS/2) pll_clocks_24576000[1] = ~pll_clocks_24576000[1];
+    always #(CLK_98304000_PS/2) pll_clocks_24576000[2] = ~pll_clocks_24576000[2];
 
-    logic [3:0] pll_clocks_22579200 = 4'b0000;
+    logic [2:0] pll_clocks_22579200 = 4'b0000;
     // Max bit clock for 24 bit @22.579200 MHz
     localparam CLK_16934400_PS = 59051;
-    always #(CLK_16934400_PS/2) pll_clocks_22579200[0] = ~pll_clocks_22579200[0];
+    always #(CLK_16934400_PS/2) pll_clocks_22579200[1] = ~pll_clocks_22579200[1];
     // Max frequency which is a multiple of 2 of @22.579200 MHz
     localparam CLK_90316800_PS = 11072;
-    always #(CLK_90316800_PS/2) pll_clocks_22579200[1] = ~pll_clocks_22579200[1];
+    always #(CLK_90316800_PS/2) pll_clocks_22579200[2] = ~pll_clocks_22579200[2];
 `else
-    logic [3:0] pll_clocks_24576000;
-    logic pll1_locked;
-    ecp5pll #(.in_hz(24576000),
-            // Max bit clock for 24 bit @24.576000 MHz
-            .out0_hz(18432000),
-            // Max frequency which is a multiple of 2 @24.576000 MHz
-            .out1_hz(98304000)) pll_1(
-            .clk_i(clk_24576000_i),
-            .clk_o(pll_clocks_24576000),
-            .reset(reset_i),
-            .standby(1'b0),
-            .phasesel(2'b00),
-            .phasedir(1'b0),
-            .phasestep(1'b0),
-            .phaseloadreg(1'b0),
-            .locked(pll1_locked));
+    logic [2:0] pll_clocks_24576000;
+    pll_24576000 pll_24576000_m(
+        .CLKI (clk_24576000_i),
+        .CLKOP(pll_clocks_24576000[0]),
+        .CLKOS(pll_clocks_24576000[1]),
+        .CLKOS2(pll_clocks_24576000[2]));
 
-    logic [3:0] pll_clocks_22579200;
-    logic pll2_locked;
-    ecp5pll #(.in_hz(22579200),
-            // Max bit clock for 24 bit @22.579200 MHz
-            .out0_hz(16934400),
-            // Max frequency which is a multiple of 2 of @22.579200 MHz
-            .out1_hz(90316800)) pll_2(
-            .clk_i(clk_22579200_i),
-            .clk_o(pll_clocks_22579200),
-            .reset(reset_i),
-            .standby(1'b0),
-            .phasesel(2'b00),
-            .phasedir(1'b0),
-            .phasestep(1'b0),
-            .phaseloadreg(1'b0),
-            .locked(pll2_locked));
+    logic [2:0] pll_clocks_22579200;
+    pll_22579200 pll_22579200_m(
+        .CLKI (clk_22579200_i),
+        .CLKOP(pll_clocks_22579200[0]),
+        .CLKOS(pll_clocks_22579200[1]),
+        .CLKOS2(pll_clocks_22579200[2]));
 `endif
 
     /*==================================================================================================================
@@ -157,7 +137,7 @@ module control (
     // 24 bit @24.576000 MHz
     logic [3:0] clk_24576000_24;
     // 384 KHz 24 bit: 18432000 Hz
-    assign clk_24576000_24[3] = pll_clocks_24576000[0];
+    assign clk_24576000_24[3] = pll_clocks_24576000[1];
     // 192 KHz 24 bit: 9216000 Hz
     divide_by_2 divide_by_2_4_m (reset_i, clk_24576000_24[3], clk_24576000_24[2]);
     // 96 KHz 24 bit: 4608000 Hz
@@ -179,7 +159,7 @@ module control (
     // MCLK @24.576000 MHz
     logic [3:0] clk_24576000_mclk;
     // 384 KHz MCLK: 98304000 Hz
-    assign clk_24576000_mclk[3] = pll_clocks_24576000[1];
+    assign clk_24576000_mclk[3] = pll_clocks_24576000[2];
     // 192 KHz MCLK: 49152000 Hz
     divide_by_2 divide_by_2_8_m (reset_i, clk_24576000_mclk[3], clk_24576000_mclk[2]);
     // 96 KHz MCLK: 24576000 Hz
@@ -201,7 +181,7 @@ module control (
     // 24 bit @22.579200 MHz
     logic [3:0] clk_22579200_24;
     // 352.8 KHz 24 bit: 16934400 Hz
-    assign clk_22579200_24[3] = pll_clocks_22579200[0];
+    assign clk_22579200_24[3] = pll_clocks_22579200[1];
     // 176.4 KHz 24 bit: 8467200 Hz
     divide_by_2 divide_by_2_23_m (reset_i, clk_22579200_24[3], clk_22579200_24[2]);
     // 88.2 KHz 24 bit: 4233600 Hz
@@ -223,7 +203,7 @@ module control (
     // MCLK @22.579200 MHz
     logic [3:0] clk_22579200_mclk;
     // 352.8 KHz MCLK: 90316800 Hz
-    assign clk_22579200_mclk[3] = pll_clocks_22579200[1];
+    assign clk_22579200_mclk[3] = pll_clocks_22579200[2];
     // 176.4 KHz MCLK: 45158400 Hz
     divide_by_2 divide_by_2_27_m (reset_i, clk_22579200_mclk[3], clk_22579200_mclk[2]);
     // 88.2 KHz MCLK: 22579200 Hz
