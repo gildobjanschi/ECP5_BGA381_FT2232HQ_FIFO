@@ -300,7 +300,10 @@ module audio (
         .led_br_32_bit_o        (ext_led_br_32_bit_o),
         .led_ctrl_err_o         (ext_led_ctrl_err_o),
         .led_streaming_spdif_o  (ext_led_streaming_spdif_o),
-        .led_streaming_i2s_o    (ext_led_streaming_i2s_o));
+        .led_streaming_i2s_o    (ext_led_streaming_i2s_o),
+        // Test points
+        .tp_control_1_o         (ext_tp_control_1_o),
+        .tp_control_2_o         (ext_tp_control_2_o));
 
     logic btn_reset_meta;
     DFF_META fpga_reset_meta_m (1'b0, btn_reset, clk, btn_reset_meta);
