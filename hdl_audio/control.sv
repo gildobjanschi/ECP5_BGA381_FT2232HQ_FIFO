@@ -76,7 +76,8 @@ module control (
     assign wr_out_fifo_clk_o = clk;
 
 `ifdef SIMULATION
-    logic [2:0] pll_clocks_24576000 = 4'b0000;
+    logic [2:0] pll_clocks_24576000;
+    assign pll_clocks_24576000[0] = clk_24576000_i;
     // Max bit clock for 24 bit @24.576000 MHz
     localparam CLK_18432000_PS = 54253;
     always #(CLK_18432000_PS/2) pll_clocks_24576000[1] = ~pll_clocks_24576000[1];
@@ -84,7 +85,8 @@ module control (
     localparam CLK_98304000_PS = 10172;
     always #(CLK_98304000_PS/2) pll_clocks_24576000[2] = ~pll_clocks_24576000[2];
 
-    logic [2:0] pll_clocks_22579200 = 4'b0000;
+    logic [2:0] pll_clocks_22579200;
+    assign pll_clocks_22579200[0] = clk_22579200_i;
     // Max bit clock for 24 bit @22.579200 MHz
     localparam CLK_16934400_PS = 59051;
     always #(CLK_16934400_PS/2) pll_clocks_22579200[1] = ~pll_clocks_22579200[1];
